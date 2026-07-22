@@ -1,139 +1,148 @@
 <div align="center">
 
-# ⚡ Physics Project
+# ⚛️ Physics Project
 
-### Learn Physics Through Interactive Simulations, Visualizations, and Modern Web Technologies
+### *Making Physics Learning Interactive, Modern, and Accessible*
 
 <p align="center">
-  <img src="./public/logo.png" alt="Physics Project Logo" width="140">
+  <img src="./public/logo.png" alt="Physics Project Logo" width="150"/>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Mxrn-Cyber/physic_project/stargazers">
-    <img src="https://img.shields.io/github/stars/Mxrn-Cyber/physic_project?style=for-the-badge" />
-  </a>
-  <a href="https://github.com/Mxrn-Cyber/physic_project/network">
-    <img src="https://img.shields.io/github/forks/Mxrn-Cyber/physic_project?style=for-the-badge" />
-  </a>
-  <img src="https://img.shields.io/github/license/Mxrn-Cyber/physic_project?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react" />
-  <img src="https://img.shields.io/badge/Vite-Latest-646CFF?style=for-the-badge&logo=vite" />
-  <img src="https://img.shields.io/badge/TailwindCSS-Latest-06B6D4?style=for-the-badge&logo=tailwindcss" />
+  <strong>An interactive web platform designed to simplify physics concepts through engaging lessons, visual learning, and modern web technologies.</strong>
+</p>
+
+<p align="center">
+
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=for-the-badge&logo=vite)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4-06B6D4?style=for-the-badge&logo=tailwindcss)
+![License](https://img.shields.io/badge/License-MIT-success?style=for-the-badge)
+![PRs](https://img.shields.io/badge/PRs-Welcome-blue?style=for-the-badge)
+
+</p>
+
+<p align="center">
+  <a href="#-features">Features</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-project-structure">Project Structure</a> •
+  <a href="#-future-roadmap">Roadmap</a>
 </p>
 
 </div>
 
 ---
 
-# 🚀 Overview
+# 📖 About the Project
 
-**Physics Project** is a modern educational platform that helps students learn and explore physics concepts through an engaging digital experience.
+**Physics Project** is a modern educational web application built to help students understand physics concepts through a clean, interactive, and responsive learning experience.
 
-The project focuses on making complex physics topics easier to understand using interactive lessons, responsive design, and a clean user interface.
+The platform is designed with usability in mind, providing an engaging interface where students can explore lessons, improve their understanding, and enjoy learning with modern web technologies.
 
 ---
 
 # ✨ Features
 
-- 📖 Interactive Learning Materials
-- 🎥 Video Lessons
-- 🧠 Practice Exercises
-- 📊 Student Progress Tracking
-- 🌍 Multi-language Support
+- 📚 Interactive Physics Lessons
+- 🎥 Learning Resources
+- 🧪 Practical Examples
 - 📱 Fully Responsive Design
-- ⚡ Fast Performance with Vite
-- 🎨 Beautiful Modern UI
+- 🌙 Modern User Interface
+- ⚡ Fast Performance
+- 🌍 Multi-language Ready
+- 🔐 User Authentication
+- 📊 Student Dashboard
+- 🎯 Easy Navigation
 
 ---
 
-# 🖥️ Demo
+# 🖼️ Preview
 
-> Coming Soon
+> Add screenshots inside the **docs/** folder.
 
----
-
-# 📸 Screenshots
-
-## Home Page
-
-![Home](docs/home.png)
-
-## Course Page
-
-![Course](docs/course.png)
-
-## Dashboard
-
-![Dashboard](docs/dashboard.png)
+| Home | Learning |
+|------|----------|
+| ![](docs/home.png) | ![](docs/course.png) |
 
 ---
 
 # 🛠 Tech Stack
 
-| Technology | Description |
-|------------|-------------|
-| React | Frontend Framework |
-| Vite | Build Tool |
-| Tailwind CSS | Styling |
-| React Router | Routing |
-| Material Tailwind | UI Components |
-| Lucide React | Icons |
+## Frontend
+
+- React
+- Vite
+- Tailwind CSS
+- Material Tailwind
+- React Router DOM
+- Lucide React
+
+## Development Tools
+
+- Git
+- GitHub
+- npm
 
 ---
 
-# 📂 Folder Structure
+# 📂 Project Structure
 
 ```text
-physic_project
+Physics_Project
 │
-├── public
+├── public/
+│   ├── logo.png
+│   └── favicon.ico
 │
-├── src
-│   ├── assets
-│   ├── components
-│   ├── context
-│   ├── hooks
-│   ├── layouts
-│   ├── pages
-│   ├── services
-│   ├── styles
-│   ├── utils
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── context/
+│   ├── hooks/
+│   ├── i18n/
+│   ├── layouts/
+│   ├── pages/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
 │   ├── App.jsx
 │   └── main.jsx
 │
 ├── package.json
-└── vite.config.js
+├── vite.config.js
+└── README.md
 ```
 
 ---
 
-# ⚙️ Installation
+# 🚀 Getting Started
 
-Clone the repository
+## Clone Repository
 
 ```bash
 git clone https://github.com/Mxrn-Cyber/physic_project.git
 ```
 
-Move into the project
+## Enter Project
 
 ```bash
 cd physic_project
 ```
 
-Install dependencies
+## Install Dependencies
 
 ```bash
 npm install
 ```
 
-Start development server
+## Start Development Server
 
 ```bash
 npm run dev
 ```
 
-Open
+The application will be available at
 
 ```
 http://localhost:5173
@@ -141,13 +150,13 @@ http://localhost:5173
 
 ---
 
-# 📦 Production Build
+# 📦 Build for Production
 
 ```bash
 npm run build
 ```
 
-Preview
+Preview production build
 
 ```bash
 npm run preview
@@ -155,26 +164,61 @@ npm run preview
 
 ---
 
-# 🌟 Future Improvements
+# 🎨 UI Highlights
 
-- AI Physics Tutor
-- Dark Mode
-- Student Authentication
-- Online Quiz System
-- Discussion Forum
-- Physics Simulations
-- Leaderboard
-- Certificates
+- Clean Minimal Design
+- Responsive Layout
+- Material Tailwind Components
+- Smooth Navigation
+- Mobile Friendly
+- Gradient Buttons
+- Interactive Cards
+- Modern Typography
+
+---
+
+# 📱 Responsive Design
+
+The application is optimized for:
+
+- 💻 Desktop
+- 💼 Laptop
+- 📱 Mobile
+- 📲 Tablet
+
+---
+
+# 🌍 Browser Support
+
+- Chrome
+- Edge
+- Firefox
+- Safari
+
+---
+
+# 🚀 Future Roadmap
+
+- 🤖 AI Physics Assistant
+- 🧠 Interactive Quizzes
+- 🏆 Student Achievements
+- 📊 Progress Analytics
+- 🎓 Certificates
+- 💬 Community Discussion
+- 🌙 Dark Mode
+- 🔔 Notifications
+- 📹 Live Classes
+- 📈 Admin Dashboard
 
 ---
 
 # 🤝 Contributing
 
-Contributions are welcome!
+Contributions are always welcome.
 
-1. Fork the repository
+1. Fork this repository
 
-2. Create a feature branch
+2. Create a new branch
 
 ```bash
 git checkout -b feature/new-feature
@@ -183,38 +227,42 @@ git checkout -b feature/new-feature
 3. Commit your changes
 
 ```bash
-git commit -m "Add new feature"
+git commit -m "Add amazing feature"
 ```
 
-4. Push
+4. Push your branch
 
 ```bash
 git push origin feature/new-feature
 ```
 
-5. Open a Pull Request
+5. Create a Pull Request
 
 ---
 
 # 📄 License
 
-This project is licensed under the **MIT License**.
+Distributed under the **MIT License**.
+
+See the `LICENSE` file for more information.
 
 ---
 
-# 👨‍💻 Author
+# 👨‍💻 Developer
 
 **Lao Thomorn**
 
-- GitHub: https://github.com/Mxrn-Cyber
-- Portfolio: https://myportfolio-7s0.pages.dev/
+Information Technology Engineer
+
+- 🌐 Portfolio: https://myportfolio-7s0.pages.dev/
+- 💻 GitHub: https://github.com/Mxrn-Cyber
 
 ---
 
 <div align="center">
 
-### ⭐ If you found this project useful, please consider giving it a Star!
+### ⭐ If you found this project helpful, please give it a star!
 
-Made with ❤️ by **Lao Thomorn**
+**Built with ❤️ using React, Vite, and Tailwind CSS**
 
 </div>
