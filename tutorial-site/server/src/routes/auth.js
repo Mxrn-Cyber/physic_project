@@ -15,7 +15,12 @@ function publicUser(user) {
     id: user._id,
     name: user.name,
     email: user.email,
-    plan: user.plan,
+    isAdmin: user.isAdmin,
+    photoUrl: user.photoUrl,
+    phone: user.phone,
+    address: user.address,
+    purchasedVideos: user.purchasedVideos,
+    purchasedBooks: user.purchasedBooks,
   };
 }
 
@@ -60,6 +65,24 @@ router.post("/login", async (req, res) => {
 
 router.get("/me", requireAuth, async (req, res) => {
   res.json({ user: publicUser(req.user) });
+});
+
+// Self-service profile update -- name/phone/address/photoUrl only.
+// Email, password, plan, and isAdmin are not editable through this route.
+router.patch("/me", requireAuth, async (req, res) => {
+  const { name, phone, address, photoUrl } = req.body;
+
+  if (name !== undefined) req.user.name = name;
+  if (phone !== undefined) req.user.phone = phone;
+  if (address !== undefined) req.user.address = address;
+  if (photoUrl !== undefined) req.user.photoUrl = photoUrl;
+
+  try {
+    await req.user.save();
+    res.json({ user: publicUser(req.user) });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 export default router;

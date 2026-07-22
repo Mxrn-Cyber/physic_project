@@ -1,4 +1,4 @@
-# TutorHub — Video + PDF Tutorial Site (Full Sample Project)
+# ReanPhysics — Video + PDF Tutorial Site (Full Sample Project)
 
 A deeper, more realistic version of the earlier single-file demo: a real
 client/server split with authentication, a database layer, and a Stripe

@@ -23,16 +23,52 @@ async function request(path, { method = "GET", body, ...rest } = {}) {
   return data;
 }
 
+// Multipart upload (file), separate from request() since it must NOT set
+// Content-Type: application/json.
+async function uploadFile(file) {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetch(`${BASE_URL}/uploads`, {
+    method: "POST",
+    headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    body: form,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`);
+  return data;
+}
+
 export const api = {
   register: (name, email, password) => request("/auth/register", { method: "POST", body: { name, email, password } }),
   login: (email, password) => request("/auth/login", { method: "POST", body: { email, password } }),
   me: () => request("/auth/me"),
+  updateProfile: (profile) => request("/auth/me", { method: "PATCH", body: profile }),
 
-  getCourses: () => request("/courses"),
-  getPlaybackUrl: (lessonId) => request(`/courses/lessons/${lessonId}/playback`),
-  getPdfUrl: (lessonId) => request(`/courses/lessons/${lessonId}/pdf`),
-  markComplete: (lessonId) => request(`/courses/lessons/${lessonId}/complete`, { method: "POST" }),
+  getVideos: (courseId) => request(courseId ? `/videos?course=${courseId}` : "/videos"),
+  getVideo: (videoId) => request(`/videos/${videoId}`),
+  getVideoPlayback: (videoId) => request(`/videos/${videoId}/playback`),
+  markVideoComplete: (videoId) => request(`/videos/${videoId}/complete`, { method: "POST" }),
 
-  startCheckout: () => request("/billing/create-checkout-session", { method: "POST" }),
-  openBillingPortal: () => request("/billing/create-portal-session", { method: "POST" }),
+  getBooks: (courseId) => request(courseId ? `/books?course=${courseId}` : "/books"),
+  getBook: (bookId) => request(`/books/${bookId}`),
+  getBookView: (bookId) => request(`/books/${bookId}/view`),
+  markBookComplete: (bookId) => request(`/books/${bookId}/complete`, { method: "POST" }),
+
+  // ABA PayWay per-item purchases
+  createPayment: (itemType, itemId) =>
+    request("/payments/create", { method: "POST", body: { itemType, itemId } }),
+  getPaymentStatus: (tranId) => request(`/payments/${tranId}/status`),
+
+  uploadFile,
+
+  // Admin-only (server enforces via requireAuth + requireAdmin)
+  getAdminVideos: () => request("/videos/admin/all"),
+  createVideo: (video) => request("/videos", { method: "POST", body: video }),
+  updateVideo: (id, video) => request(`/videos/${id}`, { method: "PATCH", body: video }),
+  deleteVideo: (id) => request(`/videos/${id}`, { method: "DELETE" }),
+
+  getAdminBooks: () => request("/books/admin/all"),
+  createBook: (book) => request("/books", { method: "POST", body: book }),
+  updateBook: (id, book) => request(`/books/${id}`, { method: "PATCH", body: book }),
+  deleteBook: (id) => request(`/books/${id}`, { method: "DELETE" }),
 };

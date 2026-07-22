@@ -6,13 +6,24 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true },
 
-    // "free" until Stripe webhook confirms an active subscription
-    plan: { type: String, enum: ["free", "paid"], default: "free" },
+    // Standard profile fields, editable by the user themselves on /profile.
+    photoUrl: { type: String, default: "" },
+    phone: { type: String, default: "" },
+    address: { type: String, default: "" },
 
-    stripeCustomerId: { type: String, default: null },
-    stripeSubscriptionId: { type: String, default: null },
+    // Grants access to the /admin panel (video/book management).
+    // Set manually in the DB or via the seed script -- there's no
+    // self-service way to become an admin from the UI.
+    isAdmin: { type: Boolean, default: false },
 
-    completedLessons: [{ type: mongoose.Schema.Types.ObjectId, ref: "Lesson" }],
+    // Access is per-item (bought via ABA PayWay -- see routes/payments.js),
+    // not a site-wide subscription plan. A video/book is unlocked if it's
+    // marked isFree OR its id is in the matching array below.
+    purchasedVideos: [{ type: mongoose.Schema.Types.ObjectId, ref: "Video" }],
+    purchasedBooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
+
+    completedVideos: [{ type: mongoose.Schema.Types.ObjectId, ref: "Video" }],
+    completedBooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
   },
   { timestamps: true }
 );

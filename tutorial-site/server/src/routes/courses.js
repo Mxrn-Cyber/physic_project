@@ -1,84 +1,124 @@
 import { Router } from "express";
 import Course from "../models/Course.js";
-import Lesson from "../models/Lesson.js";
+import Video from "../models/Video.js";
+import Book from "../models/Book.js";
 import { attachUserIfPresent, requireAuth } from "../middleware/auth.js";
+import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = Router();
 
-// List courses with lessons, but redact locked lessons' asset info for
-// free/anonymous users. attachUserIfPresent lets logged-out visitors
-// still browse the catalog (seeing only free previews).
+function publicVideo(v, unlocked) {
+  return {
+    _id: v._id,
+    title: v.title,
+    order: v.order,
+    durationSeconds: v.durationSeconds,
+    isFree: v.isFree,
+    price: v.price,
+    discountPercent: v.discountPercent || 0,
+    effectivePrice: v.isFree
+      ? 0
+      : Math.round(v.price * (1 - Math.min(Math.max(v.discountPercent || 0, 0), 100) / 100) * 100) / 100,
+    badges: [
+      v.isTopSeller && "topSeller",
+      v.isMedium && "medium",
+      (v.discountPercent || 0) > 0 && "discount",
+      v.isFree && "free",
+    ].filter(Boolean),
+    unlocked,
+    videoUrl: unlocked ? v.videoUrl : null,
+  };
+}
+
+function publicBook(b, unlocked) {
+  return {
+    _id: b._id,
+    title: b.title,
+    order: b.order,
+    coverImageUrl: b.coverImageUrl,
+    isFree: b.isFree,
+    price: b.price,
+    discountPercent: b.discountPercent || 0,
+    effectivePrice: b.isFree
+      ? 0
+      : Math.round(b.price * (1 - Math.min(Math.max(b.discountPercent || 0, 0), 100) / 100) * 100) / 100,
+    badges: [
+      b.isTopSeller && "topSeller",
+      b.isMedium && "medium",
+      (b.discountPercent || 0) > 0 && "discount",
+      b.isFree && "free",
+    ].filter(Boolean),
+    unlocked,
+    pdfUrl: unlocked ? b.pdfUrl : null,
+  };
+}
+
+// List courses with their videos + books, redacting locked items' URLs for
+// free/anonymous users. Price/badge info is shown regardless of unlock
+// status so shoppers can decide to upgrade or buy.
 router.get("/", attachUserIfPresent, async (req, res) => {
   const isPaid = req.user?.plan === "paid";
   const courses = await Course.find().sort({ order: 1 }).lean();
-  const lessons = await Lesson.find().sort({ order: 1 }).lean();
+  const videos = await Video.find().sort({ order: 1 }).lean();
+  const books = await Book.find().sort({ order: 1 }).lean();
 
   const result = courses.map((course) => ({
     ...course,
-    lessons: lessons
-      .filter((l) => String(l.course) === String(course._id))
-      .map((l) => {
-        const unlocked = isPaid || l.isFree;
-        return {
-          _id: l._id,
-          title: l.title,
-          order: l.order,
-          durationSeconds: l.durationSeconds,
-          isFree: l.isFree,
-          unlocked,
-          // Don't leak the real asset id / object key to locked-out users
-          videoAssetId: unlocked ? l.videoAssetId : null,
-          pdfObjectKey: unlocked ? l.pdfObjectKey : null,
-        };
-      }),
+    videos: videos
+      .filter((v) => String(v.course) === String(course._id))
+      .map((v) => publicVideo(v, isPaid || v.isFree)),
+    books: books
+      .filter((b) => String(b.course) === String(course._id))
+      .map((b) => publicBook(b, isPaid || b.isFree)),
   }));
 
   res.json({ courses: result });
 });
 
-// Example of a route that hands back a real (signed, short-lived in
-// production) playback URL — only reachable if requirePaid passes, or
-// the lesson is free (checked inline below).
-router.get("/lessons/:id/playback", attachUserIfPresent, async (req, res) => {
-  const lesson = await Lesson.findById(req.params.id);
-  if (!lesson) return res.status(404).json({ error: "Lesson not found" });
+// ---- Admin-only course management ----
 
-  const isPaid = req.user?.plan === "paid";
-  if (!lesson.isFree && !isPaid) {
-    return res.status(403).json({ error: "Upgrade to Paid to watch this lesson" });
-  }
+// Unredacted listing for the admin panel -- the public GET / above hides
+// videoUrl/pdfUrl for locked items, which would let an admin's edit form
+// accidentally null those fields out on save. Admins always see the real
+// values here regardless of their own plan.
+router.get("/admin/all", requireAuth, requireAdmin, async (_req, res) => {
+  const courses = await Course.find().sort({ order: 1 }).lean();
+  const videos = await Video.find().sort({ order: 1 }).lean();
+  const books = await Book.find().sort({ order: 1 }).lean();
 
-  // In production: call your video provider's API to mint a short-lived
-  // signed playback URL from lesson.videoAssetId instead of returning it raw.
-  res.json({ playbackUrl: `https://video-provider.example.com/play/${lesson.videoAssetId}` });
+  const result = courses.map((course) => ({
+    ...course,
+    videos: videos.filter((v) => String(v.course) === String(course._id)),
+    books: books.filter((b) => String(b.course) === String(course._id)),
+  }));
+
+  res.json({ courses: result });
 });
 
-// PDF download is always gated behind requirePaid unless the lesson is free.
-router.get("/lessons/:id/pdf", attachUserIfPresent, async (req, res) => {
-  const lesson = await Lesson.findById(req.params.id);
-  if (!lesson) return res.status(404).json({ error: "Lesson not found" });
-
-  const isPaid = req.user?.plan === "paid";
-  if (!lesson.isFree && !isPaid) {
-    return res.status(403).json({ error: "Upgrade to Paid to download this PDF" });
+router.post("/", requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const course = await Course.create(req.body);
+    res.status(201).json(course);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
-
-  // In production: generate a signed URL from S3/R2 for lesson.pdfObjectKey,
-  // e.g. using @aws-sdk/s3-request-presigner, and redirect or return it.
-  res.json({ downloadUrl: `https://files.example.com/${lesson.pdfObjectKey}?signed=true` });
 });
 
-router.post("/lessons/:id/complete", requireAuth, async (req, res) => {
-  const lesson = await Lesson.findById(req.params.id);
-  if (!lesson) return res.status(404).json({ error: "Lesson not found" });
+router.patch("/:id", requireAuth, requireAdmin, async (req, res) => {
+  const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+  if (!course) return res.status(404).json({ error: "Course not found" });
+  res.json(course);
+});
 
-  if (!lesson.isFree && req.user.plan !== "paid") {
-    return res.status(403).json({ error: "Upgrade to Paid to track this lesson" });
-  }
-
-  req.user.completedLessons.addToSet(lesson._id);
-  await req.user.save();
-  res.json({ completedLessons: req.user.completedLessons });
+router.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
+  const course = await Course.findByIdAndDelete(req.params.id);
+  if (!course) return res.status(404).json({ error: "Course not found" });
+  await Video.deleteMany({ course: course._id });
+  await Book.deleteMany({ course: course._id });
+  res.status(204).send();
 });
 
 export default router;

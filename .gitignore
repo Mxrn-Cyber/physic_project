@@ -1,0 +1,43 @@
+# --- Dependencies ---
+node_modules/
+.pnp
+.pnp.js
+
+# --- Build output ---
+dist/
+build/
+*.tsbuildinfo
+
+# --- Environment / secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Uploaded user content (local dev only -- not meant for git) ---
+server/uploads/
+tutorial-site/server/uploads/
+uploads/
+
+# --- Logs ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# --- Editor / OS junk ---
+.DS_Store
+.vscode/
+.idea/
+*.swp
+.~lock.*#
+
+# --- Vite / bundler caches ---
+.vite/
+.cache/
+
+# --- Coverage / test output ---
+coverage/
+
+# --- Misc scratch artifacts (zips, temp exports) ---
+*.zip
+*.tmp

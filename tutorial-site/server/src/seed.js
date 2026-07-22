@@ -1,56 +1,148 @@
 /**
- * One-off script to populate sample courses/lessons for local development.
- * Run with: node src/seed.js
+ * One-off script to populate sample courses/videos/books (and one admin
+ * user) for local development.
+ * Run with: node src/seed.js  (or: npm run seed)
  */
 import "dotenv/config";
+import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 import { connectDB } from "./config/db.js";
 import Course from "./models/Course.js";
-import Lesson from "./models/Lesson.js";
-import mongoose from "mongoose";
+import Video from "./models/Video.js";
+import Book from "./models/Book.js";
+import User from "./models/User.js";
 
-const DATA = [
+const COURSES = [
   {
     title: "Getting Started: Foundations",
     slug: "getting-started",
     level: "Beginner",
     isFree: true,
-    lessons: [
-      { title: "Welcome & Overview", durationSeconds: 252, isFree: true, videoAssetId: "asset_welcome", pdfObjectKey: "pdfs/welcome-overview.pdf" },
-      { title: "Setting Up Your Tools", durationSeconds: 585, isFree: true, videoAssetId: "asset_setup", pdfObjectKey: "pdfs/setup-checklist.pdf" },
-      { title: "Your First Project", durationSeconds: 750, isFree: false, videoAssetId: "asset_first_project", pdfObjectKey: "pdfs/first-project-workbook.pdf" },
-    ],
   },
   {
     title: "Intermediate Techniques",
     slug: "intermediate-techniques",
     level: "Intermediate",
     isFree: false,
-    lessons: [
-      { title: "Core Concepts Deep Dive", durationSeconds: 902, isFree: false, videoAssetId: "asset_core_concepts", pdfObjectKey: "pdfs/core-concepts.pdf" },
-      { title: "Common Mistakes to Avoid", durationSeconds: 500, isFree: false, videoAssetId: "asset_mistakes", pdfObjectKey: "pdfs/mistakes-cheatsheet.pdf" },
-    ],
   },
   {
     title: "Advanced Mastery",
     slug: "advanced-mastery",
     level: "Advanced",
     isFree: false,
-    lessons: [
-      { title: "Advanced Workflow", durationSeconds: 1120, isFree: false, videoAssetId: "asset_advanced_workflow", pdfObjectKey: "pdfs/advanced-workflow.pdf" },
-      { title: "Real-World Case Study", durationSeconds: 1325, isFree: false, videoAssetId: "asset_case_study", pdfObjectKey: "pdfs/case-study.pdf" },
-    ],
   },
 ];
+
+const SAMPLE_VIDEO_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+const SAMPLE_PDF_URL = "https://example.com/sample.pdf";
 
 async function seed() {
   await connectDB();
   await Course.deleteMany({});
-  await Lesson.deleteMany({});
+  await Video.deleteMany({});
+  await Book.deleteMany({});
 
-  for (const [i, courseData] of DATA.entries()) {
-    const { lessons, ...courseFields } = courseData;
-    const course = await Course.create({ ...courseFields, order: i });
-    await Lesson.insertMany(lessons.map((l, j) => ({ ...l, course: course._id, order: j })));
+  const courses = [];
+  for (const [i, data] of COURSES.entries()) {
+    courses.push(await Course.create({ ...data, order: i }));
+  }
+  const [foundations, intermediate, advanced] = courses;
+
+  await Video.insertMany([
+    {
+      course: foundations._id,
+      title: "Welcome & Overview",
+      order: 0,
+      durationSeconds: 252,
+      isFree: true,
+      videoUrl: SAMPLE_VIDEO_URL,
+    },
+    {
+      course: foundations._id,
+      title: "Your First Project",
+      order: 1,
+      durationSeconds: 750,
+      isFree: false,
+      price: 15,
+      isTopSeller: true,
+      videoUrl: SAMPLE_VIDEO_URL,
+    },
+    {
+      course: intermediate._id,
+      title: "Core Concepts Deep Dive",
+      order: 0,
+      durationSeconds: 902,
+      isFree: false,
+      price: 25,
+      isMedium: true,
+      videoUrl: SAMPLE_VIDEO_URL,
+    },
+    {
+      course: advanced._id,
+      title: "Advanced Workflow",
+      order: 0,
+      durationSeconds: 1120,
+      isFree: false,
+      price: 35,
+      isTopSeller: true,
+      videoUrl: SAMPLE_VIDEO_URL,
+    },
+  ]);
+
+  await Book.insertMany([
+    {
+      course: foundations._id,
+      title: "Setup Checklist (PDF)",
+      order: 0,
+      isFree: true,
+      pdfUrl: SAMPLE_PDF_URL,
+    },
+    {
+      course: foundations._id,
+      title: "First Project Workbook",
+      order: 1,
+      isFree: false,
+      price: 12,
+      discountPercent: 25,
+      pdfUrl: SAMPLE_PDF_URL,
+    },
+    {
+      course: intermediate._id,
+      title: "Common Mistakes Cheatsheet",
+      order: 0,
+      isFree: false,
+      price: 20,
+      discountPercent: 30,
+      pdfUrl: SAMPLE_PDF_URL,
+    },
+    {
+      course: advanced._id,
+      title: "Real-World Case Study Book",
+      order: 0,
+      isFree: false,
+      price: 30,
+      isMedium: true,
+      pdfUrl: SAMPLE_PDF_URL,
+    },
+  ]);
+
+  // Seed a local-only admin account so there's a way into /admin without
+  // manually flipping isAdmin in the DB. Change this password before
+  // using this script against anything but a local/dev database.
+  const adminEmail = "admin@example.com";
+  const existingAdmin = await User.findOne({ email: adminEmail });
+  if (!existingAdmin) {
+    const passwordHash = await bcrypt.hash("ChangeMe123!", 12);
+    await User.create({
+      name: "Admin",
+      email: adminEmail,
+      passwordHash,
+      plan: "paid",
+      isAdmin: true,
+    });
+    console.log(
+      `Seeded admin user: ${adminEmail} / ChangeMe123! (change this password)`,
+    );
   }
 
   console.log("Seed complete.");
