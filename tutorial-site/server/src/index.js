@@ -20,7 +20,6 @@ app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 // too -- no special raw-body handling needed (unlike Stripe's signed
 // webhooks, which this project no longer uses).
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/auth", authRoutes);

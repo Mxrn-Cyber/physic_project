@@ -1,0 +1,16 @@
+{
+  // This is a plain Vite + react-router-dom v6 client-side SPA -- NOT the
+  // React Router v7 "framework mode" (SSR, file-based routes, @react-router/dev).
+  // Declaring assets explicitly here tells Cloudflare to deploy it as a
+  // static-asset Worker and skips the framework auto-detection that was
+  // incorrectly assuming React Router v7 and demanding an upgrade.
+  "name": "tutorial-site-client",
+  "compatibility_date": "2026-07-22",
+  "assets": {
+    "directory": "./dist",
+    // Client-side routes like /videos/:id or /books/:id aren't real files,
+    // so unmatched requests should fall back to index.html and let
+    // react-router-dom handle routing in the browser.
+    "not_found_handling": "single-page-application"
+  }
+}

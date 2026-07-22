@@ -1,4 +1,8 @@
-const BASE_URL = "/api";
+// In local dev, "/api" is proxied to localhost:4000 by vite.config.js.
+// In production the client and API are on different domains (Cloudflare
+// Workers vs Render), so VITE_API_URL must be set at build time to the
+// deployed API's full URL, e.g. https://reanphysics-api.onrender.com/api.
+const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 let authToken = null;
 export function setAuthToken(token) {
