@@ -1,8 +1,197 @@
 import { useEffect, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Trash2, ShieldCheck, ShieldOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../api/client.js";
 import FileOrUrlField from "../components/FileOrUrlField.jsx";
+
+const emptyUser = { name: "", email: "", password: "", isAdmin: false };
+
+function UserForm({ onSave, onCancel }) {
+  const [form, setForm] = useState(emptyUser);
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSave(form);
+      }}
+      className="grid gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/60 sm:grid-cols-2"
+    >
+      <input
+        required
+        placeholder="Name"
+        value={form.name}
+        onChange={(e) => setForm({ ...form, name: e.target.value })}
+        className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+      />
+      <input
+        required
+        type="email"
+        placeholder="Email"
+        value={form.email}
+        onChange={(e) => setForm({ ...form, email: e.target.value })}
+        className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+      />
+      <input
+        required
+        type="password"
+        minLength={8}
+        placeholder="Temporary password (min 8 chars)"
+        value={form.password}
+        onChange={(e) => setForm({ ...form, password: e.target.value })}
+        className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 sm:col-span-2"
+      />
+      <label className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300 sm:col-span-2">
+        <input
+          type="checkbox"
+          checked={form.isAdmin}
+          onChange={(e) => setForm({ ...form, isAdmin: e.target.checked })}
+        />
+        Grant admin access
+      </label>
+
+      <div className="flex gap-2 sm:col-span-2">
+        <button
+          type="submit"
+          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+        >
+          Create user
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
+
+function UsersSection() {
+  const { user: currentUser } = useAuth();
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+  const [error, setError] = useState("");
+
+  const load = () =>
+    api
+      .getUsers()
+      .then(({ users }) => setUsers(users))
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const create = async (form) => {
+    try {
+      await api.createUser(form);
+      setAdding(false);
+      load();
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const toggleAdmin = async (u) => {
+    try {
+      await api.setUserAdmin(u.id, !u.isAdmin);
+      load();
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const remove = async (u) => {
+    if (!confirm(`Delete account "${u.email}"? This can't be undone.`)) return;
+    try {
+      await api.deleteUser(u.id);
+      load();
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Users</h2>
+        {!adding && (
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+          >
+            <Plus className="h-4 w-4" /> Add user
+          </button>
+        )}
+      </div>
+
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {loading && <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">Loading…</p>}
+
+      {adding && (
+        <div className="mt-3">
+          <UserForm onSave={create} onCancel={() => setAdding(false)} />
+        </div>
+      )}
+
+      <div className="mt-3 space-y-2">
+        {users.map((u) => {
+          const isSelf = currentUser?.id === u.id;
+          return (
+            <div
+              key={u.id}
+              className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm dark:bg-gray-800/60"
+            >
+              <span>
+                <span className="font-medium text-gray-900 dark:text-gray-100">{u.name}</span>{" "}
+                <span className="text-gray-500 dark:text-gray-400">({u.email})</span>{" "}
+                {u.isAdmin && (
+                  <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700 dark:bg-red-900/40 dark:text-red-300">
+                    admin
+                  </span>
+                )}
+                {isSelf && (
+                  <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">(you)</span>
+                )}
+              </span>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => toggleAdmin(u)}
+                  disabled={isSelf && u.isAdmin}
+                  className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-700"
+                  aria-label={u.isAdmin ? "Remove admin" : "Make admin"}
+                  title={u.isAdmin ? "Remove admin access" : "Grant admin access"}
+                >
+                  {u.isAdmin ? <ShieldOff className="h-3.5 w-3.5" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(u)}
+                  disabled={isSelf}
+                  className="rounded-lg p-1.5 text-red-500 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Delete user"
+                  title="Delete user"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+        {!loading && users.length === 0 && (
+          <p className="text-sm text-gray-500 dark:text-gray-400">No users yet.</p>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const emptyVideo = {
   title: "",
@@ -478,6 +667,7 @@ export default function Admin() {
       </p>
 
       <div className="mt-8 space-y-10">
+        <UsersSection />
         <VideosSection />
         <BooksSection />
       </div>

@@ -78,4 +78,10 @@ export const api = {
   createBook: (book) => request("/books", { method: "POST", body: book }),
   updateBook: (id, book) => request(`/books/${id}`, { method: "PATCH", body: book }),
   deleteBook: (id) => request(`/books/${id}`, { method: "DELETE" }),
+
+  // Admin-only user management
+  getUsers: () => request("/users"),
+  createUser: (user) => request("/users", { method: "POST", body: user }),
+  setUserAdmin: (id, isAdmin) => request(`/users/${id}`, { method: "PATCH", body: { isAdmin } }),
+  deleteUser: (id) => request(`/users/${id}`, { method: "DELETE" }),
 };
