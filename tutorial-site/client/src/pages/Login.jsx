@@ -58,6 +58,9 @@ export default function Login() {
           {submitting ? "Logging in…" : "Log in"}
         </button>
       </form>
+      <p className="mt-3 text-center text-sm">
+        <Link to="/forgot-password" className="font-medium text-red-600 dark:text-red-400">Forgot password?</Link>
+      </p>
       <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
         No account? <Link to="/register" className="font-medium text-red-600 dark:text-red-400">Register</Link>
       </p>

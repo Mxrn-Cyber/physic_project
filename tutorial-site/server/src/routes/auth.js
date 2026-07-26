@@ -1,8 +1,10 @@
 import { Router } from "express";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { requireAuth } from "../middleware/auth.js";
+import { sendPasswordResetEmail } from "../utils/email.js";
 
 const router = Router();
 
@@ -60,6 +62,71 @@ router.post("/login", async (req, res) => {
     res.json({ token, user: publicUser(user) });
   } catch (err) {
     res.status(500).json({ error: "Login failed" });
+  }
+});
+
+// Request a reset link. Always responds the same way whether or not the
+// email exists, so this endpoint can't be used to check which emails are
+// registered.
+router.post("/forgot-password", async (req, res) => {
+  const GENERIC_OK = { message: "If that email is registered, a reset link has been sent." };
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!user) return res.json(GENERIC_OK);
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+    user.resetPasswordTokenHash = tokenHash;
+    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
+    await sendPasswordResetEmail(user.email, resetUrl);
+
+    res.json(GENERIC_OK);
+  } catch (err) {
+    console.error("forgot-password error", err);
+    // Still return the generic message -- don't leak whether email sending
+    // failed vs. the account not existing.
+    res.json(GENERIC_OK);
+  }
+});
+
+// Complete the reset using the token emailed above.
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, token, newPassword } = req.body;
+    if (!email || !token || !newPassword) {
+      return res.status(400).json({ error: "email, token and newPassword are required" });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      resetPasswordTokenHash: tokenHash,
+      resetPasswordExpires: { $gt: new Date() },
+    }).select("+resetPasswordTokenHash +resetPasswordExpires");
+
+    if (!user) {
+      return res.status(400).json({ error: "Reset link is invalid or has expired" });
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 12);
+    user.resetPasswordTokenHash = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    res.json({ message: "Password updated. You can now log in." });
+  } catch (err) {
+    console.error("reset-password error", err);
+    res.status(500).json({ error: "Could not reset password" });
   }
 });
 

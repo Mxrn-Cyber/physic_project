@@ -47,6 +47,9 @@ export const api = {
   login: (email, password) => request("/auth/login", { method: "POST", body: { email, password } }),
   me: () => request("/auth/me"),
   updateProfile: (profile) => request("/auth/me", { method: "PATCH", body: profile }),
+  forgotPassword: (email) => request("/auth/forgot-password", { method: "POST", body: { email } }),
+  resetPassword: (email, token, newPassword) =>
+    request("/auth/reset-password", { method: "POST", body: { email, token, newPassword } }),
 
   getVideos: (courseId) => request(courseId ? `/videos?course=${courseId}` : "/videos"),
   getVideo: (videoId) => request(`/videos/${videoId}`),

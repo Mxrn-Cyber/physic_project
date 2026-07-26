@@ -31,3 +31,7 @@ services:
         sync: false
       - key: ABA_API_KEY
         sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESET_EMAIL_FROM
+        value: "ReanPhysics <onboarding@resend.dev>"

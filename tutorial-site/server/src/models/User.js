@@ -24,6 +24,12 @@ const userSchema = new mongoose.Schema(
 
     completedVideos: [{ type: mongoose.Schema.Types.ObjectId, ref: "Video" }],
     completedBooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
+
+    // Password reset -- a random token is generated on /forgot-password,
+    // only its SHA-256 hash is stored here (so a leaked DB doesn't hand out
+    // usable tokens), and it expires after 1 hour.
+    resetPasswordTokenHash: { type: String, default: null, select: false },
+    resetPasswordExpires: { type: Date, default: null, select: false },
   },
   { timestamps: true }
 );
