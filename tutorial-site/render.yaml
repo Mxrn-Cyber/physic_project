@@ -1,0 +1,54 @@
+# Render "Blueprint" for the ReanPhysics backend.
+#
+# What this does: lets you create the Render web service by clicking
+# "New > Blueprint" in the Render dashboard and pointing it at this repo,
+# instead of manually filling in root dir / build / start commands.
+#
+# What it does NOT do: fill in real secrets. Every value below marked
+# `sync: false` means "Render will prompt you to type it in during setup"
+# -- nothing sensitive lives in this file, so it's safe to commit.
+#
+# Usage:
+#   1. Push this repo to GitHub (already done: Mxrn-Cyber/physic_project).
+#   2. In Render: New > Blueprint > select this repo > Render finds this
+#      file automatically.
+#   3. Render will ask you to fill in each `sync: false` env var. Have
+#      these ready: MONGO_URI (Atlas), JWT_SECRET (any long random string),
+#      CLIENT_URL (your Cloudflare frontend URL), R2_* (from Cloudflare R2),
+#      ABA_* (from PayWay).
+#   4. SERVER_URL: leave blank on first deploy, then come back and set it
+#      to the onrender.com URL Render gives you, and redeploy.
+
+services:
+  - type: web
+    name: reanphysics-api
+    runtime: node
+    plan: free
+    rootDir: tutorial-site/server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: SERVER_URL
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: R2_PUBLIC_URL
+        sync: false
+      - key: ABA_BASE_URL
+        value: https://checkout-sandbox.payway.com.kh
+      - key: ABA_MERCHANT_ID
+        sync: false
+      - key: ABA_API_KEY
+        sync: false
