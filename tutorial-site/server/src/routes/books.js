@@ -7,6 +7,7 @@ const router = Router();
 
 function isUnlocked(book, user) {
   if (book.isFree) return true;
+  if (book.freeUntil && new Date(book.freeUntil) > new Date()) return true;
   if (!user) return false;
   return (user.purchasedBooks || []).some((id) => String(id) === String(book._id));
 }
@@ -19,17 +20,21 @@ function toPublic(b, unlocked) {
     description: b.description,
     order: b.order,
     coverImageUrl: b.coverImageUrl,
+    pageCount: b.pageCount || 0,
     isFree: b.isFree,
     price: b.price,
+    freeUntil: b.freeUntil,
     discountPercent: b.discountPercent || 0,
-    effectivePrice: b.isFree
-      ? 0
-      : Math.round(b.price * (1 - Math.min(Math.max(b.discountPercent || 0, 0), 100) / 100) * 100) / 100,
+    effectivePrice:
+      b.isFree || (b.freeUntil && new Date(b.freeUntil) > new Date())
+        ? 0
+        : Math.round(b.price * (1 - Math.min(Math.max(b.discountPercent || 0, 0), 100) / 100) * 100) / 100,
     badges: [
       b.isTopSeller && "topSeller",
       b.isMedium && "medium",
       (b.discountPercent || 0) > 0 && "discount",
       b.isFree && "free",
+      !b.isFree && b.freeUntil && new Date(b.freeUntil) > new Date() && "freeTrial",
     ].filter(Boolean),
     unlocked,
     createdAt: b.createdAt,

@@ -7,6 +7,7 @@ const router = Router();
 
 function isUnlocked(video, user) {
   if (video.isFree) return true;
+  if (video.freeUntil && new Date(video.freeUntil) > new Date()) return true;
   if (!user) return false;
   return (user.purchasedVideos || []).some((id) => String(id) === String(video._id));
 }
@@ -40,15 +41,18 @@ function toPublic(v, unlocked) {
     durationSeconds: v.durationSeconds,
     isFree: v.isFree,
     price: v.price,
+    freeUntil: v.freeUntil,
     discountPercent: v.discountPercent || 0,
-    effectivePrice: v.isFree
-      ? 0
-      : Math.round(v.price * (1 - Math.min(Math.max(v.discountPercent || 0, 0), 100) / 100) * 100) / 100,
+    effectivePrice:
+      v.isFree || (v.freeUntil && new Date(v.freeUntil) > new Date())
+        ? 0
+        : Math.round(v.price * (1 - Math.min(Math.max(v.discountPercent || 0, 0), 100) / 100) * 100) / 100,
     badges: [
       v.isTopSeller && "topSeller",
       v.isMedium && "medium",
       (v.discountPercent || 0) > 0 && "discount",
       v.isFree && "free",
+      !v.isFree && v.freeUntil && new Date(v.freeUntil) > new Date() && "freeTrial",
     ].filter(Boolean),
     unlocked,
     createdAt: v.createdAt,

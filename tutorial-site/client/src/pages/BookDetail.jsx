@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, FileText, Lock, ShoppingCart } from "lucide-react";
+import { ArrowLeft, FileText, Lock, ShoppingCart, BookOpen } from "lucide-react";
 import { api } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
@@ -131,6 +131,11 @@ export default function BookDetail() {
           {book.description && (
             <p className="mt-2 max-w-2xl text-gray-600 dark:text-gray-400">{book.description}</p>
           )}
+          {book.pageCount ? (
+            <p className="mt-3 flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+              <BookOpen className="h-4 w-4" /> {book.pageCount} pages
+            </p>
+          ) : null}
         </div>
 
         <div className="w-full max-w-xs shrink-0 rounded-xl border border-gray-200 p-5 dark:border-gray-700">

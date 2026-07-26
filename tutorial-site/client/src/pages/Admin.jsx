@@ -202,6 +202,7 @@ const emptyVideo = {
   thumbnailUrl: "",
   isFree: false,
   price: 0,
+  freeUntil: null,
   isTopSeller: false,
   isMedium: false,
   discountPercent: 0,
@@ -211,44 +212,76 @@ const emptyBook = {
   title: "",
   description: "",
   order: 0,
+  pageCount: 0,
   coverImageUrl: "",
   pdfUrl: "",
   isFree: false,
   price: 0,
+  freeUntil: null,
   isTopSeller: false,
   isMedium: false,
   discountPercent: 0,
 };
 
-function PricingFields({ form, setForm }) {
+// Simplified 3-way choice: Free (always free), Free for 1 month (free
+// until 30 days from whenever this is saved, then falls back to the
+// price below), or Paid (price required, must be purchased to view).
+function accessModeOf(form) {
+  if (form.isFree) return "free";
+  if (form.freeUntil) return "trial";
+  return "paid";
+}
+
+function AccessFields({ form, setForm }) {
+  const mode = accessModeOf(form);
+
+  function setMode(nextMode) {
+    if (nextMode === "free") {
+      setForm({ ...form, isFree: true, freeUntil: null });
+    } else if (nextMode === "trial") {
+      const untilDate = new Date();
+      untilDate.setMonth(untilDate.getMonth() + 1);
+      setForm({ ...form, isFree: false, freeUntil: untilDate.toISOString() });
+    } else {
+      setForm({ ...form, isFree: false, freeUntil: null });
+    }
+  }
+
   return (
-    <>
-      <input
-        type="number"
-        step="0.01"
-        placeholder="Price"
-        value={form.price}
-        onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-      />
-      <input
-        type="number"
-        placeholder="Discount %"
-        value={form.discountPercent}
-        onChange={(e) =>
-          setForm({ ...form, discountPercent: Number(e.target.value) })
-        }
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-      />
-      <div className="flex flex-wrap gap-4 text-sm text-gray-700 dark:text-gray-300 sm:col-span-2">
+    <div className="space-y-3 sm:col-span-2">
+      <div className="flex flex-wrap gap-4 text-sm text-gray-700 dark:text-gray-300">
         <label className="flex items-center gap-1.5">
-          <input
-            type="checkbox"
-            checked={form.isFree}
-            onChange={(e) => setForm({ ...form, isFree: e.target.checked })}
-          />
-          Free (also unlocks regardless of plan)
+          <input type="radio" name="accessMode" checked={mode === "free"} onChange={() => setMode("free")} />
+          Free
         </label>
+        <label className="flex items-center gap-1.5">
+          <input type="radio" name="accessMode" checked={mode === "trial"} onChange={() => setMode("trial")} />
+          Free for 1 month
+        </label>
+        <label className="flex items-center gap-1.5">
+          <input type="radio" name="accessMode" checked={mode === "paid"} onChange={() => setMode("paid")} />
+          Paid
+        </label>
+      </div>
+
+      {mode !== "free" && (
+        <div>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Price {mode === "trial" && "(charged once the free month ends)"}
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            required
+            value={form.price}
+            onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+            className="mt-1 w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          />
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-4 text-sm text-gray-700 dark:text-gray-300">
         <label className="flex items-center gap-1.5">
           <input
             type="checkbox"
@@ -266,8 +299,34 @@ function PricingFields({ form, setForm }) {
           Popular / medium
         </label>
       </div>
-    </>
+    </div>
   );
+}
+
+// A number input with a permanent visible label above it, instead of a
+// placeholder that disappears once you type a value (which made fields
+// like "Order" impossible to tell apart once filled in).
+function LabeledNumberField({ label, value, onChange }) {
+  return (
+    <div>
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
+      <input
+        type="number"
+        min="0"
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+      />
+    </div>
+  );
+}
+
+function priceLabel(item) {
+  if (item.isFree) return "free";
+  if (item.freeUntil && new Date(item.freeUntil) > new Date()) {
+    return `free until ${new Date(item.freeUntil).toLocaleDateString()}`;
+  }
+  return `$${item.price}`;
 }
 
 function VideoForm({ initial, onSave, onCancel }) {
@@ -316,22 +375,18 @@ function VideoForm({ initial, onSave, onCancel }) {
         className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 sm:col-span-2"
         rows={2}
       />
-      <input
-        type="number"
-        placeholder="Duration (seconds)"
+      <LabeledNumberField
+        label="Duration (seconds) — shown to viewers as minutes"
         value={form.durationSeconds}
-        onChange={(e) => setForm({ ...form, durationSeconds: Number(e.target.value) })}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+        onChange={(v) => setForm({ ...form, durationSeconds: v })}
       />
-      <input
-        type="number"
-        placeholder="Order"
+      <LabeledNumberField
+        label="Order (lower numbers show first in the list)"
         value={form.order}
-        onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+        onChange={(v) => setForm({ ...form, order: v })}
       />
 
-      <PricingFields form={form} setForm={setForm} />
+      <AccessFields form={form} setForm={setForm} />
 
       <div className="flex gap-2 sm:col-span-2">
         <button
@@ -394,15 +449,18 @@ function BookForm({ initial, onSave, onCancel }) {
         className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 sm:col-span-2"
         rows={2}
       />
-      <input
-        type="number"
-        placeholder="Order"
+      <LabeledNumberField
+        label="Number of pages — shown to readers"
+        value={form.pageCount}
+        onChange={(v) => setForm({ ...form, pageCount: v })}
+      />
+      <LabeledNumberField
+        label="Order (lower numbers show first in the list)"
         value={form.order}
-        onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+        onChange={(v) => setForm({ ...form, order: v })}
       />
 
-      <PricingFields form={form} setForm={setForm} />
+      <AccessFields form={form} setForm={setForm} />
 
       <p className="text-xs text-gray-500 dark:text-gray-400 sm:col-span-2">
         Tip: in Google Drive, right-click the PDF → Share → set to "Anyone
@@ -436,7 +494,7 @@ function ItemRow({ item, kindLabel, onEdit, onDelete }) {
       <span>
         <span className="font-medium text-gray-900 dark:text-gray-100">{item.title}</span>{" "}
         <span className="text-gray-500 dark:text-gray-400">
-          ({item.isFree ? "free" : `$${item.price}`})
+          ({priceLabel(item)})
         </span>
       </span>
       <div className="flex gap-1.5">
