@@ -59,6 +59,11 @@ export const api = {
   getBooks: (courseId) => request(courseId ? `/books?course=${courseId}` : "/books"),
   getBook: (bookId) => request(`/books/${bookId}`),
   getBookView: (bookId) => request(`/books/${bookId}/view`),
+  // Not a request() call -- this is a plain URL for an <iframe src>, which
+  // can't attach the Authorization header. The endpoint itself is public
+  // (see server routes/books.js) since it only ever serves the trimmed
+  // "first N pages" sample.
+  getBookPreviewPdfUrl: (bookId) => `${BASE_URL}/books/${bookId}/preview-pdf`,
   markBookComplete: (bookId) => request(`/books/${bookId}/complete`, { method: "POST" }),
 
   // ABA PayWay per-item purchases

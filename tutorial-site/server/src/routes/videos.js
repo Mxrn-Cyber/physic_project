@@ -88,11 +88,18 @@ router.get("/:id/playback", attachUserIfPresent, async (req, res) => {
   const video = await Video.findById(req.params.id);
   if (!video) return res.status(404).json({ error: "Video not found" });
 
-  if (!isUnlocked(video, req.user)) {
-    return res.status(403).json({ error: "Buy this video to watch it" });
+  if (isUnlocked(video, req.user)) {
+    return res.json({ playbackUrl: video.videoUrl });
   }
 
-  res.json({ playbackUrl: video.videoUrl });
+  // Not unlocked, but a preview window is configured -- hand over the
+  // real URL plus how many seconds the client should allow before cutting
+  // playback off and prompting to buy.
+  if (video.previewSeconds > 0) {
+    return res.json({ playbackUrl: video.videoUrl, previewSeconds: video.previewSeconds, isPreview: true });
+  }
+
+  return res.status(403).json({ error: "Buy this video to watch it" });
 });
 
 router.post("/:id/complete", requireAuth, async (req, res) => {

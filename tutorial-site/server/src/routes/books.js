@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { PDFDocument } from "pdf-lib";
 import Book from "../models/Book.js";
 import { attachUserIfPresent, requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
@@ -12,6 +13,60 @@ function isUnlocked(book, user) {
   return (user.purchasedBooks || []).some((id) => String(id) === String(book._id));
 }
 
+// A Google Drive "anyone with the link" share URL isn't directly
+// fetchable as a PDF -- it 302s to an HTML viewer page. Converting it to
+// the "uc?export=download" form gets the raw file bytes instead, which is
+// what we need server-side to actually read/trim the PDF (this is
+// different from utils/media.js's toDriveEmbedUrl, which builds an
+// *embeddable* URL for the browser, not a fetchable one for the server).
+function toDriveDownloadUrl(url) {
+  try {
+    const u = new URL(url);
+    if (!u.hostname.includes("drive.google.com")) return null;
+    const match = u.pathname.match(/\/file\/d\/([^/]+)/);
+    const id = match ? match[1] : u.searchParams.get("id");
+    return id ? `https://drive.google.com/uc?export=download&id=${id}` : null;
+  } catch {
+    return null;
+  }
+}
+
+// Downloads the full PDF and cuts it down to just its first `pages`
+// pages, so a non-buyer's browser only ever receives those pages -- there
+// are no bytes for the rest of the book to inspect or work around.
+async function buildPreviewPdf(pdfUrl, pages) {
+  const fetchUrl = toDriveDownloadUrl(pdfUrl) || pdfUrl;
+  const response = await fetch(fetchUrl);
+  if (!response.ok) {
+    throw new Error(`Could not fetch source PDF (${response.status} ${response.statusText}) from ${fetchUrl}`);
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  const sourceBytes = await response.arrayBuffer();
+
+  // Google Drive serves an HTML "can't scan this file for viruses" warning
+  // page (status 200, but content-type text/html) for PDFs it doesn't
+  // recognize as small/safe -- that HTML isn't a valid PDF and PDFDocument
+  // .load() below would throw a confusing parsing error, so catch it here
+  // with a clearer message pointing at the actual cause.
+  if (contentType.includes("text/html")) {
+    throw new Error(
+      `Fetched an HTML page instead of a PDF from ${fetchUrl} -- Google Drive likely served a ` +
+        `warning/confirmation page instead of the file. Try re-sharing the file as "Anyone with the ` +
+        `link", or upload the PDF directly instead of linking to Drive.`
+    );
+  }
+
+  const sourceDoc = await PDFDocument.load(sourceBytes);
+
+  const pageCount = Math.min(pages, sourceDoc.getPageCount());
+  const previewDoc = await PDFDocument.create();
+  const copiedPages = await previewDoc.copyPages(sourceDoc, [...Array(pageCount).keys()]);
+  copiedPages.forEach((page) => previewDoc.addPage(page));
+
+  return previewDoc.save();
+}
+
 function toPublic(b, unlocked) {
   return {
     _id: b._id,
@@ -21,6 +76,7 @@ function toPublic(b, unlocked) {
     order: b.order,
     coverImageUrl: b.coverImageUrl,
     pageCount: b.pageCount || 0,
+    previewPages: b.previewPages || 0,
     isFree: b.isFree,
     price: b.price,
     freeUntil: b.freeUntil,
@@ -62,16 +118,44 @@ router.get("/:id", attachUserIfPresent, async (req, res) => {
 });
 
 // Returns the PDF URL to view/embed (e.g. a Google Drive share link --
-// the client converts it to an embeddable preview URL).
+// the client converts it to an embeddable preview URL). For a locked book
+// with previewPages set, the real pdfUrl is never handed over -- the
+// client is told to load /:id/preview-pdf instead, which only ever
+// contains the first N pages.
 router.get("/:id/view", attachUserIfPresent, async (req, res) => {
   const book = await Book.findById(req.params.id);
   if (!book) return res.status(404).json({ error: "Book not found" });
 
-  if (!isUnlocked(book, req.user)) {
-    return res.status(403).json({ error: "Buy this book to view it" });
+  if (isUnlocked(book, req.user)) {
+    return res.json({ pdfUrl: book.pdfUrl });
   }
 
-  res.json({ pdfUrl: book.pdfUrl });
+  if (book.previewPages > 0) {
+    return res.json({ previewPages: book.previewPages, isPreview: true });
+  }
+
+  return res.status(403).json({ error: "Buy this book to view it" });
+});
+
+// GET /api/books/:id/preview-pdf -- streams a trimmed PDF containing only
+// the book's first `previewPages` pages. No auth required: this is
+// intentionally the shareable "sample" of a paid book, same idea as a
+// public thumbnail. Locked-out visitors' browsers load this directly in
+// an <iframe>, so it can't require an Authorization header.
+router.get("/:id/preview-pdf", async (req, res) => {
+  const book = await Book.findById(req.params.id).catch(() => null);
+  if (!book) return res.status(404).json({ error: "Book not found" });
+  if (!book.previewPages) return res.status(403).json({ error: "No preview available for this book" });
+
+  try {
+    const previewBytes = await buildPreviewPdf(book.pdfUrl, book.previewPages);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=preview.pdf");
+    res.send(Buffer.from(previewBytes));
+  } catch (err) {
+    console.error("Failed to build book preview PDF", err);
+    res.status(502).json({ error: "Could not generate a preview for this book right now" });
+  }
 });
 
 router.post("/:id/complete", requireAuth, async (req, res) => {

@@ -17,6 +17,7 @@ export default function VideoDetail() {
   const [video, setVideo] = useState(null);
   const [status, setStatus] = useState("loading");
   const [playbackUrl, setPlaybackUrl] = useState(null);
+  const [previewInfo, setPreviewInfo] = useState({ previewSeconds: 0, isPreview: false });
   const [playError, setPlayError] = useState(null);
   const [buying, setBuying] = useState(false);
 
@@ -36,13 +37,20 @@ export default function VideoDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // Fetch playback regardless of the unlocked flag -- the server itself
+  // decides whether to hand over the URL (fully unlocked, a preview
+  // window, or a 403 if neither applies), rather than the client
+  // pre-judging it from `video.unlocked` alone.
   useEffect(() => {
-    if (!video?.unlocked) return;
+    if (!video) return undefined;
     let cancelled = false;
     api
       .getVideoPlayback(id)
-      .then(({ playbackUrl }) => {
-        if (!cancelled) setPlaybackUrl(playbackUrl);
+      .then(({ playbackUrl, previewSeconds, isPreview }) => {
+        if (!cancelled) {
+          setPlaybackUrl(playbackUrl);
+          setPreviewInfo({ previewSeconds: previewSeconds || 0, isPreview: Boolean(isPreview) });
+        }
       })
       .catch((err) => {
         if (!cancelled) setPlayError(err.message);
@@ -50,7 +58,7 @@ export default function VideoDetail() {
     return () => {
       cancelled = true;
     };
-  }, [video?.unlocked, id]);
+  }, [video?._id, id]);
 
   if (status === "loading") {
     return (
@@ -94,18 +102,22 @@ export default function VideoDetail() {
             : undefined
         }
       >
-        {video.unlocked ? (
-          playbackUrl ? (
-            <VideoPlayer url={playbackUrl} title={video.title} />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40 p-4">
-              <p className="text-sm text-gray-100">{playError || t.common.loading}</p>
-            </div>
-          )
-        ) : (
+        {playbackUrl ? (
+          <VideoPlayer
+            url={playbackUrl}
+            title={video.title}
+            previewSeconds={previewInfo.previewSeconds}
+            isPreview={previewInfo.isPreview}
+            onBuyClick={() => setBuying(true)}
+          />
+        ) : playError ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/40 text-white">
             <Lock className="h-10 w-10 text-gray-200" />
             <p className="text-sm text-gray-100">{t.videos.buyToWatch}</p>
+          </div>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40 p-4">
+            <p className="text-sm text-gray-100">{t.common.loading}</p>
           </div>
         )}
       </div>

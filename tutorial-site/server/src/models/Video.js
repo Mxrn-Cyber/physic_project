@@ -31,6 +31,11 @@ const videoSchema = new mongoose.Schema(
     // the future can watch for free; everyone else must have purchased it.
     freeUntil: { type: Date, default: null },
 
+    // Only meaningful for paid (not free / not currently in free trial)
+    // videos: lets a non-buyer watch a short preview before being cut off
+    // and asked to pay. 0 means no preview -- straight to the paywall.
+    previewSeconds: { type: Number, default: 0, min: 0 },
+
     // Independent badges/flags -- a video can be, say, both a top seller
     // AND discounted at once. isFree overrides price display to $0.
     isTopSeller: { type: Boolean, default: false },

@@ -203,6 +203,7 @@ const emptyVideo = {
   isFree: false,
   price: 0,
   freeUntil: null,
+  previewSeconds: 0,
   isTopSeller: false,
   isMedium: false,
   discountPercent: 0,
@@ -218,6 +219,7 @@ const emptyBook = {
   isFree: false,
   price: 0,
   freeUntil: null,
+  previewPages: 0,
   isTopSeller: false,
   isMedium: false,
   discountPercent: 0,
@@ -232,8 +234,14 @@ function accessModeOf(form) {
   return "paid";
 }
 
-function AccessFields({ form, setForm }) {
+// previewField picks which field this item type uses for its "let
+// non-buyers sample it first" setting: videos use a time window
+// (previewSeconds), books use a page count (previewPages) so the trimmed
+// PDF served by the server (see api.getBookPreviewPdfUrl) has a matching
+// admin control.
+function AccessFields({ form, setForm, previewField = "previewSeconds" }) {
   const mode = accessModeOf(form);
+  const isPageBased = previewField === "previewPages";
 
   function setMode(nextMode) {
     if (nextMode === "free") {
@@ -278,6 +286,29 @@ function AccessFields({ form, setForm }) {
             onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
             className="mt-1 w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
           />
+        </div>
+      )}
+
+      {mode === "paid" && (
+        <div>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {isPageBased
+              ? "Preview pages before requiring purchase (0 = no preview)"
+              : "Preview length before requiring purchase (seconds, 0 = no preview)"}
+          </label>
+          <input
+            type="number"
+            min="0"
+            value={form[previewField]}
+            onChange={(e) => setForm({ ...form, [previewField]: Number(e.target.value) })}
+            className="mt-1 w-full max-w-xs rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          />
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {isPageBased
+              ? "Non-buyers can read this many pages from the start of the PDF before being asked to pay. We generate that trimmed sample automatically — the rest of the file is never sent to them."
+              : "Non-buyers can watch for this many seconds before being asked to pay."}{" "}
+            Not shown for Free or Free-for-1-month items since they're already fully viewable.
+          </p>
         </div>
       )}
 
@@ -354,6 +385,7 @@ function VideoForm({ initial, onSave, onCancel }) {
           onChange={(url) => setForm({ ...form, videoUrl: url })}
           accept="video/*"
           placeholder="Video URL (YouTube, Vimeo, or direct .mp4 link)"
+          onDurationDetected={(seconds) => setForm((f) => ({ ...f, durationSeconds: seconds }))}
         />
       </div>
       <div className="sm:col-span-2">
@@ -374,16 +406,6 @@ function VideoForm({ initial, onSave, onCancel }) {
         onChange={(e) => setForm({ ...form, description: e.target.value })}
         className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 sm:col-span-2"
         rows={2}
-      />
-      <LabeledNumberField
-        label="Duration (seconds) — shown to viewers as minutes"
-        value={form.durationSeconds}
-        onChange={(v) => setForm({ ...form, durationSeconds: v })}
-      />
-      <LabeledNumberField
-        label="Order (lower numbers show first in the list)"
-        value={form.order}
-        onChange={(v) => setForm({ ...form, order: v })}
       />
 
       <AccessFields form={form} setForm={setForm} />
@@ -460,12 +482,13 @@ function BookForm({ initial, onSave, onCancel }) {
         onChange={(v) => setForm({ ...form, order: v })}
       />
 
-      <AccessFields form={form} setForm={setForm} />
+      <AccessFields form={form} setForm={setForm} previewField="previewPages" />
 
       <p className="text-xs text-gray-500 dark:text-gray-400 sm:col-span-2">
         Tip: in Google Drive, right-click the PDF → Share → set to "Anyone
         with the link", then paste that link here. It'll show as an
-        embedded reader on the site.
+        embedded reader on the site, and if you set a page-limited preview
+        above, non-buyers only ever get a PDF trimmed to that many pages.
       </p>
 
       <div className="flex gap-2 sm:col-span-2">

@@ -17,6 +17,7 @@ export default function BookDetail() {
   const [book, setBook] = useState(null);
   const [status, setStatus] = useState("loading");
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [isPreview, setIsPreview] = useState(false);
   const [viewError, setViewError] = useState(null);
   const [buying, setBuying] = useState(false);
 
@@ -36,13 +37,21 @@ export default function BookDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
+  // Fetch the view URL regardless of the unlocked flag -- the server
+  // decides whether to hand it over (fully unlocked, a page-limited
+  // preview, or a 403 if neither applies). In the preview case the server
+  // never sends the real pdfUrl -- we point the viewer at the dedicated
+  // preview-pdf endpoint instead, which only ever contains the first N
+  // pages.
   useEffect(() => {
-    if (!book?.unlocked) return;
+    if (!book) return undefined;
     let cancelled = false;
     api
       .getBookView(id)
-      .then(({ pdfUrl }) => {
-        if (!cancelled) setPdfUrl(pdfUrl);
+      .then(({ pdfUrl, isPreview }) => {
+        if (cancelled) return;
+        setIsPreview(Boolean(isPreview));
+        setPdfUrl(isPreview ? api.getBookPreviewPdfUrl(id) : pdfUrl);
       })
       .catch((err) => {
         if (!cancelled) setViewError(err.message);
@@ -50,7 +59,7 @@ export default function BookDetail() {
     return () => {
       cancelled = true;
     };
-  }, [book?.unlocked, id]);
+  }, [book?._id, id]);
 
   if (status === "loading") {
     return (
@@ -87,15 +96,14 @@ export default function BookDetail() {
       </Link>
 
       <div className="mt-4 aspect-[3/4] max-h-[70vh] overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
-        {book.unlocked ? (
-          pdfUrl ? (
-            <BookViewer url={pdfUrl} title={book.title} />
-          ) : (
-            <p className="flex h-full items-center justify-center p-4 text-sm text-gray-500 dark:text-gray-400">
-              {viewError || t.common.loading}
-            </p>
-          )
-        ) : (
+        {pdfUrl ? (
+          <BookViewer
+            url={pdfUrl}
+            title={book.title}
+            isPreview={isPreview}
+            onBuyClick={() => setBuying(true)}
+          />
+        ) : viewError ? (
           <div
             className="flex h-full flex-col items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800"
             style={
@@ -108,6 +116,10 @@ export default function BookDetail() {
             <Lock className="h-6 w-6 text-gray-400" />
             <p className="text-sm text-gray-500 dark:text-gray-400">{t.books.buyToView}</p>
           </div>
+        ) : (
+          <p className="flex h-full items-center justify-center p-4 text-sm text-gray-500 dark:text-gray-400">
+            {t.common.loading}
+          </p>
         )}
       </div>
 
