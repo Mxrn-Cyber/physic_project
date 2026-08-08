@@ -1,7 +1,3 @@
-// In local dev, "/api" is proxied to localhost:4000 by vite.config.js.
-// In production the client and API are on different domains (Cloudflare
-// Workers vs Render), so VITE_API_URL must be set at build time to the
-// deployed API's full URL, e.g. https://reanphysics-api.onrender.com/api.
 const BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 let authToken = null;
@@ -27,8 +23,6 @@ async function request(path, { method = "GET", body, ...rest } = {}) {
   return data;
 }
 
-// Multipart upload (file), separate from request() since it must NOT set
-// Content-Type: application/json.
 async function uploadFile(file) {
   const form = new FormData();
   form.append("file", file);
@@ -59,21 +53,15 @@ export const api = {
   getBooks: (courseId) => request(courseId ? `/books?course=${courseId}` : "/books"),
   getBook: (bookId) => request(`/books/${bookId}`),
   getBookView: (bookId) => request(`/books/${bookId}/view`),
-  // Not a request() call -- this is a plain URL for an <iframe src>, which
-  // can't attach the Authorization header. The endpoint itself is public
-  // (see server routes/books.js) since it only ever serves the trimmed
-  // "first N pages" sample.
   getBookPreviewPdfUrl: (bookId) => `${BASE_URL}/books/${bookId}/preview-pdf`,
   markBookComplete: (bookId) => request(`/books/${bookId}/complete`, { method: "POST" }),
 
-  // ABA PayWay per-item purchases
   createPayment: (itemType, itemId) =>
     request("/payments/create", { method: "POST", body: { itemType, itemId } }),
   getPaymentStatus: (tranId) => request(`/payments/${tranId}/status`),
 
   uploadFile,
 
-  // Admin-only (server enforces via requireAuth + requireAdmin)
   getAdminVideos: () => request("/videos/admin/all"),
   createVideo: (video) => request("/videos", { method: "POST", body: video }),
   updateVideo: (id, video) => request(`/videos/${id}`, { method: "PATCH", body: video }),
@@ -84,7 +72,6 @@ export const api = {
   updateBook: (id, book) => request(`/books/${id}`, { method: "PATCH", body: book }),
   deleteBook: (id) => request(`/books/${id}`, { method: "DELETE" }),
 
-  // Admin-only user management
   getUsers: () => request("/users"),
   createUser: (user) => request("/users", { method: "POST", body: user }),
   setUserAdmin: (id, isAdmin) => request(`/users/${id}`, { method: "PATCH", body: { isAdmin } }),

@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-/** Verifies the JWT and attaches req.user (the full Mongo user doc). */
 export async function requireAuth(req, res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
@@ -18,7 +17,6 @@ export async function requireAuth(req, res, next) {
   }
 }
 
-/** Optional auth: attaches req.user if a valid token is present, but doesn't block the request. */
 export async function attachUserIfPresent(req, _res, next) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
@@ -26,8 +24,6 @@ export async function attachUserIfPresent(req, _res, next) {
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(payload.sub).select("-passwordHash");
-  } catch {
-    // ignore invalid token for optional auth
-  }
+  } catch {}
   next();
 }

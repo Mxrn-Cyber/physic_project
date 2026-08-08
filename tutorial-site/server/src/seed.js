@@ -1,8 +1,3 @@
-/**
- * One-off script to populate sample courses/videos/books (and one admin
- * user) for local development.
- * Run with: node src/seed.js  (or: npm run seed)
- */
 import "dotenv/config";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
@@ -126,9 +121,6 @@ async function seed() {
     },
   ]);
 
-  // Seed a local-only admin account so there's a way into /admin without
-  // manually flipping isAdmin in the DB. Change this password before
-  // using this script against anything but a local/dev database.
   const adminEmail = "admin@example.com";
   const existingAdmin = await User.findOne({ email: adminEmail });
   if (!existingAdmin) {

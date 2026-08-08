@@ -6,7 +6,6 @@ import { requireAdmin } from "../middleware/requireAdmin.js";
 
 const router = Router();
 
-// Every route here is admin-only.
 router.use(requireAuth, requireAdmin);
 
 function publicUser(user) {
@@ -19,14 +18,11 @@ function publicUser(user) {
   };
 }
 
-// GET /api/users -- list everyone, for the admin panel's user table.
 router.get("/", async (_req, res) => {
   const users = await User.find().sort({ createdAt: -1 });
   res.json({ users: users.map(publicUser) });
 });
 
-// POST /api/users -- admin creates an account directly (no email
-// verification step, unlike self-service /api/auth/register).
 router.post("/", async (req, res) => {
   try {
     const { name, email, password, isAdmin } = req.body;
@@ -48,8 +44,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PATCH /api/users/:id -- currently only used to promote/demote admin
-// status from the admin panel toggle.
 router.patch("/:id", async (req, res) => {
   if (req.params.id === String(req.user._id) && req.body.isAdmin === false) {
     return res.status(400).json({ error: "You can't remove your own admin access" });
@@ -63,7 +57,6 @@ router.patch("/:id", async (req, res) => {
   res.json({ user: publicUser(user) });
 });
 
-// DELETE /api/users/:id
 router.delete("/:id", async (req, res) => {
   if (req.params.id === String(req.user._id)) {
     return res.status(400).json({ error: "You can't delete your own account while logged in as it" });

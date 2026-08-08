@@ -1,7 +1,5 @@
 import { Resend } from "resend";
 
-// Lazily constructed so the app doesn't crash on import if RESEND_API_KEY
-// isn't set yet (e.g. during initial local setup, before it's configured).
 let resendClient = null;
 function getClient() {
   if (!resendClient) {
@@ -13,10 +11,6 @@ function getClient() {
   return resendClient;
 }
 
-// "onboarding@resend.dev" is Resend's shared sender address -- it works
-// immediately with no domain verification, which is fine for a starter
-// project. To send from your own address (e.g. no-reply@reanphysics.com),
-// verify that domain in the Resend dashboard and set RESET_EMAIL_FROM.
 const FROM = process.env.RESET_EMAIL_FROM || "ReanPhysics <onboarding@resend.dev>";
 
 export async function sendPasswordResetEmail(toEmail, resetUrl) {

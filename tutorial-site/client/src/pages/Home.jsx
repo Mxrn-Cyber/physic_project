@@ -30,9 +30,6 @@ const SLIDES = [
 
 const PREVIEW_COUNT = 6;
 
-// A category row that mirrors the exact card grid used on the dedicated
-// /videos and /books pages, with a "See more" link to that page. Renders
-// nothing while there's no live data for it yet.
 function CategorySection({ title, seeMoreTo, seeMoreLabel, items }) {
   if (items.length === 0) return null;
 
@@ -71,8 +68,7 @@ function Slideshow() {
 
   return (
     <div className="relative mx-auto max-w-5xl">
-      {/* Ambient color glow behind the carousel -- no visible border/frame,
-          just a soft red/orange halo that matches the rest of the page. */}
+      {}
       <div
         aria-hidden="true"
         className="absolute -inset-4 -z-10 rounded-[2.5rem] bg-gradient-to-r from-red-500/30 via-rose-500/20 to-orange-400/30 blur-2xl"
@@ -93,7 +89,7 @@ function Slideshow() {
                 alt={slide.alt}
                 className="h-full w-full object-cover"
               />
-              {/* Bottom scrim + caption for a modern hero-banner feel */}
+              {}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
               <p className="absolute bottom-6 left-6 right-16 text-left text-lg font-semibold text-white drop-shadow sm:text-xl">
                 {slide.alt}
@@ -139,8 +135,6 @@ function Slideshow() {
   );
 }
 
-// Live counts pulled from the same catalog data already on the page --
-// no invented numbers, just a bolder way of surfacing what's really there.
 function StatsStrip({ videoCount, bookCount, freeCount }) {
   const stats = [
     { icon: Video, value: videoCount, label: "Videos" },

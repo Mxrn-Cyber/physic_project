@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
 import { toVideoEmbedUrl } from "../utils/media.js";
 
-// previewSeconds/isPreview come from the server (see routes/videos.js) --
-// they're only set when the viewer hasn't bought this video but a preview
-// window is configured. After that many seconds we cover the player with
-// a "buy to keep watching" prompt instead of relying on the client alone
-// to hide the real URL (which is already handed over at this point).
 export default function VideoPlayer({ url, title, previewSeconds, isPreview, onBuyClick }) {
   const [previewEnded, setPreviewEnded] = useState(false);
   const embedUrl = toVideoEmbedUrl(url);
@@ -44,9 +39,5 @@ export default function VideoPlayer({ url, title, previewSeconds, isPreview, onB
     );
   }
 
-  // Fall back to a direct <video> tag for plain .mp4/.webm links.
-  return (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
-    <video className="h-full w-full" src={url} controls title={title} />
-  );
+  return (<video className="h-full w-full" src={url} controls title={title} />);
 }

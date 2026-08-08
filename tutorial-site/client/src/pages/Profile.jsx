@@ -11,7 +11,7 @@ export default function Profile() {
     address: user?.address || "",
     photoUrl: user?.photoUrl || "",
   });
-  const [status, setStatus] = useState("idle"); // idle | saving | saved | error
+  const [status, setStatus] = useState("idle");
   const [error, setError] = useState("");
 
   async function handleSubmit(e) {

@@ -12,9 +12,6 @@ function isUnlocked(video, user) {
   return (user.purchasedVideos || []).some((id) => String(id) === String(video._id));
 }
 
-// Derives a thumbnail from a YouTube URL when the admin hasn't set one
-// explicitly. Returns null for Vimeo/direct-file links since there's no
-// reliable way to get a thumbnail from those without an extra API call.
 function youTubeThumbnail(url) {
   if (!url) return null;
   try {
@@ -56,16 +53,11 @@ function toPublic(v, unlocked) {
     ].filter(Boolean),
     unlocked,
     createdAt: v.createdAt,
-    // A thumbnail is just a preview image, not the gated content, so it's
-    // shown even for locked videos (matches Udemy-style browsing).
     thumbnailUrl: v.thumbnailUrl || youTubeThumbnail(v.videoUrl) || "",
-    // Don't leak the real video URL to locked-out users
     videoUrl: unlocked ? v.videoUrl : null,
   };
 }
 
-// GET /api/videos?course=<id> -- public catalog (attachUserIfPresent lets
-// logged-out visitors browse and see free previews unlocked).
 router.get("/", attachUserIfPresent, async (req, res) => {
   const filter = {};
   if (req.query.course) filter.course = req.query.course;
@@ -74,10 +66,6 @@ router.get("/", attachUserIfPresent, async (req, res) => {
   res.json({ videos: videos.map((v) => toPublic(v, isUnlocked(v, req.user))) });
 });
 
-// GET /api/videos/:id -- single video's public detail (for the dedicated
-// video detail/product page). Placed before /:id/playback etc. only for
-// readability -- Express doesn't care about order here since the path
-// shapes don't overlap.
 router.get("/:id", attachUserIfPresent, async (req, res) => {
   const video = await Video.findById(req.params.id).lean().catch(() => null);
   if (!video) return res.status(404).json({ error: "Video not found" });
@@ -92,9 +80,6 @@ router.get("/:id/playback", attachUserIfPresent, async (req, res) => {
     return res.json({ playbackUrl: video.videoUrl });
   }
 
-  // Not unlocked, but a preview window is configured -- hand over the
-  // real URL plus how many seconds the client should allow before cutting
-  // playback off and prompting to buy.
   if (video.previewSeconds > 0) {
     return res.json({ playbackUrl: video.videoUrl, previewSeconds: video.previewSeconds, isPreview: true });
   }
@@ -114,8 +99,6 @@ router.post("/:id/complete", requireAuth, async (req, res) => {
   await req.user.save();
   res.json({ completedVideos: req.user.completedVideos });
 });
-
-// ---- Admin-only management ----
 
 router.get("/admin/all", requireAuth, requireAdmin, async (_req, res) => {
   const videos = await Video.find().sort({ order: 1, createdAt: -1 });

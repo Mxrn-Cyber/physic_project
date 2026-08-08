@@ -3,10 +3,6 @@ import { api, setAuthToken } from "../api/client.js";
 
 const AuthContext = createContext(null);
 
-// NOTE on token storage: this demo persists the JWT in localStorage for
-// simplicity across page reloads. For production, prefer an httpOnly,
-// Secure, SameSite cookie set by the server instead — that keeps the
-// token out of reach of any XSS in your own frontend code.
 const STORAGE_KEY = "tutorhub_token";
 
 export function AuthProvider({ children }) {

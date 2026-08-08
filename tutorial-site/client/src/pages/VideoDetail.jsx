@@ -34,13 +34,8 @@ export default function VideoDetail() {
     setStatus("loading");
     setPlaybackUrl(null);
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Fetch playback regardless of the unlocked flag -- the server itself
-  // decides whether to hand over the URL (fully unlocked, a preview
-  // window, or a 403 if neither applies), rather than the client
-  // pre-judging it from `video.unlocked` alone.
   useEffect(() => {
     if (!video) return undefined;
     let cancelled = false;

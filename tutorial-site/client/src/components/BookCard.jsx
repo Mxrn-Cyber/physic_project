@@ -2,8 +2,6 @@ import { Link } from "react-router-dom";
 import { FileText, Lock } from "lucide-react";
 import { BADGE_LABELS, BADGE_STYLES } from "./badges.js";
 
-// Shared book preview card -- used on the Books listing page and on the
-// Home page "Books" section so both look and behave identically.
 export default function BookCard({ book }) {
   const badges = book.badges || [];
   const onSale = book.discountPercent > 0 && !book.isFree;

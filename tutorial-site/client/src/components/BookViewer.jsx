@@ -1,10 +1,5 @@
 import { toDriveEmbedUrl } from "../utils/media.js";
 
-// When isPreview is true, `url` already points at the server's
-// preview-pdf endpoint (see api.getBookPreviewPdfUrl), which physically
-// only contains the book's first N pages -- there's nothing to time out
-// or hide, the file itself just ends there. We just show a persistent
-// "buy to keep reading" strip under the reader instead of blocking it.
 export default function BookViewer({ url, title, isPreview, onBuyClick }) {
   const embedUrl = toDriveEmbedUrl(url) || url;
 

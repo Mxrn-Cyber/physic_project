@@ -65,9 +65,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Request a reset link. Always responds the same way whether or not the
-// email exists, so this endpoint can't be used to check which emails are
-// registered.
 router.post("/forgot-password", async (req, res) => {
   const GENERIC_OK = { message: "If that email is registered, a reset link has been sent." };
   try {
@@ -81,7 +78,7 @@ router.post("/forgot-password", async (req, res) => {
     const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
 
     user.resetPasswordTokenHash = tokenHash;
-    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000);
     await user.save();
 
     const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
@@ -90,13 +87,10 @@ router.post("/forgot-password", async (req, res) => {
     res.json(GENERIC_OK);
   } catch (err) {
     console.error("forgot-password error", err);
-    // Still return the generic message -- don't leak whether email sending
-    // failed vs. the account not existing.
     res.json(GENERIC_OK);
   }
 });
 
-// Complete the reset using the token emailed above.
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, token, newPassword } = req.body;
@@ -134,8 +128,6 @@ router.get("/me", requireAuth, async (req, res) => {
   res.json({ user: publicUser(req.user) });
 });
 
-// Self-service profile update -- name/phone/address/photoUrl only.
-// Email, password, plan, and isAdmin are not editable through this route.
 router.patch("/me", requireAuth, async (req, res) => {
   const { name, phone, address, photoUrl } = req.body;
 

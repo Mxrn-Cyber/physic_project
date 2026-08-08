@@ -5,9 +5,6 @@ import { BADGE_LABELS, BADGE_STYLES } from "./badges.js";
 import { api } from "../api/client.js";
 import { toVideoEmbedUrl } from "../utils/media.js";
 
-// Adds autoplay+mute+no-controls/branding params to a YouTube/Vimeo embed
-// URL so the hover preview plays quietly without the viewer needing to
-// interact with it.
 function toHoverEmbedUrl(embedUrl) {
   try {
     const u = new URL(embedUrl);
@@ -30,11 +27,6 @@ function toHoverEmbedUrl(embedUrl) {
   }
 }
 
-// Hovering a card fetches the same playback URL the video detail page
-// uses (server decides: full URL if free/unlocked, or the configured
-// preview window, or nothing at all) and plays it quietly in place of the
-// thumbnail -- like a Netflix/Udemy hover preview. Moving the mouse away
-// (or the preview window ending) reverts to the static thumbnail.
 function HoverPreview({ videoId }) {
   const [playbackUrl, setPlaybackUrl] = useState(null);
   const timerRef = useRef(null);
@@ -49,10 +41,7 @@ function HoverPreview({ videoId }) {
           timerRef.current = setTimeout(() => setPlaybackUrl(null), previewSeconds * 1000);
         }
       })
-      .catch(() => {
-        // No preview available (locked, no preview window) -- just keep
-        // showing the static thumbnail.
-      });
+      .catch(() => {});
   };
 
   const stop = () => {
@@ -75,15 +64,12 @@ function HoverPreview({ videoId }) {
           allow="autoplay; encrypted-media"
         />
       ) : (
-        // eslint-disable-next-line jsx-a11y/media-has-caption
-        <video className="h-full w-full object-cover" src={playbackUrl} autoPlay muted loop playsInline />
+        (<video className="h-full w-full object-cover" src={playbackUrl} autoPlay muted loop playsInline />)
       )}
     </div>
   );
 }
 
-// Shared video preview card -- used on the Videos listing page and on the
-// Home page "Videos" section so both look and behave identically.
 export default function VideoCard({ video }) {
   const badges = video.badges || [];
   const onSale = video.discountPercent > 0 && !video.isFree;

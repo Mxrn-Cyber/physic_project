@@ -11,7 +11,7 @@ export default function CourseDetail() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
-  const [activeType, setActiveType] = useState(null); // "video" | "book"
+  const [activeType, setActiveType] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
   const [mediaUrl, setMediaUrl] = useState(null);
   const [error, setError] = useState(null);

@@ -4,8 +4,6 @@ import NavBar from "./components/NavBar.jsx";
 import BackgroundDecor from "./components/BackgroundDecor.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Home from "./pages/Home.jsx";
-// Courses/course-detail pages are disabled for now (see server/src/index.js) --
-// only Videos and Books are sold directly, each with its own price.
 import Videos from "./pages/Videos.jsx";
 import Books from "./pages/Books.jsx";
 import VideoDetail from "./pages/VideoDetail.jsx";

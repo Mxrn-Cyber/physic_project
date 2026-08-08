@@ -13,7 +13,7 @@ export default function FileOrUrlField({
   placeholder,
   onDurationDetected,
 }) {
-  const [mode, setMode] = useState(value ? "url" : "upload"); // "url" | "upload"
+  const [mode, setMode] = useState(value ? "url" : "upload");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 

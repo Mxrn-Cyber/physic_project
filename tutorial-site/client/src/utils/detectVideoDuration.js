@@ -1,18 +1,3 @@
-// Best-effort automatic duration detection so the admin never has to type
-// it in by hand. Three cases:
-//
-// 1. A freshly-selected File (from the upload picker) -- always reliable,
-//    since we're reading the actual file's own metadata locally.
-// 2. A pasted direct video URL (e.g. an R2/S3 link ending in .mp4) --
-//    usually works, by quietly loading it in an off-screen <video> tag.
-// 3. A pasted Vimeo URL -- works via Vimeo's public oEmbed endpoint, which
-//    returns duration without needing an API key.
-//
-// YouTube links are the one case we can't get a duration for without a
-// Google API key, so those are silently skipped -- the video just won't
-// show a duration on its detail page, which is fine since that field was
-// never required.
-
 export function detectDurationFromFile(file) {
   return new Promise((resolve) => {
     const objectUrl = URL.createObjectURL(file);
@@ -65,7 +50,8 @@ export async function detectDurationFromUrl(url) {
   try {
     const host = new URL(url).hostname;
     if (host.includes("vimeo.com")) return detectDurationFromVimeo(url);
-    if (host.includes("youtube.com") || host === "youtu.be") return null; // needs an API key, skip
+    if (host.includes("youtube.com") || host === "youtu.be")
+      return null;
   } catch {
     return null;
   }

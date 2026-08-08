@@ -225,20 +225,12 @@ const emptyBook = {
   discountPercent: 0,
 };
 
-// Simplified 3-way choice: Free (always free), Free for 1 month (free
-// until 30 days from whenever this is saved, then falls back to the
-// price below), or Paid (price required, must be purchased to view).
 function accessModeOf(form) {
   if (form.isFree) return "free";
   if (form.freeUntil) return "trial";
   return "paid";
 }
 
-// previewField picks which field this item type uses for its "let
-// non-buyers sample it first" setting: videos use a time window
-// (previewSeconds), books use a page count (previewPages) so the trimmed
-// PDF served by the server (see api.getBookPreviewPdfUrl) has a matching
-// admin control.
 function AccessFields({ form, setForm, previewField = "previewSeconds" }) {
   const mode = accessModeOf(form);
   const isPageBased = previewField === "previewPages";
@@ -334,9 +326,6 @@ function AccessFields({ form, setForm, previewField = "previewSeconds" }) {
   );
 }
 
-// A number input with a permanent visible label above it, instead of a
-// placeholder that disappears once you type a value (which made fields
-// like "Order" impossible to tell apart once filled in).
 function LabeledNumberField({ label, value, onChange }) {
   return (
     <div>

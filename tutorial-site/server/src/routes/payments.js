@@ -7,10 +7,6 @@ import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-// ---- ABA PayWay config -----------------------------------------------
-// Sandbox docs/signup: https://developer.payway.com.kh/ and
-// https://sandbox.payway.com.kh/register-sandbox/
-// Swap ABA_BASE_URL to https://checkout.payway.com.kh for production.
 const ABA_BASE_URL = process.env.ABA_BASE_URL || "https://checkout-sandbox.payway.com.kh";
 const ABA_MERCHANT_ID = process.env.ABA_MERCHANT_ID || "";
 const ABA_API_KEY = process.env.ABA_API_KEY || "";
@@ -32,15 +28,11 @@ function formatReqTime(date) {
 }
 
 function makeTranId() {
-  // Max 20 chars per PayWay's spec.
   return `T${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
     .toUpperCase()
     .slice(0, 20);
 }
 
-// Field order matters -- this must match developer.payway.com.kh's Purchase
-// API hash spec exactly. Missing/optional fields are still concatenated as
-// empty strings in this exact position.
 function buildPurchaseHash(fields) {
   const order = [
     "req_time",
@@ -72,9 +64,6 @@ function buildPurchaseHash(fields) {
   return crypto.createHmac("sha512", ABA_API_KEY).update(concatenated).digest("base64");
 }
 
-// Verifies ABA's callback signature: sort the received body's keys
-// alphabetically, concatenate all values (JSON-encoding arrays/objects),
-// HMAC-SHA512 + base64 with the API key, compare to the header.
 function verifyCallbackSignature(body, headerSignature) {
   if (!headerSignature) return false;
   const sortedKeys = Object.keys(body).sort();
@@ -89,11 +78,10 @@ function verifyCallbackSignature(body, headerSignature) {
   try {
     return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(headerSignature));
   } catch {
-    return false; // length mismatch etc.
+    return false;
   }
 }
 
-// POST /api/payments/create -- start a purchase for one video or book.
 router.post("/create", requireAuth, async (req, res) => {
   const { itemType, itemId } = req.body;
   const Model = ITEM_LOOKUP[itemType];
@@ -135,7 +123,7 @@ router.post("/create", requireAuth, async (req, res) => {
     lastname: rest.join(" "),
     email: req.user.email,
     phone: req.user.phone || "",
-    payment_option: "abapay_khqr_deeplink", // KHQR scan-to-pay
+    payment_option: "abapay_khqr_deeplink",
     return_url: `${SERVER_URL}/api/payments/callback`,
     cancel_url: `${process.env.CLIENT_URL}/${itemType}s`,
     continue_success_url: `${process.env.CLIENT_URL}/${itemType}s`,
@@ -174,17 +162,12 @@ router.post("/create", requireAuth, async (req, res) => {
   }
 });
 
-// GET /api/payments/:tranId/status -- the client polls this while showing
-// the QR code, since ABA confirms payment via the server-to-server
-// callback below, not a browser redirect.
 router.get("/:tranId/status", requireAuth, async (req, res) => {
   const purchase = await Purchase.findOne({ tranId: req.params.tranId, user: req.user._id });
   if (!purchase) return res.status(404).json({ error: "Purchase not found" });
   res.json({ status: purchase.status });
 });
 
-// POST /api/payments/callback -- ABA PayWay calls this server-to-server
-// once the customer completes (or fails/cancels) the KHQR payment.
 export async function handleAbaCallback(req, res) {
   const signature = req.header("X-PAYWAY-HMAC-SHA512");
   if (!verifyCallbackSignature(req.body, signature)) {
@@ -197,9 +180,6 @@ export async function handleAbaCallback(req, res) {
 
   purchase.rawCallback = req.body;
 
-  // PayWay convention: status "0" means approved. Double-check this
-  // against developer.payway.com.kh/ecommerce-checkout-3158159f0 for your
-  // account, since exact success codes can vary by payment_option.
   const approved = String(status) === "0";
   purchase.status = approved ? "completed" : "failed";
   await purchase.save();

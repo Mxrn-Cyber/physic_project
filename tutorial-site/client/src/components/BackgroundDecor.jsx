@@ -1,9 +1,3 @@
-// Purely decorative, fixed-position background: a few soft blurred color
-// blobs plus a faint dot grid, sitting behind all real content. Doesn't
-// scroll away, doesn't intercept clicks, and adapts for dark mode.
-// Rendered once as the first child of the app's root element, which must
-// have `relative isolate` so this stacks correctly behind page content
-// instead of behind the root's own background.
 export default function BackgroundDecor() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">

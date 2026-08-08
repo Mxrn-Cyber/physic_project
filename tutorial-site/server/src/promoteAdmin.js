@@ -1,12 +1,3 @@
-/**
- * One-off script to grant admin access to an existing user by email.
- * Needed because there's no self-service way to become an admin from the
- * UI (see models/User.js) -- the /api/uploads route (and other admin
- * panel actions) return 403 for any account with isAdmin: false.
- *
- * Run from the server/ directory (uses the same .env as the app):
- *   node src/promoteAdmin.js you@example.com
- */
 import "dotenv/config";
 import mongoose from "mongoose";
 import { connectDB } from "./config/db.js";

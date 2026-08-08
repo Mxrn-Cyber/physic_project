@@ -34,15 +34,8 @@ export default function BookDetail() {
     setStatus("loading");
     setPdfUrl(null);
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Fetch the view URL regardless of the unlocked flag -- the server
-  // decides whether to hand it over (fully unlocked, a page-limited
-  // preview, or a 403 if neither applies). In the preview case the server
-  // never sends the real pdfUrl -- we point the viewer at the dedicated
-  // preview-pdf endpoint instead, which only ever contains the first N
-  // pages.
   useEffect(() => {
     if (!book) return undefined;
     let cancelled = false;

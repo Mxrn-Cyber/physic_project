@@ -53,9 +53,6 @@ function publicBook(b, unlocked) {
   };
 }
 
-// List courses with their videos + books, redacting locked items' URLs for
-// free/anonymous users. Price/badge info is shown regardless of unlock
-// status so shoppers can decide to upgrade or buy.
 router.get("/", attachUserIfPresent, async (req, res) => {
   const isPaid = req.user?.plan === "paid";
   const courses = await Course.find().sort({ order: 1 }).lean();
@@ -75,12 +72,6 @@ router.get("/", attachUserIfPresent, async (req, res) => {
   res.json({ courses: result });
 });
 
-// ---- Admin-only course management ----
-
-// Unredacted listing for the admin panel -- the public GET / above hides
-// videoUrl/pdfUrl for locked items, which would let an admin's edit form
-// accidentally null those fields out on save. Admins always see the real
-// values here regardless of their own plan.
 router.get("/admin/all", requireAuth, requireAdmin, async (_req, res) => {
   const courses = await Course.find().sort({ order: 1 }).lean();
   const videos = await Video.find().sort({ order: 1 }).lean();

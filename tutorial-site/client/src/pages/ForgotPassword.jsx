@@ -14,8 +14,6 @@ export default function ForgotPassword() {
     setSubmitting(true);
     try {
       await api.forgotPassword(email);
-      // Always show the same confirmation, whether or not the email is
-      // registered -- the server does the same thing for the same reason.
       setSent(true);
     } catch (err) {
       setError(err.message);

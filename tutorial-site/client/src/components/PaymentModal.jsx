@@ -2,12 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { api } from "../api/client.js";
 
-// Shown after the user clicks "Buy" -- creates an ABA PayWay payment,
-// displays the KHQR code to scan with their banking app, and polls for
-// completion (ABA confirms via a server-to-server callback, not a
-// browser redirect, so polling is how the client finds out).
 export default function PaymentModal({ itemType, itemId, title, amount, onClose, onPaid }) {
-  const [state, setState] = useState("creating"); // creating | waiting | error
+  const [state, setState] = useState("creating");
   const [payment, setPayment] = useState(null);
   const [error, setError] = useState("");
   const pollRef = useRef(null);
@@ -32,9 +28,7 @@ export default function PaymentModal({ itemType, itemId, title, amount, onClose,
               setError("Payment failed or was cancelled. Please try again.");
               setState("error");
             }
-          } catch {
-            // transient network hiccup while polling -- keep trying
-          }
+          } catch {}
         }, 3000);
       })
       .catch((err) => {
@@ -47,7 +41,6 @@ export default function PaymentModal({ itemType, itemId, title, amount, onClose,
       cancelled = true;
       if (pollRef.current) clearInterval(pollRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemType, itemId]);
 
   return (
