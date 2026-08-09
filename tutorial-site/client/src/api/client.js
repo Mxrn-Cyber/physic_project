@@ -71,6 +71,11 @@ export const api = {
   getBookView: (bookId) => request(`/books/${bookId}/view`),
   getBookPreviewPdfUrl: (bookId) => `${BASE_URL}/books/${bookId}/preview-pdf`,
   markBookComplete: (bookId) => request(`/books/${bookId}/complete`, { method: "POST" }),
+  // Renders page 1 of a PDF (fetched from the given URL) into a cover image
+  // and returns { coverUrl }. Used when an admin pastes a PDF URL instead
+  // of uploading the file directly -- uploaded files get their cover
+  // generated automatically as part of the upload response instead.
+  generateBookCover: (pdfUrl) => request("/books/generate-cover", { method: "POST", body: { pdfUrl } }),
 
   createPayment: (itemType, itemId) =>
     request("/payments/create", { method: "POST", body: { itemType, itemId } }),

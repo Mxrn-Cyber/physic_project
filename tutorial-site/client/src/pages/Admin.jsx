@@ -421,6 +421,26 @@ function VideoForm({ initial, onSave, onCancel }) {
 
 function BookForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(initial || emptyBook);
+  const [coverStatus, setCoverStatus] = useState("");
+  const [coverError, setCoverError] = useState("");
+
+  // Generates a cover from page 1 of the given PDF URL. By default it only
+  // fills in coverImageUrl if it's still blank (so a pasted/uploaded PDF
+  // doesn't clobber a cover the admin already picked); pass force:true for
+  // the explicit "use the PDF's first page" button, which always overwrites.
+  async function generateCoverFrom(pdfUrl, { force = false } = {}) {
+    if (!pdfUrl) return;
+    setCoverStatus("generating");
+    setCoverError("");
+    try {
+      const { coverUrl } = await api.generateBookCover(pdfUrl);
+      setForm((f) => (force || !f.coverImageUrl ? { ...f, coverImageUrl: coverUrl } : f));
+    } catch (err) {
+      setCoverError(err.message);
+    } finally {
+      setCoverStatus("");
+    }
+  }
 
   return (
     <form
@@ -444,15 +464,54 @@ function BookForm({ initial, onSave, onCancel }) {
           onChange={(url) => setForm({ ...form, pdfUrl: url })}
           accept="application/pdf"
           placeholder="PDF URL (Google Drive share link, or any direct PDF link)"
+          // Direct uploads: the server already renders page 1 and returns
+          // it as coverUrl in the same response, so no extra request.
+          onUploadMeta={(data) => {
+            if (data.coverUrl) {
+              setForm((f) => (f.coverImageUrl ? f : { ...f, coverImageUrl: data.coverUrl }));
+            }
+          }}
+          // Pasted URL (e.g. Google Drive link): fetch it server-side and
+          // render page 1 the same way.
+          onUrlBlur={(url) => generateCoverFrom(url)}
         />
       </div>
-      <input
-        type="url"
-        placeholder="Cover image URL (optional)"
-        value={form.coverImageUrl}
-        onChange={(e) => setForm({ ...form, coverImageUrl: e.target.value })}
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 sm:col-span-2"
-      />
+      <div className="sm:col-span-2">
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Cover image
+        </label>
+        <div className="mt-1 flex items-start gap-3">
+          {form.coverImageUrl ? (
+            <img
+              src={form.coverImageUrl}
+              alt="Cover preview"
+              className="h-24 w-16 flex-shrink-0 rounded-md border border-gray-200 object-cover dark:border-gray-700"
+            />
+          ) : (
+            <div className="flex h-24 w-16 flex-shrink-0 items-center justify-center rounded-md border border-dashed border-gray-300 text-center text-[10px] text-gray-400 dark:border-gray-700 dark:text-gray-600">
+              No cover
+            </div>
+          )}
+          <div className="flex-1 space-y-1.5">
+            <input
+              type="url"
+              placeholder="Cover image URL (auto-filled from the PDF's first page, or set your own)"
+              value={form.coverImageUrl}
+              onChange={(e) => setForm({ ...form, coverImageUrl: e.target.value })}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+            />
+            <button
+              type="button"
+              onClick={() => generateCoverFrom(form.pdfUrl, { force: true })}
+              disabled={!form.pdfUrl || coverStatus === "generating"}
+              className="text-xs font-semibold text-red-600 hover:text-red-700 disabled:cursor-not-allowed disabled:text-gray-400 dark:disabled:text-gray-600"
+            >
+              {coverStatus === "generating" ? "Generating…" : "Use the PDF's first page as the cover"}
+            </button>
+            {coverError && <p className="text-xs text-red-600">{coverError}</p>}
+          </div>
+        </div>
+      </div>
       <textarea
         placeholder="Description (optional)"
         value={form.description}

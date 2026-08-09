@@ -12,6 +12,14 @@ export default function FileOrUrlField({
   accept,
   placeholder,
   onDurationDetected,
+  // Called with the full upload response (not just { url }) after a
+  // successful file upload -- lets a caller pick up extra fields the
+  // server returns, like the auto-generated { coverUrl } for PDF uploads.
+  onUploadMeta,
+  // Called with the trimmed URL whenever the "paste URL" input loses
+  // focus, in addition to the duration-detection handled below. Lets a
+  // caller react to a pasted URL (e.g. request a generated cover for it).
+  onUrlBlur,
   // Defaults to the admin-only uploader (used for video/book content).
   // Pass api.uploadAvatar here for profile photos, which any logged-in
   // user is allowed to use.
@@ -32,8 +40,9 @@ export default function FileOrUrlField({
       });
     }
     try {
-      const { url } = await uploadFn(file);
-      onChange(url);
+      const data = await uploadFn(file);
+      onChange(data.url);
+      if (onUploadMeta) onUploadMeta(data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -43,10 +52,13 @@ export default function FileOrUrlField({
 
   const handleUrlBlur = (e) => {
     const url = e.target.value.trim();
-    if (!onDurationDetected || !url) return;
-    detectDurationFromUrl(url).then((seconds) => {
-      if (seconds) onDurationDetected(seconds);
-    });
+    if (!url) return;
+    if (onDurationDetected) {
+      detectDurationFromUrl(url).then((seconds) => {
+        if (seconds) onDurationDetected(seconds);
+      });
+    }
+    if (onUrlBlur) onUrlBlur(url);
   };
 
   return (

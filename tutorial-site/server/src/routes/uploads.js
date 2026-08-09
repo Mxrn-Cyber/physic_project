@@ -3,33 +3,13 @@ import multer from "multer";
 import path from "path";
 import crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { putToR2, randomKey } from "../utils/r2.js";
+import { renderFirstPageAsJpeg } from "../utils/pdfCover.js";
 
 const router = Router();
-
-const r2 = new S3Client({
-  region: "auto",
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  },
-});
-
-async function putToR2(key, buffer, mimetype) {
-  await r2.send(
-    new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET_NAME,
-      Key: key,
-      Body: buffer,
-      ContentType: mimetype,
-    })
-  );
-  return `${process.env.R2_PUBLIC_URL}/${key}`;
-}
 
 // Admin content uploads: video thumbnails, book covers, book PDFs. These can
 // be large, so this stays admin-only -- R2 storage isn't free.
@@ -46,16 +26,39 @@ router.post(
   asyncHandler(async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    const unique = crypto.randomBytes(8).toString("hex");
-    const key = `${Date.now()}-${unique}${path.extname(req.file.originalname)}`;
+    const key = randomKey("", path.extname(req.file.originalname));
 
+    let url;
     try {
-      const url = await putToR2(key, req.file.buffer, req.file.mimetype);
-      res.status(201).json({ url });
+      url = await putToR2(key, req.file.buffer, req.file.mimetype);
     } catch (err) {
       console.error("R2 upload failed", err);
-      res.status(500).json({ error: "Upload failed" });
+      return res.status(500).json({ error: "Upload failed" });
     }
+
+    const response = { url };
+
+    // If this looks like a real PDF (checked by content, not the
+    // client-supplied Content-Type), auto-generate a cover image from its
+    // first page -- this is what makes book covers "just work" when an
+    // admin uploads a PDF without also picking a cover image. Sniffing the
+    // actual bytes (rather than trusting req.file.mimetype) means a
+    // mislabeled file doesn't crash cover generation.
+    const detected = await fileTypeFromBuffer(req.file.buffer).catch(() => null);
+    if (detected?.mime === "application/pdf") {
+      try {
+        const coverBuffer = await renderFirstPageAsJpeg(req.file.buffer);
+        const coverKey = randomKey("covers/", ".jpg");
+        response.coverUrl = await putToR2(coverKey, coverBuffer, "image/jpeg");
+      } catch (err) {
+        // Best-effort only: a broken/unrenderable PDF still uploads fine,
+        // it just won't get an automatic cover. The admin can still set
+        // one manually.
+        console.error("Auto cover generation failed", err);
+      }
+    }
+
+    res.status(201).json(response);
   })
 );
 

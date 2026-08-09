@@ -5,6 +5,8 @@ import Book from "../models/Book.js";
 import { attachUserIfPresent, requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { putToR2, randomKey } from "../utils/r2.js";
+import { renderFirstPageAsJpeg } from "../utils/pdfCover.js";
 
 const router = Router();
 
@@ -177,6 +179,56 @@ router.get(
   asyncHandler(async (_req, res) => {
     const books = await Book.find().sort({ order: 1, createdAt: -1 });
     res.json({ books });
+  })
+);
+
+// Generates a cover image from page 1 of a PDF that was linked by URL
+// rather than uploaded directly (e.g. a Google Drive share link pasted
+// into the admin form). Direct file uploads get their cover generated
+// inline in routes/uploads.js instead, since the bytes are already in
+// hand there -- this route exists to cover the "paste a URL" path too.
+router.post(
+  "/generate-cover",
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const { pdfUrl } = req.body || {};
+    if (!pdfUrl) return res.status(400).json({ error: "pdfUrl is required" });
+
+    const fetchUrl = toDriveDownloadUrl(pdfUrl) || pdfUrl;
+    let response;
+    try {
+      response = await fetch(fetchUrl);
+    } catch {
+      return res.status(502).json({ error: `Could not fetch the PDF from ${fetchUrl}` });
+    }
+    if (!response.ok) {
+      return res
+        .status(502)
+        .json({ error: `Could not fetch source PDF (${response.status} ${response.statusText}) from ${fetchUrl}` });
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("text/html")) {
+      return res.status(400).json({
+        error:
+          `Fetched an HTML page instead of a PDF from ${fetchUrl} -- Google Drive likely served a ` +
+          `warning/confirmation page instead of the file. Try re-sharing the file as "Anyone with the ` +
+          `link", or upload the PDF directly instead of linking to Drive.`,
+      });
+    }
+
+    const pdfBytes = Buffer.from(await response.arrayBuffer());
+
+    try {
+      const coverBuffer = await renderFirstPageAsJpeg(pdfBytes);
+      const coverKey = randomKey("covers/", ".jpg");
+      const coverUrl = await putToR2(coverKey, coverBuffer, "image/jpeg");
+      res.json({ coverUrl });
+    } catch (err) {
+      console.error("Failed to generate book cover from URL", err);
+      res.status(502).json({ error: "Could not generate a cover from this PDF" });
+    }
   })
 );
 
