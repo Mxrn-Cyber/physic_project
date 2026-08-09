@@ -1,6 +1,7 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -9,6 +10,26 @@ import { sendOtpSms } from "../utils/sms.js";
 import { buildOtp, canResend, emptyOtp, secondsUntilResend, verifyOtpMatch } from "../utils/otp.js";
 
 const router = Router();
+
+// Nothing below was rate-limited before, so an attacker (or a buggy client
+// stuck retrying) could throw unlimited login/OTP guesses at any account.
+// These are per-IP, in-memory limits -- fine for a single Render instance;
+// swap for a shared store (e.g. Redis) if this ever runs on more than one.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts. Please wait a few minutes and try again." },
+});
+
+const otpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many attempts. Please wait a few minutes and try again." },
+});
 
 // Set to true to require a signup OTP again -- new accounts will need to
 // verify a code before they can log in, same as the reset-password flow.
@@ -24,7 +45,10 @@ const OTP_SELECT = "+otp.codeHash +otp.purpose +otp.channel +otp.expiresAt +otp.
 const googleClient = process.env.GOOGLE_CLIENT_ID ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID) : null;
 
 function signToken(user) {
-  return jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+    algorithm: "HS256",
+  });
 }
 
 function publicUser(user) {
@@ -64,7 +88,7 @@ function recordFailedAttempt(user) {
   return Promise.resolve();
 }
 
-router.post("/register", async (req, res) => {
+router.post("/register", loginLimiter, async (req, res) => {
   try {
     const { name, email, password, phone, channel } = req.body;
     if (!name || !email || !password) {
@@ -121,7 +145,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/verify-otp", async (req, res) => {
+router.post("/verify-otp", otpLimiter, async (req, res) => {
   try {
     const { email, code, purpose = "signup" } = req.body;
     if (!email || !code) return res.status(400).json({ error: "email and code are required" });
@@ -156,7 +180,7 @@ router.post("/verify-otp", async (req, res) => {
   }
 });
 
-router.post("/resend-otp", async (req, res) => {
+router.post("/resend-otp", otpLimiter, async (req, res) => {
   try {
     const { email, purpose = "signup", channel } = req.body;
     if (!email) return res.status(400).json({ error: "email is required" });
@@ -186,7 +210,7 @@ router.post("/resend-otp", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email: (email || "").toLowerCase().trim() });
@@ -258,7 +282,7 @@ router.post("/google", async (req, res) => {
   }
 });
 
-router.post("/forgot-password", async (req, res) => {
+router.post("/forgot-password", otpLimiter, async (req, res) => {
   const GENERIC_OK = { message: "If that email is registered, a code has been sent." };
   try {
     const { email } = req.body;
@@ -276,7 +300,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-router.post("/reset-password", async (req, res) => {
+router.post("/reset-password", otpLimiter, async (req, res) => {
   try {
     const { email, code, newPassword } = req.body;
     if (!email || !code || !newPassword) {

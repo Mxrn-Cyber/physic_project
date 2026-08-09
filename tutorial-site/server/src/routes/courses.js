@@ -4,8 +4,29 @@ import Video from "../models/Video.js";
 import Book from "../models/Book.js";
 import { attachUserIfPresent, requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
+
+// Same unlock rules as routes/videos.js / routes/books.js: free items are
+// always unlocked, items on an active free-trial window are unlocked, and
+// otherwise it comes down to whether this specific user has purchased this
+// specific item. (This used to check `req.user?.plan === "paid"`, but User
+// has no `plan` field, so that was always false and this endpoint never
+// reflected anyone's real purchases or free-trial windows.)
+function isVideoUnlocked(video, user) {
+  if (video.isFree) return true;
+  if (video.freeUntil && new Date(video.freeUntil) > new Date()) return true;
+  if (!user) return false;
+  return (user.purchasedVideos || []).some((id) => String(id) === String(video._id));
+}
+
+function isBookUnlocked(book, user) {
+  if (book.isFree) return true;
+  if (book.freeUntil && new Date(book.freeUntil) > new Date()) return true;
+  if (!user) return false;
+  return (user.purchasedBooks || []).some((id) => String(id) === String(book._id));
+}
 
 function publicVideo(v, unlocked) {
   return {
@@ -53,63 +74,86 @@ function publicBook(b, unlocked) {
   };
 }
 
-router.get("/", attachUserIfPresent, async (req, res) => {
-  const isPaid = req.user?.plan === "paid";
-  const courses = await Course.find().sort({ order: 1 }).lean();
-  const videos = await Video.find().sort({ order: 1 }).lean();
-  const books = await Book.find().sort({ order: 1 }).lean();
+router.get(
+  "/",
+  attachUserIfPresent,
+  asyncHandler(async (req, res) => {
+    const courses = await Course.find().sort({ order: 1 }).lean();
+    const videos = await Video.find().sort({ order: 1 }).lean();
+    const books = await Book.find().sort({ order: 1 }).lean();
 
-  const result = courses.map((course) => ({
-    ...course,
-    videos: videos
-      .filter((v) => String(v.course) === String(course._id))
-      .map((v) => publicVideo(v, isPaid || v.isFree)),
-    books: books
-      .filter((b) => String(b.course) === String(course._id))
-      .map((b) => publicBook(b, isPaid || b.isFree)),
-  }));
+    const result = courses.map((course) => ({
+      ...course,
+      videos: videos
+        .filter((v) => String(v.course) === String(course._id))
+        .map((v) => publicVideo(v, isVideoUnlocked(v, req.user))),
+      books: books
+        .filter((b) => String(b.course) === String(course._id))
+        .map((b) => publicBook(b, isBookUnlocked(b, req.user))),
+    }));
 
-  res.json({ courses: result });
-});
+    res.json({ courses: result });
+  })
+);
 
-router.get("/admin/all", requireAuth, requireAdmin, async (_req, res) => {
-  const courses = await Course.find().sort({ order: 1 }).lean();
-  const videos = await Video.find().sort({ order: 1 }).lean();
-  const books = await Book.find().sort({ order: 1 }).lean();
+router.get(
+  "/admin/all",
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (_req, res) => {
+    const courses = await Course.find().sort({ order: 1 }).lean();
+    const videos = await Video.find().sort({ order: 1 }).lean();
+    const books = await Book.find().sort({ order: 1 }).lean();
 
-  const result = courses.map((course) => ({
-    ...course,
-    videos: videos.filter((v) => String(v.course) === String(course._id)),
-    books: books.filter((b) => String(b.course) === String(course._id)),
-  }));
+    const result = courses.map((course) => ({
+      ...course,
+      videos: videos.filter((v) => String(v.course) === String(course._id)),
+      books: books.filter((b) => String(b.course) === String(course._id)),
+    }));
 
-  res.json({ courses: result });
-});
+    res.json({ courses: result });
+  })
+);
 
-router.post("/", requireAuth, requireAdmin, async (req, res) => {
-  try {
-    const course = await Course.create(req.body);
-    res.status(201).json(course);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+router.post(
+  "/",
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    try {
+      const course = await Course.create(req.body);
+      res.status(201).json(course);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  })
+);
 
-router.patch("/:id", requireAuth, requireAdmin, async (req, res) => {
-  const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-  if (!course) return res.status(404).json({ error: "Course not found" });
-  res.json(course);
-});
+router.patch(
+  "/:id",
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!course) return res.status(404).json({ error: "Course not found" });
+    res.json(course);
+  })
+);
 
-router.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
-  const course = await Course.findByIdAndDelete(req.params.id);
-  if (!course) return res.status(404).json({ error: "Course not found" });
-  await Video.deleteMany({ course: course._id });
-  await Book.deleteMany({ course: course._id });
-  res.status(204).send();
-});
+router.delete(
+  "/:id",
+  requireAuth,
+  requireAdmin,
+  asyncHandler(async (req, res) => {
+    const course = await Course.findByIdAndDelete(req.params.id);
+    if (!course) return res.status(404).json({ error: "Course not found" });
+    await Video.deleteMany({ course: course._id });
+    await Book.deleteMany({ course: course._id });
+    res.status(204).send();
+  })
+);
 
 export default router;

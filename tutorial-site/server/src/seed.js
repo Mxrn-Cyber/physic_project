@@ -1,4 +1,5 @@
 import "dotenv/config";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import { connectDB } from "./config/db.js";
@@ -121,20 +122,35 @@ async function seed() {
     },
   ]);
 
-  const adminEmail = "admin@example.com";
+  // A fixed, published email/password ("admin@example.com" / "ChangeMe123!")
+  // used to be created here unconditionally. If this script is ever run
+  // against a real deployment (even by accident, e.g. copy-pasting a Render
+  // shell command), that's a live, publicly-guessable admin account. Now:
+  // the email/password can be overridden via env vars, the password is
+  // randomly generated if not supplied, and seeding an admin in production
+  // requires an explicit opt-in.
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || "admin@example.com";
   const existingAdmin = await User.findOne({ email: adminEmail });
   if (!existingAdmin) {
-    const passwordHash = await bcrypt.hash("ChangeMe123!", 12);
-    await User.create({
-      name: "Admin",
-      email: adminEmail,
-      passwordHash,
-      plan: "paid",
-      isAdmin: true,
-    });
-    console.log(
-      `Seeded admin user: ${adminEmail} / ChangeMe123! (change this password)`,
-    );
+    if (process.env.NODE_ENV === "production" && process.env.ALLOW_PROD_SEED !== "true") {
+      console.warn(
+        "Skipping admin seed: NODE_ENV=production and ALLOW_PROD_SEED is not 'true'. " +
+          "If you really want to seed an admin account on this database, set " +
+          "ALLOW_PROD_SEED=true and SEED_ADMIN_PASSWORD explicitly and re-run.",
+      );
+    } else {
+      const adminPassword = process.env.SEED_ADMIN_PASSWORD || crypto.randomBytes(9).toString("base64url");
+      const passwordHash = await bcrypt.hash(adminPassword, 12);
+      await User.create({
+        name: "Admin",
+        email: adminEmail,
+        passwordHash,
+        isAdmin: true,
+      });
+      console.log(
+        `Seeded admin user: ${adminEmail} / ${adminPassword} -- log in once and change this password immediately.`,
+      );
+    }
   }
 
   console.log("Seed complete.");

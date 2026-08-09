@@ -4,6 +4,7 @@ import Video from "../models/Video.js";
 import Book from "../models/Book.js";
 import Purchase from "../models/Purchase.js";
 import { requireAuth } from "../middleware/auth.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
@@ -82,7 +83,10 @@ function verifyCallbackSignature(body, headerSignature) {
   }
 }
 
-router.post("/create", requireAuth, async (req, res) => {
+router.post(
+  "/create",
+  requireAuth,
+  asyncHandler(async (req, res) => {
   const { itemType, itemId } = req.body;
   const Model = ITEM_LOOKUP[itemType];
   if (!Model) return res.status(400).json({ error: "itemType must be 'video' or 'book'" });
@@ -160,13 +164,18 @@ router.post("/create", requireAuth, async (req, res) => {
   } catch (err) {
     res.status(502).json({ error: `Could not reach ABA PayWay: ${err.message}` });
   }
-});
+  })
+);
 
-router.get("/:tranId/status", requireAuth, async (req, res) => {
-  const purchase = await Purchase.findOne({ tranId: req.params.tranId, user: req.user._id });
-  if (!purchase) return res.status(404).json({ error: "Purchase not found" });
-  res.json({ status: purchase.status });
-});
+router.get(
+  "/:tranId/status",
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const purchase = await Purchase.findOne({ tranId: req.params.tranId, user: req.user._id });
+    if (!purchase) return res.status(404).json({ error: "Purchase not found" });
+    res.json({ status: purchase.status });
+  })
+);
 
 export async function handleAbaCallback(req, res) {
   const signature = req.header("X-PAYWAY-HMAC-SHA512");
@@ -193,6 +202,6 @@ export async function handleAbaCallback(req, res) {
   res.json({ received: true });
 }
 
-router.post("/callback", handleAbaCallback);
+router.post("/callback", asyncHandler(handleAbaCallback));
 
 export default router;

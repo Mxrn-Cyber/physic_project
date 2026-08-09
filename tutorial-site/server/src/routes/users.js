@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import { requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = Router();
 
@@ -18,53 +19,65 @@ function publicUser(user) {
   };
 }
 
-router.get("/", async (_req, res) => {
-  const users = await User.find().sort({ createdAt: -1 });
-  res.json({ users: users.map(publicUser) });
-});
+router.get(
+  "/",
+  asyncHandler(async (_req, res) => {
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json({ users: users.map(publicUser) });
+  })
+);
 
-router.post("/", async (req, res) => {
-  try {
-    const { name, email, password, isAdmin } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: "name, email and password are required" });
+router.post(
+  "/",
+  asyncHandler(async (req, res) => {
+    try {
+      const { name, email, password, isAdmin } = req.body;
+      if (!name || !email || !password) {
+        return res.status(400).json({ error: "name, email and password are required" });
+      }
+      if (password.length < 8) {
+        return res.status(400).json({ error: "Password must be at least 8 characters" });
+      }
+
+      const existing = await User.findOne({ email: email.toLowerCase() });
+      if (existing) return res.status(409).json({ error: "Email already registered" });
+
+      const passwordHash = await bcrypt.hash(password, 12);
+      const user = await User.create({ name, email, passwordHash, isAdmin: Boolean(isAdmin) });
+      res.status(201).json({ user: publicUser(user) });
+    } catch (err) {
+      res.status(400).json({ error: err.message });
     }
-    if (password.length < 8) {
-      return res.status(400).json({ error: "Password must be at least 8 characters" });
+  })
+);
+
+router.patch(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    if (req.params.id === String(req.user._id) && req.body.isAdmin === false) {
+      return res.status(400).json({ error: "You can't remove your own admin access" });
     }
 
-    const existing = await User.findOne({ email: email.toLowerCase() });
-    if (existing) return res.status(409).json({ error: "Email already registered" });
+    const update = {};
+    if (typeof req.body.isAdmin === "boolean") update.isAdmin = req.body.isAdmin;
 
-    const passwordHash = await bcrypt.hash(password, 12);
-    const user = await User.create({ name, email, passwordHash, isAdmin: Boolean(isAdmin) });
-    res.status(201).json({ user: publicUser(user) });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+    const user = await User.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({ user: publicUser(user) });
+  })
+);
 
-router.patch("/:id", async (req, res) => {
-  if (req.params.id === String(req.user._id) && req.body.isAdmin === false) {
-    return res.status(400).json({ error: "You can't remove your own admin access" });
-  }
+router.delete(
+  "/:id",
+  asyncHandler(async (req, res) => {
+    if (req.params.id === String(req.user._id)) {
+      return res.status(400).json({ error: "You can't delete your own account while logged in as it" });
+    }
 
-  const update = {};
-  if (typeof req.body.isAdmin === "boolean") update.isAdmin = req.body.isAdmin;
-
-  const user = await User.findByIdAndUpdate(req.params.id, update, { new: true });
-  if (!user) return res.status(404).json({ error: "User not found" });
-  res.json({ user: publicUser(user) });
-});
-
-router.delete("/:id", async (req, res) => {
-  if (req.params.id === String(req.user._id)) {
-    return res.status(400).json({ error: "You can't delete your own account while logged in as it" });
-  }
-
-  const user = await User.findByIdAndDelete(req.params.id);
-  if (!user) return res.status(404).json({ error: "User not found" });
-  res.status(204).send();
-});
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.status(204).send();
+  })
+);
 
 export default router;

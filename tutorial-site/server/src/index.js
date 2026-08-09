@@ -24,6 +24,17 @@ app.use("/api/uploads", uploadRoutes);
 app.use("/api/users", userRoutes);
 
 app.use((err, _req, res, _next) => {
+  // Routes are now wrapped in asyncHandler (see utils/asyncHandler.js), so
+  // errors that used to be unhandled promise rejections -- e.g. a malformed
+  // id like GET /api/videos/not-an-id -- land here instead of crashing or
+  // hanging the request. Give the two common Mongoose cases a real 4xx
+  // instead of a generic 500.
+  if (err?.name === "CastError") {
+    return res.status(400).json({ error: `Invalid ${err.path}: "${err.value}"` });
+  }
+  if (err?.name === "ValidationError") {
+    return res.status(400).json({ error: err.message });
+  }
   console.error(err);
   res.status(500).json({ error: "Internal server error" });
 });

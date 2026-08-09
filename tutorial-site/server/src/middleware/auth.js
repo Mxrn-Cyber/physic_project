@@ -7,7 +7,11 @@ export async function requireAuth(req, res, next) {
   if (!token) return res.status(401).json({ error: "Missing auth token" });
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    // Pin the accepted algorithm explicitly -- without this, jwt.verify
+    // accepts whatever algorithm the token's header claims, which is the
+    // root cause of the classic "alg: none" / algorithm-confusion JWT
+    // attacks. Our tokens are always signed with HS256, so only accept that.
+    const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
     const user = await User.findById(payload.sub).select("-passwordHash");
     if (!user) return res.status(401).json({ error: "User no longer exists" });
     req.user = user;
@@ -22,7 +26,7 @@ export async function attachUserIfPresent(req, _res, next) {
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
   if (!token) return next();
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
     req.user = await User.findById(payload.sub).select("-passwordHash");
   } catch {}
   next();
