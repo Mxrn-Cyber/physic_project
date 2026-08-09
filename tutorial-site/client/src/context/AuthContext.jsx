@@ -40,9 +40,32 @@ export function AuthProvider({ children }) {
     [applySession]
   );
 
+  // Registration no longer logs the user in directly -- the account stays
+  // unverified until the OTP sent here is confirmed via verifyOtp().
   const register = useCallback(
-    async (name, email, password) => {
-      const { token, user } = await api.register(name, email, password);
+    async (name, email, password, opts) => api.register(name, email, password, opts),
+    []
+  );
+
+  const verifyOtp = useCallback(
+    async (email, code, purpose = "signup") => {
+      const data = await api.verifyOtp(email, code, purpose);
+      if (purpose === "signup" && data.token) {
+        applySession(data.token, data.user);
+      }
+      return data;
+    },
+    [applySession]
+  );
+
+  const resendOtp = useCallback(
+    (email, purpose = "signup", channel) => api.resendOtp(email, purpose, channel),
+    []
+  );
+
+  const googleLogin = useCallback(
+    async (credential) => {
+      const { token, user } = await api.googleAuth(credential);
       applySession(token, user);
     },
     [applySession]
@@ -60,7 +83,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, register, verifyOtp, resendOtp, googleLogin, logout, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

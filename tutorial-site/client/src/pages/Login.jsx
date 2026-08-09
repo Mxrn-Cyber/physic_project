@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import GoogleAuthButton from "../components/GoogleAuthButton.jsx";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [googleError, setGoogleError] = useState(null);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -19,15 +21,41 @@ export default function Login() {
       await login(email, password);
       navigate(location.state?.from?.pathname || "/dashboard", { replace: true });
     } catch (err) {
+      if (err.data?.needsVerification) {
+        navigate("/verify-otp", { state: { email: err.data.email || email, purpose: "signup" } });
+        return;
+      }
       setError(err.message);
     } finally {
       setSubmitting(false);
     }
   }
 
+  async function handleGoogle(credential) {
+    setGoogleError(null);
+    try {
+      await googleLogin(credential);
+      navigate(location.state?.from?.pathname || "/dashboard", { replace: true });
+    } catch (err) {
+      setGoogleError(err.message);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Log in</h1>
+
+      <div className="mt-6">
+        <GoogleAuthButton onCredential={handleGoogle} text="signin_with" />
+        {googleError && <p className="mt-2 text-center text-sm text-red-600">{googleError}</p>}
+      </div>
+
+      <div className="mt-6 flex items-center gap-3 text-xs uppercase text-gray-400">
+        <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+        or log in with email
+        <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+      </div>
+
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
@@ -59,10 +87,15 @@ export default function Login() {
         </button>
       </form>
       <p className="mt-3 text-center text-sm">
-        <Link to="/forgot-password" className="font-medium text-red-600 dark:text-red-400">Forgot password?</Link>
+        <Link to="/forgot-password" className="font-medium text-red-600 dark:text-red-400">
+          Forgot password?
+        </Link>
       </p>
       <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-        No account? <Link to="/register" className="font-medium text-red-600 dark:text-red-400">Register</Link>
+        No account?{" "}
+        <Link to="/register" className="font-medium text-red-600 dark:text-red-400">
+          Register
+        </Link>
       </p>
     </div>
   );

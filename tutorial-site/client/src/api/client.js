@@ -18,7 +18,10 @@ async function request(path, { method = "GET", body, ...rest } = {}) {
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.error || `Request failed (${res.status})`);
+    const err = new Error(data.error || `Request failed (${res.status})`);
+    err.status = res.status;
+    err.data = data;
+    throw err;
   }
   return data;
 }
@@ -37,13 +40,19 @@ async function uploadFile(file) {
 }
 
 export const api = {
-  register: (name, email, password) => request("/auth/register", { method: "POST", body: { name, email, password } }),
+  register: (name, email, password, { phone, channel } = {}) =>
+    request("/auth/register", { method: "POST", body: { name, email, password, phone, channel } }),
+  verifyOtp: (email, code, purpose = "signup") =>
+    request("/auth/verify-otp", { method: "POST", body: { email, code, purpose } }),
+  resendOtp: (email, purpose = "signup", channel) =>
+    request("/auth/resend-otp", { method: "POST", body: { email, purpose, channel } }),
+  googleAuth: (credential) => request("/auth/google", { method: "POST", body: { credential } }),
   login: (email, password) => request("/auth/login", { method: "POST", body: { email, password } }),
   me: () => request("/auth/me"),
   updateProfile: (profile) => request("/auth/me", { method: "PATCH", body: profile }),
   forgotPassword: (email) => request("/auth/forgot-password", { method: "POST", body: { email } }),
-  resetPassword: (email, token, newPassword) =>
-    request("/auth/reset-password", { method: "POST", body: { email, token, newPassword } }),
+  resetPassword: (email, code, newPassword) =>
+    request("/auth/reset-password", { method: "POST", body: { email, code, newPassword } }),
 
   getVideos: (courseId) => request(courseId ? `/videos?course=${courseId}` : "/videos"),
   getVideo: (videoId) => request(`/videos/${videoId}`),

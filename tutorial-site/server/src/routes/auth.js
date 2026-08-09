@@ -1,12 +1,20 @@
 import { Router } from "express";
-import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
 import { requireAuth } from "../middleware/auth.js";
-import { sendPasswordResetEmail } from "../utils/email.js";
+import { sendOtpEmail } from "../utils/email.js";
+import { sendOtpSms } from "../utils/sms.js";
+import { buildOtp, canResend, emptyOtp, secondsUntilResend, verifyOtpMatch } from "../utils/otp.js";
 
 const router = Router();
+
+// otp.* fields are select:false on the schema -- opt back in explicitly
+// wherever a route needs to inspect the current code.
+const OTP_SELECT = "+otp.codeHash +otp.purpose +otp.channel +otp.expiresAt +otp.attempts +otp.lastSentAt";
+
+const googleClient = process.env.GOOGLE_CLIENT_ID ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID) : null;
 
 function signToken(user) {
   return jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -18,6 +26,8 @@ function publicUser(user) {
     name: user.name,
     email: user.email,
     isAdmin: user.isAdmin,
+    isVerified: user.isVerified,
+    authProvider: user.authProvider,
     photoUrl: user.photoUrl,
     phone: user.phone,
     address: user.address,
@@ -26,9 +36,30 @@ function publicUser(user) {
   };
 }
 
+async function issueOtp(user, purpose, channel) {
+  const { otp, code } = buildOtp(purpose, channel);
+  user.otp = otp;
+  await user.save();
+
+  if (channel === "phone") {
+    if (!user.phone) throw new Error("No phone number on file for SMS.");
+    await sendOtpSms(user.phone, code);
+  } else {
+    await sendOtpEmail(user.email, code, purpose);
+  }
+}
+
+function recordFailedAttempt(user) {
+  if (user.otp?.codeHash) {
+    user.otp.attempts = (user.otp.attempts || 0) + 1;
+    return user.save();
+  }
+  return Promise.resolve();
+}
+
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone, channel } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ error: "name, email and password are required" });
     }
@@ -36,54 +67,196 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 8 characters" });
     }
 
-    const existing = await User.findOne({ email: email.toLowerCase() });
+    const wantsPhoneChannel = channel === "phone";
+    if (wantsPhoneChannel && !phone) {
+      return res.status(400).json({ error: "A phone number is required to receive an SMS code" });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) return res.status(409).json({ error: "Email already registered" });
 
     const passwordHash = await bcrypt.hash(password, 12);
-    const user = await User.create({ name, email, passwordHash });
+    const user = await User.create({
+      name,
+      email: normalizedEmail,
+      passwordHash,
+      phone: phone || "",
+      authProvider: "local",
+      isVerified: false,
+    });
 
-    const token = signToken(user);
-    res.status(201).json({ token, user: publicUser(user) });
+    const resolvedChannel = wantsPhoneChannel ? "phone" : "email";
+    try {
+      await issueOtp(user, "signup", resolvedChannel);
+    } catch (otpErr) {
+      console.error("Failed to send signup OTP", otpErr);
+      return res.status(502).json({
+        error: "Account created, but we couldn't send the verification code. Try resending it.",
+        email: user.email,
+        channel: resolvedChannel,
+      });
+    }
+
+    res.status(201).json({
+      message: "We sent a verification code -- enter it to activate your account.",
+      email: user.email,
+      channel: resolvedChannel,
+    });
   } catch (err) {
+    console.error("register error", err);
     res.status(500).json({ error: "Registration failed" });
+  }
+});
+
+router.post("/verify-otp", async (req, res) => {
+  try {
+    const { email, code, purpose = "signup" } = req.body;
+    if (!email || !code) return res.status(400).json({ error: "email and code are required" });
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select(OTP_SELECT);
+    if (!user) return res.status(400).json({ error: "Invalid code" });
+
+    const result = verifyOtpMatch(user.otp, purpose, code);
+    if (!result.ok) {
+      await recordFailedAttempt(user);
+      return res.status(400).json({ error: result.reason || "Invalid code" });
+    }
+
+    const usedChannel = user.otp.channel;
+
+    if (purpose === "signup") {
+      user.isVerified = true;
+      if (usedChannel === "phone") user.phoneVerified = true;
+    }
+    user.otp = emptyOtp();
+    await user.save();
+
+    if (purpose === "signup") {
+      const token = signToken(user);
+      return res.json({ token, user: publicUser(user) });
+    }
+
+    res.json({ message: "Code verified." });
+  } catch (err) {
+    console.error("verify-otp error", err);
+    res.status(500).json({ error: "Could not verify code" });
+  }
+});
+
+router.post("/resend-otp", async (req, res) => {
+  try {
+    const { email, purpose = "signup", channel } = req.body;
+    if (!email) return res.status(400).json({ error: "email is required" });
+
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select(`${OTP_SELECT} +phone`);
+    if (!user) return res.json({ message: "If that account exists, a new code has been sent." });
+
+    if (purpose === "signup" && user.isVerified) {
+      return res.status(400).json({ error: "This account is already verified." });
+    }
+
+    if (!canResend(user.otp)) {
+      const retryAfterSeconds = secondsUntilResend(user.otp);
+      return res.status(429).json({
+        error: `Please wait ${retryAfterSeconds}s before requesting another code.`,
+        retryAfterSeconds,
+      });
+    }
+
+    const resolvedChannel = channel === "phone" && user.phone ? "phone" : user.otp.channel || "email";
+    await issueOtp(user, purpose, resolvedChannel);
+
+    res.json({ message: "A new code has been sent.", channel: resolvedChannel });
+  } catch (err) {
+    console.error("resend-otp error", err);
+    res.status(500).json({ error: "Could not resend code" });
   }
 });
 
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email: (email || "").toLowerCase() });
-    if (!user) return res.status(401).json({ error: "Invalid email or password" });
+    const user = await User.findOne({ email: (email || "").toLowerCase().trim() });
+    if (!user || !user.passwordHash) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: "Invalid email or password" });
 
+    if (!user.isVerified) {
+      return res.status(403).json({
+        error: "Please verify your account before logging in.",
+        needsVerification: true,
+        email: user.email,
+      });
+    }
+
     const token = signToken(user);
     res.json({ token, user: publicUser(user) });
   } catch (err) {
+    console.error("login error", err);
     res.status(500).json({ error: "Login failed" });
   }
 });
 
+router.post("/google", async (req, res) => {
+  try {
+    if (!googleClient) {
+      return res.status(501).json({ error: "Google sign-in isn't configured on this server yet." });
+    }
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ error: "Missing Google credential" });
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    if (!payload?.email) return res.status(400).json({ error: "Google account has no email" });
+
+    let user = await User.findOne({ googleId: payload.sub });
+    if (!user) {
+      user = await User.findOne({ email: payload.email.toLowerCase().trim() });
+    }
+
+    if (user) {
+      user.googleId = user.googleId || payload.sub;
+      user.isVerified = true;
+      if (!user.photoUrl && payload.picture) user.photoUrl = payload.picture;
+      await user.save();
+    } else {
+      user = await User.create({
+        name: payload.name || payload.email.split("@")[0],
+        email: payload.email.toLowerCase().trim(),
+        passwordHash: null,
+        photoUrl: payload.picture || "",
+        authProvider: "google",
+        googleId: payload.sub,
+        isVerified: true,
+      });
+    }
+
+    const token = signToken(user);
+    res.json({ token, user: publicUser(user) });
+  } catch (err) {
+    console.error("google auth error", err);
+    res.status(401).json({ error: "Google sign-in failed" });
+  }
+});
+
 router.post("/forgot-password", async (req, res) => {
-  const GENERIC_OK = { message: "If that email is registered, a reset link has been sent." };
+  const GENERIC_OK = { message: "If that email is registered, a code has been sent." };
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: "Email is required" });
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select(OTP_SELECT);
     if (!user) return res.json(GENERIC_OK);
+    if (!canResend(user.otp)) return res.json(GENERIC_OK);
 
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-
-    user.resetPasswordTokenHash = tokenHash;
-    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000);
-    await user.save();
-
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${rawToken}&email=${encodeURIComponent(user.email)}`;
-    await sendPasswordResetEmail(user.email, resetUrl);
-
+    await issueOtp(user, "reset", "email");
     res.json(GENERIC_OK);
   } catch (err) {
     console.error("forgot-password error", err);
@@ -93,28 +266,25 @@ router.post("/forgot-password", async (req, res) => {
 
 router.post("/reset-password", async (req, res) => {
   try {
-    const { email, token, newPassword } = req.body;
-    if (!email || !token || !newPassword) {
-      return res.status(400).json({ error: "email, token and newPassword are required" });
+    const { email, code, newPassword } = req.body;
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ error: "email, code and newPassword are required" });
     }
     if (newPassword.length < 8) {
       return res.status(400).json({ error: "Password must be at least 8 characters" });
     }
 
-    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-    const user = await User.findOne({
-      email: email.toLowerCase().trim(),
-      resetPasswordTokenHash: tokenHash,
-      resetPasswordExpires: { $gt: new Date() },
-    }).select("+resetPasswordTokenHash +resetPasswordExpires");
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select(OTP_SELECT);
+    if (!user) return res.status(400).json({ error: "Invalid or expired code" });
 
-    if (!user) {
-      return res.status(400).json({ error: "Reset link is invalid or has expired" });
+    const result = verifyOtpMatch(user.otp, "reset", code);
+    if (!result.ok) {
+      await recordFailedAttempt(user);
+      return res.status(400).json({ error: result.reason || "Invalid or expired code" });
     }
 
     user.passwordHash = await bcrypt.hash(newPassword, 12);
-    user.resetPasswordTokenHash = null;
-    user.resetPasswordExpires = null;
+    user.otp = emptyOtp();
     await user.save();
 
     res.json({ message: "Password updated. You can now log in." });

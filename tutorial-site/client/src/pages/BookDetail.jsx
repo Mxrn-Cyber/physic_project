@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, FileText, Lock, ShoppingCart, BookOpen } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  Lock,
+  ShoppingCart,
+  BookOpen,
+} from "lucide-react";
 import { api } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
@@ -80,7 +86,7 @@ export default function BookDetail() {
   const onSale = book.discountPercent > 0 && !book.isFree;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
       <Link
         to="/books"
         className="inline-flex items-center gap-1 text-sm font-medium text-red-600 hover:underline dark:text-red-400"
@@ -88,102 +94,119 @@ export default function BookDetail() {
         <ArrowLeft className="h-4 w-4" /> {t.books.backToList}
       </Link>
 
-      <div className="mt-4 aspect-[3/4] max-h-[70vh] overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
-        {pdfUrl ? (
-          <BookViewer
-            url={pdfUrl}
-            title={book.title}
-            isPreview={isPreview}
-            onBuyClick={() => setBuying(true)}
-          />
-        ) : viewError ? (
-          <div
-            className="flex h-full flex-col items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800"
-            style={
-              book.coverImageUrl
-                ? { backgroundImage: `url(${book.coverImageUrl})`, backgroundSize: "cover", backgroundPosition: "center" }
-                : undefined
-            }
-          >
-            {!book.coverImageUrl && <FileText className="h-10 w-10 text-gray-400" />}
-            <Lock className="h-6 w-6 text-gray-400" />
-            <p className="text-sm text-gray-500 dark:text-gray-400">{t.books.buyToView}</p>
-          </div>
-        ) : (
-          <p className="flex h-full items-center justify-center p-4 text-sm text-gray-500 dark:text-gray-400">
-            {t.common.loading}
-          </p>
-        )}
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-start justify-between gap-6">
-        <div className="min-w-0 flex-1">
-          {badges.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {badges.map((b) => (
-                <span
-                  key={b}
-                  className={`rounded-full px-2 py-0.5 text-xs font-semibold ${BADGE_STYLES[b]}`}
-                >
-                  {BADGE_LABELS[b]}
-                </span>
-              ))}
+      <div className="mt-4 grid grid-cols-1 gap-6 sm:mt-6 sm:gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(260px,1fr)] lg:items-start">
+        <div className="aspect-[3/4] max-h-[80vh] w-full sm:max-h-[75vh] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)]">
+          {pdfUrl ? (
+            <BookViewer
+              url={pdfUrl}
+              title={book.title}
+              isPreview={isPreview}
+              onBuyClick={() => setBuying(true)}
+            />
+          ) : viewError ? (
+            <div
+              className="flex h-full flex-col items-center justify-center gap-2 rounded-2xl bg-gray-100 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700"
+              style={
+                book.coverImageUrl
+                  ? {
+                      backgroundImage: `url(${book.coverImageUrl})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }
+                  : undefined
+              }
+            >
+              {!book.coverImageUrl && (
+                <FileText className="h-10 w-10 text-gray-400" />
+              )}
+              <Lock className="h-6 w-6 text-gray-400" />
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {t.books.buyToView}
+              </p>
+            </div>
+          ) : (
+            <div className="flex h-full items-center justify-center rounded-2xl bg-gray-100 shadow-sm ring-1 ring-gray-200 dark:bg-gray-800 dark:ring-gray-700">
+              <p className="p-4 text-sm text-gray-500 dark:text-gray-400">
+                {t.common.loading}
+              </p>
             </div>
           )}
-          <h1 className="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {book.title}
-          </h1>
-          {book.description && (
-            <p className="mt-2 max-w-2xl text-gray-600 dark:text-gray-400">{book.description}</p>
-          )}
-          {book.pageCount ? (
-            <p className="mt-3 flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
-              <BookOpen className="h-4 w-4" /> {book.pageCount} pages
-            </p>
-          ) : null}
         </div>
 
-        <div className="w-full max-w-xs shrink-0 rounded-xl border border-gray-200 p-5 dark:border-gray-700">
-          <div className="flex items-baseline gap-2">
-            {book.isFree ? (
-              <span className="text-2xl font-bold text-green-700 dark:text-green-400">
-                {t.common.free}
-              </span>
-            ) : onSale ? (
-              <>
-                <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  ${book.effectivePrice.toFixed(2)}
-                </span>
-                <span className="text-sm text-gray-400 line-through">${book.price.toFixed(2)}</span>
-              </>
-            ) : (
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                ${book.price.toFixed(2)}
-              </span>
+        <div className="flex min-w-0 flex-col gap-5">
+          <div className="min-w-0">
+            {badges.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {badges.map((b) => (
+                  <span
+                    key={b}
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${BADGE_STYLES[b]}`}
+                  >
+                    {BADGE_LABELS[b]}
+                  </span>
+                ))}
+              </div>
             )}
+            <h1 className="mt-2 text-xl font-bold text-gray-900 dark:text-gray-100 sm:text-2xl">
+              {book.title}
+            </h1>
+            {book.description && (
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 sm:text-base">
+                {book.description}
+              </p>
+            )}
+            {book.pageCount ? (
+              <p className="mt-3 flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                <BookOpen className="h-4 w-4" /> {book.pageCount} pages
+              </p>
+            ) : null}
           </div>
 
-          {book.unlocked ? (
-            <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
-              <FileText className="h-4 w-4" /> {t.books.youOwnThis}
-            </p>
-          ) : user ? (
-            <button
-              type="button"
-              onClick={() => setBuying(true)}
-              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
-            >
-              <ShoppingCart className="h-4 w-4" /> {t.books.buy} ${book.effectivePrice.toFixed(2)}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => navigate("/login")}
-              className="mt-3 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-            >
-              {t.books.loginToBuy}
-            </button>
-          )}
+          <div className="w-full rounded-2xl border border-gray-200 p-5 shadow-sm dark:border-gray-700">
+            <div className="flex items-baseline gap-2">
+              {book.isFree ? (
+                <span className="text-2xl font-bold text-green-700 dark:text-green-400">
+                  {t.common.free}
+                </span>
+              ) : onSale ? (
+                <>
+                  <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    ${book.effectivePrice.toFixed(2)}
+                  </span>
+                  <span className="text-sm text-gray-400 line-through">
+                    ${book.price.toFixed(2)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  ${book.price.toFixed(2)}
+                </span>
+              )}
+            </div>
+
+            {book.unlocked ? (
+              <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                <FileText className="h-4 w-4" /> {t.books.youOwnThis}
+              </p>
+            ) : user ? (
+              <button
+                type="button"
+                onClick={() => setBuying(true)}
+                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 active:scale-[0.98]"
+              >
+                <ShoppingCart className="h-4 w-4" /> {t.books.buy} $
+                {book.effectivePrice.toFixed(2)}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="mt-3 w-full rounded-lg border border-red-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-red-50 dark:border-red-700 dark:text-gray-300 dark:hover:bg-red-900"
+              >
+                {t.books.loginToBuy}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

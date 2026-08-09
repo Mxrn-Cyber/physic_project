@@ -15,6 +15,7 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
+import VerifyOtp from "./pages/VerifyOtp.jsx";
 import Admin from "./pages/Admin.jsx";
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route
           path="/dashboard"
           element={

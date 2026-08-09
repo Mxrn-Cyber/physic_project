@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Navbar,
-  MobileNav,
+  Collapse,
   Typography,
   Button,
   IconButton,
@@ -116,7 +116,7 @@ export default function NavBar() {
             <Link
               to={to}
               className={[
-                "relative flex items-center gap-2 rounded-lg px-3 py-2 transition-colors duration-200",
+                "relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-colors duration-200",
                 active
                   ? "bg-red-50 text-black dark:bg-white/10 dark:text-white"
                   : "text-black hover:bg-red-50/60 hover:text-black dark:text-gray-100 dark:hover:bg-white/10",
@@ -140,7 +140,7 @@ export default function NavBar() {
           <Link
             to="/dashboard"
             className={[
-              "flex items-center gap-2 rounded-lg px-3 py-2 transition-colors duration-200",
+              "flex items-center gap-2.5 rounded-xl px-3 py-2.5 transition-colors duration-200",
               isActive("/dashboard")
                 ? "bg-red-50 text-red-700 dark:bg-white/10 dark:text-white"
                 : "text-blue-gray-600 hover:bg-red-50/60 hover:text-red-600 dark:text-gray-300 dark:hover:bg-white/10",
@@ -274,18 +274,17 @@ export default function NavBar() {
         </div>
       </div>
 
-      <MobileNav
-        open={openNav}
-        className="overflow-hidden bg-white/80 backdrop-blur-lg backdrop-saturate-150 transition-all duration-300 dark:bg-gray-950/90"
-      >
-        <div className="mx-auto max-w-6xl py-2">
-          {navList}
-          <hr className="my-3 border-blue-gray-50 dark:border-white/10" />
-          <div className="flex flex-col gap-2 px-1">
+      <Collapse open={openNav} className="overflow-hidden lg:hidden">
+        <div className="mx-auto max-w-6xl pb-3 pt-2">
+          <div className="rounded-2xl border border-black/5 bg-white/95 p-3 shadow-lg shadow-black/5 backdrop-blur-lg backdrop-saturate-150 dark:border-white/10 dark:bg-gray-950/95">
+            {navList}
+
+            <hr className="my-3 border-blue-gray-50 dark:border-white/10" />
+
             {user ? (
-              <>
-                <div className="flex items-center gap-3 rounded-lg bg-blue-gray-50/60 px-3 py-2 dark:bg-white/5">
-                  <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
+              <div className="flex flex-col gap-2.5">
+                <div className="flex items-center gap-3 rounded-xl bg-blue-gray-50/60 px-3 py-2.5 dark:bg-white/5">
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-white dark:ring-gray-800">
                     <Avatar
                       size="sm"
                       alt={user.email}
@@ -296,36 +295,45 @@ export default function NavBar() {
                   <div className="min-w-0 flex-1">
                     <Typography
                       variant="small"
-                      className="truncate font-medium text-blue-gray-800 dark:text-gray-100"
+                      className="truncate font-semibold text-blue-gray-800 dark:text-gray-100"
+                    >
+                      {user.name || initialsFor(user.email)}
+                    </Typography>
+                    <Typography
+                      variant="small"
+                      className="truncate text-xs text-blue-gray-500 dark:text-gray-400"
                     >
                       {user.email}
                     </Typography>
                   </div>
                 </div>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  className="flex items-center justify-center gap-2 border-blue-gray-200 text-blue-gray-700 dark:border-white/20 dark:text-gray-100"
-                  onClick={() => navigate("/profile")}
-                >
-                  <UserCog size={16} /> {t.nav.profile}
-                </Button>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  className="flex items-center justify-center gap-2 border-blue-gray-200 text-blue-gray-700 dark:border-white/20 dark:text-gray-100"
-                  onClick={() => {
-                    logout();
-                    navigate("/");
-                  }}
-                >
-                  <LogOut size={16} /> {t.nav.logout}
-                </Button>
-              </>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <Button
+                    size="sm"
+                    variant="outlined"
+                    className="flex items-center justify-center gap-1.5 border-blue-gray-200 text-blue-gray-700 dark:border-white/20 dark:text-gray-100"
+                    onClick={() => navigate("/profile")}
+                  >
+                    <UserCog size={16} /> {t.nav.profile}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outlined"
+                    className="flex items-center justify-center gap-1.5 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+                    onClick={() => {
+                      logout();
+                      navigate("/");
+                    }}
+                  >
+                    <LogOut size={16} /> {t.nav.logout}
+                  </Button>
+                </div>
+              </div>
             ) : (
-              <>
+              <div className="grid grid-cols-2 gap-2.5">
                 <Button
-                  fullWidth
+                  size="sm"
                   variant="outlined"
                   className="dark:border-white/20 dark:text-gray-100"
                   onClick={() => navigate("/login")}
@@ -333,17 +341,17 @@ export default function NavBar() {
                   {t.nav.login}
                 </Button>
                 <Button
-                  fullWidth
+                  size="sm"
                   className="bg-gradient-to-tr from-red-600 to-rose-500"
                   onClick={() => navigate("/register")}
                 >
                   {t.nav.getStarted}
                 </Button>
-              </>
+              </div>
             )}
           </div>
         </div>
-      </MobileNav>
+      </Collapse>
     </Navbar>
   );
 }
