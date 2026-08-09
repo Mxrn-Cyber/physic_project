@@ -6,8 +6,7 @@ import GoogleAuthButton from "../components/GoogleAuthButton.jsx";
 export default function Register() {
   const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
-  const [channel, setChannel] = useState("email");
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [googleError, setGoogleError] = useState(null);
@@ -21,14 +20,20 @@ export default function Register() {
     setError(null);
     setSubmitting(true);
     try {
-      const resolvedChannel = form.phone ? channel : "email";
+      // SMS codes are disabled for now (Twilio needs a paid plan) -- always
+      // verify by email. See server/.env.example if you turn Twilio back on.
       const result = await register(form.name, form.email, form.password, {
-        phone: form.phone || undefined,
-        channel: resolvedChannel,
+        channel: "email",
       });
-      navigate("/verify-otp", {
-        state: { email: result.email, purpose: "signup", channel: result.channel },
-      });
+      if (result.token) {
+        // Signup verification is off -- register() already logged us in.
+        navigate("/dashboard", { replace: true });
+      } else {
+        // Signup verification is on -- confirm the emailed code first.
+        navigate("/verify-otp", {
+          state: { email: result.email, purpose: "signup", channel: result.channel },
+        });
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -93,51 +98,6 @@ export default function Register() {
           />
           <p className="mt-1 text-xs text-gray-400">At least 8 characters.</p>
         </div>
-        <div>
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone (optional)</label>
-          <input
-            type="tel"
-            value={form.phone}
-            onChange={update("phone")}
-            placeholder="+855 12 345 678"
-            className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-          />
-        </div>
-
-        <div>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Send my verification code by
-          </span>
-          <div className="mt-2 flex gap-2">
-            <button
-              type="button"
-              onClick={() => setChannel("email")}
-              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-                channel === "email"
-                  ? "border-red-600 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400"
-                  : "border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-300"
-              }`}
-            >
-              Email
-            </button>
-            <button
-              type="button"
-              disabled={!form.phone}
-              onClick={() => setChannel("phone")}
-              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40 ${
-                channel === "phone"
-                  ? "border-red-600 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400"
-                  : "border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-300"
-              }`}
-            >
-              SMS
-            </button>
-          </div>
-          {!form.phone && (
-            <p className="mt-1 text-xs text-gray-400">Add a phone number above to unlock SMS codes.</p>
-          )}
-        </div>
-
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="submit"

@@ -26,10 +26,10 @@ async function request(path, { method = "GET", body, ...rest } = {}) {
   return data;
 }
 
-async function uploadFile(file) {
+async function uploadTo(path, file) {
   const form = new FormData();
   form.append("file", file);
-  const res = await fetch(`${BASE_URL}/uploads`, {
+  const res = await fetch(`${BASE_URL}${path}`, {
     method: "POST",
     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
     body: form,
@@ -38,6 +38,11 @@ async function uploadFile(file) {
   if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`);
   return data;
 }
+
+const uploadFile = (file) => uploadTo("/uploads", file);
+// Any logged-in user can use this one (not just admins) -- the server keeps
+// it locked to small image files so it can't be used to run up storage costs.
+const uploadAvatar = (file) => uploadTo("/uploads/avatar", file);
 
 export const api = {
   register: (name, email, password, { phone, channel } = {}) =>
@@ -70,6 +75,7 @@ export const api = {
   getPaymentStatus: (tranId) => request(`/payments/${tranId}/status`),
 
   uploadFile,
+  uploadAvatar,
 
   getAdminVideos: () => request("/videos/admin/all"),
   createVideo: (video) => request("/videos", { method: "POST", body: video }),

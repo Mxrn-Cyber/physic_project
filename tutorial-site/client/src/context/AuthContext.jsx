@@ -40,11 +40,19 @@ export function AuthProvider({ children }) {
     [applySession]
   );
 
-  // Registration no longer logs the user in directly -- the account stays
-  // unverified until the OTP sent here is confirmed via verifyOtp().
+  // Signup verification is currently off server-side, so /register returns
+  // a token/user right away and we log the user in immediately. If it's
+  // ever turned back on, the server instead returns {email, channel} with
+  // no token, and the caller (Register.jsx) sends the user to /verify-otp.
   const register = useCallback(
-    async (name, email, password, opts) => api.register(name, email, password, opts),
-    []
+    async (name, email, password, opts) => {
+      const data = await api.register(name, email, password, opts);
+      if (data.token) {
+        applySession(data.token, data.user);
+      }
+      return data;
+    },
+    [applySession]
   );
 
   const verifyOtp = useCallback(

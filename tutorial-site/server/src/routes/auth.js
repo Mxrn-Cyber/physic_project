@@ -10,6 +10,13 @@ import { buildOtp, canResend, emptyOtp, secondsUntilResend, verifyOtpMatch } fro
 
 const router = Router();
 
+// Set to true to require a signup OTP again -- new accounts will need to
+// verify a code before they can log in, same as the reset-password flow.
+// Off for now: registration verifies + logs the user in immediately, no
+// code sent, and /login stops enforcing isVerified. Password reset always
+// uses its OTP code regardless of this flag.
+const REQUIRE_SIGNUP_VERIFICATION = false;
+
 // otp.* fields are select:false on the schema -- opt back in explicitly
 // wherever a route needs to inspect the current code.
 const OTP_SELECT = "+otp.codeHash +otp.purpose +otp.channel +otp.expiresAt +otp.attempts +otp.lastSentAt";
@@ -83,8 +90,13 @@ router.post("/register", async (req, res) => {
       passwordHash,
       phone: phone || "",
       authProvider: "local",
-      isVerified: false,
+      isVerified: !REQUIRE_SIGNUP_VERIFICATION,
     });
+
+    if (!REQUIRE_SIGNUP_VERIFICATION) {
+      const token = signToken(user);
+      return res.status(201).json({ token, user: publicUser(user) });
+    }
 
     const resolvedChannel = wantsPhoneChannel ? "phone" : "email";
     try {
@@ -185,7 +197,7 @@ router.post("/login", async (req, res) => {
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: "Invalid email or password" });
 
-    if (!user.isVerified) {
+    if (REQUIRE_SIGNUP_VERIFICATION && !user.isVerified) {
       return res.status(403).json({
         error: "Please verify your account before logging in.",
         needsVerification: true,

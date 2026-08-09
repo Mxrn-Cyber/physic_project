@@ -79,6 +79,7 @@ export default function Profile() {
               onChange={(url) => setForm({ ...form, photoUrl: url })}
               accept="image/*"
               placeholder="https://… (link to your photo)"
+              uploadFn={api.uploadAvatar}
             />
           </div>
         </div>

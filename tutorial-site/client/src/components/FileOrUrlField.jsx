@@ -12,6 +12,10 @@ export default function FileOrUrlField({
   accept,
   placeholder,
   onDurationDetected,
+  // Defaults to the admin-only uploader (used for video/book content).
+  // Pass api.uploadAvatar here for profile photos, which any logged-in
+  // user is allowed to use.
+  uploadFn = api.uploadFile,
 }) {
   const [mode, setMode] = useState(value ? "url" : "upload");
   const [uploading, setUploading] = useState(false);
@@ -28,7 +32,7 @@ export default function FileOrUrlField({
       });
     }
     try {
-      const { url } = await api.uploadFile(file);
+      const { url } = await uploadFn(file);
       onChange(url);
     } catch (err) {
       setError(err.message);
