@@ -29,7 +29,14 @@ function toDriveDownloadUrl(url) {
   }
 }
 
-async function buildPreviewPdf(pdfUrl, pages) {
+// Fetches a book's actual PDF bytes server-side, whether it lives on our
+// own storage or is a Google Drive share link. Used by every route that
+// needs to hand real PDF bytes to the client (full view, preview, cover
+// generation) -- fetching happens here, server-to-server, specifically so
+// the browser never has to fetch cross-origin from Drive directly (which
+// Drive doesn't allow via CORS, and which is also part of why the old
+// iframe-based viewer had to fall back to opening a new tab on mobile).
+async function fetchSourcePdfBytes(pdfUrl) {
   const fetchUrl = toDriveDownloadUrl(pdfUrl) || pdfUrl;
   const response = await fetch(fetchUrl);
   if (!response.ok) {
@@ -37,7 +44,7 @@ async function buildPreviewPdf(pdfUrl, pages) {
   }
 
   const contentType = response.headers.get("content-type") || "";
-  const sourceBytes = await response.arrayBuffer();
+  const bytes = await response.arrayBuffer();
 
   if (contentType.includes("text/html")) {
     throw new Error(
@@ -47,6 +54,11 @@ async function buildPreviewPdf(pdfUrl, pages) {
     );
   }
 
+  return Buffer.from(bytes);
+}
+
+async function buildPreviewPdf(pdfUrl, pages) {
+  const sourceBytes = await fetchSourcePdfBytes(pdfUrl);
   const sourceDoc = await PDFDocument.load(sourceBytes);
 
   const pageCount = Math.min(pages, sourceDoc.getPageCount());
@@ -155,6 +167,42 @@ router.get(
   })
 );
 
+// Serves the actual PDF bytes for a book -- the full document if unlocked,
+// otherwise the same page-limited preview as /preview-pdf above. This is
+// what the in-page pdf.js viewer on the frontend fetches (with the user's
+// auth token, so purchases are respected) instead of pointing an <iframe>
+// straight at the source URL. Loading the file this way -- as bytes the
+// browser's JS renders onto <canvas> -- is what keeps books readable
+// inline on mobile instead of bouncing out to a new tab: mobile browsers
+// generally don't have a PDF renderer available *inside* an iframe the way
+// desktop browsers do, so an iframe pointed at a raw PDF (or a Google
+// Drive link) is what was forcing the "open in new tab" behavior before.
+router.get(
+  "/:id/pdf",
+  attachUserIfPresent,
+  asyncHandler(async (req, res) => {
+    const book = await Book.findById(req.params.id).catch(() => null);
+    if (!book) return res.status(404).json({ error: "Book not found" });
+
+    const unlocked = isUnlocked(book, req.user);
+    if (!unlocked && !book.previewPages) {
+      return res.status(403).json({ error: "Buy this book to view it" });
+    }
+
+    try {
+      const bytes = unlocked
+        ? await fetchSourcePdfBytes(book.pdfUrl)
+        : await buildPreviewPdf(book.pdfUrl, book.previewPages);
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline; filename=book.pdf");
+      res.send(Buffer.from(bytes));
+    } catch (err) {
+      console.error("Failed to serve book PDF", err);
+      res.status(502).json({ error: "Could not load this PDF right now" });
+    }
+  })
+);
+
 router.post(
   "/:id/complete",
   requireAuth,
@@ -195,30 +243,12 @@ router.post(
     const { pdfUrl } = req.body || {};
     if (!pdfUrl) return res.status(400).json({ error: "pdfUrl is required" });
 
-    const fetchUrl = toDriveDownloadUrl(pdfUrl) || pdfUrl;
-    let response;
+    let pdfBytes;
     try {
-      response = await fetch(fetchUrl);
-    } catch {
-      return res.status(502).json({ error: `Could not fetch the PDF from ${fetchUrl}` });
+      pdfBytes = await fetchSourcePdfBytes(pdfUrl);
+    } catch (err) {
+      return res.status(502).json({ error: err.message });
     }
-    if (!response.ok) {
-      return res
-        .status(502)
-        .json({ error: `Could not fetch source PDF (${response.status} ${response.statusText}) from ${fetchUrl}` });
-    }
-
-    const contentType = response.headers.get("content-type") || "";
-    if (contentType.includes("text/html")) {
-      return res.status(400).json({
-        error:
-          `Fetched an HTML page instead of a PDF from ${fetchUrl} -- Google Drive likely served a ` +
-          `warning/confirmation page instead of the file. Try re-sharing the file as "Anyone with the ` +
-          `link", or upload the PDF directly instead of linking to Drive.`,
-      });
-    }
-
-    const pdfBytes = Buffer.from(await response.arrayBuffer());
 
     try {
       const coverBuffer = await renderFirstPageAsJpeg(pdfBytes);

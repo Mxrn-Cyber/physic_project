@@ -10,7 +10,6 @@ import Home from "./pages/Home.jsx";
 import Videos from "./pages/Videos.jsx";
 import Books from "./pages/Books.jsx";
 import VideoDetail from "./pages/VideoDetail.jsx";
-import BookDetail from "./pages/BookDetail.jsx";
 import About from "./pages/About.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
@@ -26,6 +25,12 @@ import VerifyOtp from "./pages/VerifyOtp.jsx";
 // student on a slow connection no longer downloads admin-only code.
 const Admin = lazy(() => import("./pages/Admin.jsx"));
 
+// BookDetail pulls in pdf.js (the in-page PDF renderer used by
+// BookViewer.jsx) which is a large library on its own. Lazy-loading this
+// page keeps pdf.js out of the bundle every other page pays for -- it only
+// downloads when someone actually opens a book.
+const BookDetail = lazy(() => import("./pages/BookDetail.jsx"));
+
 export default function App() {
   const { lang, toggleLang } = useLanguage();
   const { mode, toggleMode } = useDarkMode();
@@ -39,7 +44,18 @@ export default function App() {
         <Route path="/videos" element={<Videos />} />
         <Route path="/videos/:id" element={<VideoDetail />} />
         <Route path="/books" element={<Books />} />
-        <Route path="/books/:id" element={<BookDetail />} />
+        <Route
+          path="/books/:id"
+          element={
+            <Suspense
+              fallback={
+                <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>
+              }
+            >
+              <BookDetail />
+            </Suspense>
+          }
+        />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

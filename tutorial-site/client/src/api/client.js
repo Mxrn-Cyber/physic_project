@@ -4,6 +4,12 @@ let authToken = null;
 export function setAuthToken(token) {
   authToken = token;
 }
+// Exposed so the in-page PDF viewer (BookViewer.jsx) can attach the current
+// user's token to its own PDF fetches -- it doesn't go through request()
+// above, since pdf.js does its own fetching internally.
+export function getAuthToken() {
+  return authToken;
+}
 
 async function request(path, { method = "GET", body, ...rest } = {}) {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -70,6 +76,10 @@ export const api = {
   getBook: (bookId) => request(`/books/${bookId}`),
   getBookView: (bookId) => request(`/books/${bookId}/view`),
   getBookPreviewPdfUrl: (bookId) => `${BASE_URL}/books/${bookId}/preview-pdf`,
+  // The single URL the in-page PDF viewer fetches from: the server decides
+  // whether to hand back the full document or a page-limited preview based
+  // on whether the requesting user (via their auth token) owns the book.
+  getBookPdfUrl: (bookId) => `${BASE_URL}/books/${bookId}/pdf`,
   markBookComplete: (bookId) => request(`/books/${bookId}/complete`, { method: "POST" }),
   // Renders page 1 of a PDF (fetched from the given URL) into a cover image
   // and returns { coverUrl }. Used when an admin pastes a PDF URL instead

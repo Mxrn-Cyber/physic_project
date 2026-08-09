@@ -22,7 +22,11 @@ export default function BookDetail() {
 
   const [book, setBook] = useState(null);
   const [status, setStatus] = useState("loading");
-  const [pdfUrl, setPdfUrl] = useState(null);
+  // Whether we're allowed to view *something* for this book (full text or a
+  // page-limited preview) -- the actual bytes are fetched by BookViewer
+  // itself, from api.getBookPdfUrl(id), which decides server-side which one
+  // to serve based on the requester's auth token.
+  const [canView, setCanView] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
   const [viewError, setViewError] = useState(null);
   const [buying, setBuying] = useState(false);
@@ -38,7 +42,7 @@ export default function BookDetail() {
 
   useEffect(() => {
     setStatus("loading");
-    setPdfUrl(null);
+    setCanView(false);
     load();
   }, [id]);
 
@@ -47,10 +51,10 @@ export default function BookDetail() {
     let cancelled = false;
     api
       .getBookView(id)
-      .then(({ pdfUrl, isPreview }) => {
+      .then(({ isPreview }) => {
         if (cancelled) return;
         setIsPreview(Boolean(isPreview));
-        setPdfUrl(isPreview ? api.getBookPreviewPdfUrl(id) : pdfUrl);
+        setCanView(true);
       })
       .catch((err) => {
         if (!cancelled) setViewError(err.message);
@@ -96,9 +100,9 @@ export default function BookDetail() {
 
       <div className="mt-4 grid grid-cols-1 gap-6 sm:mt-6 sm:gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(260px,1fr)] lg:items-start">
         <div className="aspect-[3/4] max-h-[80vh] w-full sm:max-h-[75vh] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)]">
-          {pdfUrl ? (
+          {canView ? (
             <BookViewer
-              url={pdfUrl}
+              url={api.getBookPdfUrl(id)}
               title={book.title}
               isPreview={isPreview}
               onBuyClick={() => setBuying(true)}
