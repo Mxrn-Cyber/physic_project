@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import NavBar from "./components/NavBar.jsx";
@@ -8,6 +9,8 @@ import Videos from "./pages/Videos.jsx";
 import Books from "./pages/Books.jsx";
 import VideoDetail from "./pages/VideoDetail.jsx";
 import BookDetail from "./pages/BookDetail.jsx";
+import Courses from "./pages/Courses.jsx";
+import CourseDetail from "./pages/Lesson.jsx";
 import About from "./pages/About.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
@@ -16,7 +19,12 @@ import Register from "./pages/Register.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import VerifyOtp from "./pages/VerifyOtp.jsx";
-import Admin from "./pages/Admin.jsx";
+
+// Admin ships a large CRUD dashboard (users/videos/books management) that
+// only admins ever use, but it used to be bundled into every visitor's
+// initial page load regardless of role. Loading it lazily means a regular
+// student on a slow connection no longer downloads admin-only code.
+const Admin = lazy(() => import("./pages/Admin.jsx"));
 
 export default function App() {
   return (
@@ -29,6 +37,8 @@ export default function App() {
         <Route path="/videos/:id" element={<VideoDetail />} />
         <Route path="/books" element={<Books />} />
         <Route path="/books/:id" element={<BookDetail />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/courses/:courseId" element={<CourseDetail />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -47,7 +57,13 @@ export default function App() {
           path="/admin"
           element={
             <ProtectedRoute>
-              <Admin />
+              <Suspense
+                fallback={
+                  <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>
+                }
+              >
+                <Admin />
+              </Suspense>
             </ProtectedRoute>
           }
         />

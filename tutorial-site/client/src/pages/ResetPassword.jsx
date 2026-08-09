@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation, useSearchParams, Link } from "react-router-dom";
 import { api } from "../api/client.js";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { t } = useLanguage();
 
   const email = location.state?.email || searchParams.get("email") || "";
 
@@ -26,11 +28,11 @@ export default function ResetPassword() {
   if (!email) {
     return (
       <div className="mx-auto max-w-sm px-4 py-16">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Reset password</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.auth.resetTitle}</h1>
         <p className="mt-6 text-sm text-red-600">
-          We don't know which account to reset. Start again from{" "}
+          {t.auth.resetNoEmailMessage}{" "}
           <Link to="/forgot-password" className="font-medium text-red-600 dark:text-red-400">
-            forgot password
+            {t.auth.forgotPasswordLink}
           </Link>
           .
         </p>
@@ -43,7 +45,7 @@ export default function ResetPassword() {
     setError(null);
 
     if (newPassword !== confirmPassword) {
-      setError("Passwords don't match");
+      setError(t.auth.passwordsDontMatch);
       return;
     }
 
@@ -74,20 +76,20 @@ export default function ResetPassword() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Reset password</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.auth.resetTitle}</h1>
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        Enter the 6-digit code we sent to <span className="font-medium">{email}</span>, then choose a
-        new password.
+        {t.auth.resetSubtitlePrefix} <span className="font-medium">{email}</span>
+        {t.auth.resetSubtitleSuffix}
       </p>
 
       {done ? (
-        <p className="mt-6 text-sm text-green-600">Password updated. Redirecting you to log in…</p>
+        <p className="mt-6 text-sm text-green-600">{t.auth.resetDone}</p>
       ) : (
         <>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Verification code
+                {t.auth.verificationCode}
               </label>
               <input
                 required
@@ -101,7 +103,7 @@ export default function ResetPassword() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">New password</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.auth.newPassword}</label>
               <input
                 type="password"
                 required
@@ -113,7 +115,7 @@ export default function ResetPassword() {
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Confirm new password
+                {t.auth.confirmNewPassword}
               </label>
               <input
                 type="password"
@@ -130,7 +132,7 @@ export default function ResetPassword() {
               disabled={submitting || code.length !== 6}
               className="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
             >
-              {submitting ? "Updating…" : "Update password"}
+              {submitting ? t.auth.updating : t.auth.updatePassword}
             </button>
           </form>
 
@@ -140,7 +142,11 @@ export default function ResetPassword() {
             disabled={resending || cooldown > 0}
             className="mt-4 w-full text-center text-sm font-medium text-red-600 hover:underline disabled:cursor-not-allowed disabled:text-gray-400 disabled:no-underline dark:text-red-400"
           >
-            {cooldown > 0 ? `Resend code in ${cooldown}s` : resending ? "Sending…" : "Resend code"}
+            {cooldown > 0
+              ? `${t.auth.resendCodeIn} ${cooldown}s`
+              : resending
+                ? t.auth.sending
+                : t.auth.resendCode}
           </button>
         </>
       )}

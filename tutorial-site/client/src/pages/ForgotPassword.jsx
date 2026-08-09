@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api/client.js";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -24,14 +26,12 @@ export default function ForgotPassword() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Forgot password</h1>
-      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        Enter your email and we'll send you a 6-digit code to reset your password.
-      </p>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.auth.forgotTitle}</h1>
+      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{t.auth.forgotSubtitle}</p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.auth.emailLabel}</label>
           <input
             type="email"
             required
@@ -46,13 +46,13 @@ export default function ForgotPassword() {
           disabled={submitting}
           className="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
         >
-          {submitting ? "Sending…" : "Send code"}
+          {submitting ? t.auth.sending : t.auth.sendCode}
         </button>
       </form>
 
       <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
         <Link to="/login" className="font-medium text-red-600 dark:text-red-400">
-          Back to log in
+          {t.auth.backToLogin}
         </Link>
       </p>
     </div>

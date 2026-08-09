@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useLanguage } from "../context/LanguageContext.jsx";
 import { api } from "../api/client.js";
 import FileOrUrlField from "../components/FileOrUrlField.jsx";
 
 export default function Profile() {
   const { user, refreshUser } = useAuth();
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -29,17 +31,15 @@ export default function Profile() {
   }
 
   if (!user) {
-    return <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>;
+    return <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">{t.profile.loading}</div>;
   }
 
   const ownedCount = (user.purchasedVideos?.length || 0) + (user.purchasedBooks?.length || 0);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Your Profile</h1>
-      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        Update your contact details. Email and password are managed elsewhere.
-      </p>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.profile.title}</h1>
+      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{t.profile.subtitle}</p>
 
       <div className="mt-6 flex items-center gap-4">
         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-gray-200 dark:border-gray-700">
@@ -55,14 +55,14 @@ export default function Profile() {
         <div>
           <p className="font-medium text-gray-900 dark:text-gray-100">{user.email}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {ownedCount} item{ownedCount === 1 ? "" : "s"} owned
+            {ownedCount} {ownedCount === 1 ? t.profile.itemOwned : t.profile.itemsOwned}
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
         <label className="block">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Name</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.profile.nameLabel}</span>
           <input
             required
             value={form.name}
@@ -72,20 +72,20 @@ export default function Profile() {
         </label>
 
         <div className="block">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Profile photo</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.profile.photoLabel}</span>
           <div className="mt-1">
             <FileOrUrlField
               value={form.photoUrl}
               onChange={(url) => setForm({ ...form, photoUrl: url })}
               accept="image/*"
-              placeholder="https://… (link to your photo)"
+              placeholder={t.profile.photoPlaceholder}
               uploadFn={api.uploadAvatar}
             />
           </div>
         </div>
 
         <label className="block">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone number</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.profile.phoneLabel}</span>
           <input
             type="tel"
             value={form.phone}
@@ -95,7 +95,7 @@ export default function Profile() {
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Address</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.profile.addressLabel}</span>
           <textarea
             rows={3}
             value={form.address}
@@ -106,7 +106,7 @@ export default function Profile() {
 
         {error && <p className="text-sm text-red-600">{error}</p>}
         {status === "saved" && (
-          <p className="text-sm text-green-700 dark:text-green-400">Profile updated.</p>
+          <p className="text-sm text-green-700 dark:text-green-400">{t.profile.saved}</p>
         )}
 
         <button
@@ -114,7 +114,7 @@ export default function Profile() {
           disabled={status === "saving"}
           className="w-fit rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
         >
-          {status === "saving" ? "Saving…" : "Save changes"}
+          {status === "saving" ? t.profile.saving : t.profile.saveChanges}
         </button>
       </form>
     </div>

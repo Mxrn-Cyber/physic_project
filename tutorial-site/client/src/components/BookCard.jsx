@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { FileText, Lock } from "lucide-react";
-import { BADGE_LABELS, BADGE_STYLES } from "./badges.js";
+import { badgeLabel, BADGE_STYLES } from "./badges.js";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 export default function BookCard({ book }) {
+  const { t } = useLanguage();
   const badges = book.badges || [];
   const onSale = book.discountPercent > 0 && !book.isFree;
 
@@ -36,7 +38,7 @@ export default function BookCard({ book }) {
                 key={b}
                 className={`rounded-full px-2 py-0.5 text-xs font-semibold ${BADGE_STYLES[b]}`}
               >
-                {BADGE_LABELS[b]}
+                {badgeLabel(b, t)}
               </span>
             ))}
           </div>
@@ -45,7 +47,7 @@ export default function BookCard({ book }) {
 
       <div className="mt-2 flex items-baseline gap-2">
         {book.isFree ? (
-          <span className="font-semibold text-green-700 dark:text-green-400">Free</span>
+          <span className="font-semibold text-green-700 dark:text-green-400">{t.common.free}</span>
         ) : onSale ? (
           <>
             <span className="font-semibold text-gray-900 dark:text-gray-100">

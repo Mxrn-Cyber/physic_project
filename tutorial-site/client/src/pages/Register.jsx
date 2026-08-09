@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useLanguage } from "../context/LanguageContext.jsx";
 import GoogleAuthButton from "../components/GoogleAuthButton.jsx";
 
 export default function Register() {
   const { register, googleLogin } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState(null);
@@ -53,7 +55,7 @@ export default function Register() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create an account</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.auth.registerTitle}</h1>
 
       <div className="mt-6">
         <GoogleAuthButton onCredential={handleGoogle} text="signup_with" />
@@ -62,13 +64,13 @@ export default function Register() {
 
       <div className="mt-6 flex items-center gap-3 text-xs uppercase text-gray-400">
         <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
-        or sign up with email
+        {t.auth.orSignUpWithEmail}
         <span className="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.auth.nameLabel}</label>
           <input
             required
             value={form.name}
@@ -77,7 +79,7 @@ export default function Register() {
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.auth.emailLabel}</label>
           <input
             type="email"
             required
@@ -87,7 +89,7 @@ export default function Register() {
           />
         </div>
         <div>
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.auth.passwordLabel}</label>
           <input
             type="password"
             required
@@ -96,7 +98,7 @@ export default function Register() {
             onChange={update("password")}
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
           />
-          <p className="mt-1 text-xs text-gray-400">At least 8 characters.</p>
+          <p className="mt-1 text-xs text-gray-400">{t.auth.passwordHint}</p>
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
@@ -104,13 +106,13 @@ export default function Register() {
           disabled={submitting}
           className="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
         >
-          {submitting ? "Creating account…" : "Create account"}
+          {submitting ? t.auth.creatingAccount : t.auth.createAccount}
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-        Already have an account?{" "}
+        {t.auth.alreadyHaveAccount}{" "}
         <Link to="/login" className="font-medium text-red-600 dark:text-red-400">
-          Log in
+          {t.auth.loginLink}
         </Link>
       </p>
     </div>

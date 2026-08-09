@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Play, Lock } from "lucide-react";
-import { BADGE_LABELS, BADGE_STYLES } from "./badges.js";
+import { badgeLabel, BADGE_STYLES } from "./badges.js";
 import { api } from "../api/client.js";
 import { toVideoEmbedUrl } from "../utils/media.js";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 function toHoverEmbedUrl(embedUrl) {
   try {
@@ -71,6 +72,7 @@ function HoverPreview({ videoId }) {
 }
 
 export default function VideoCard({ video }) {
+  const { t } = useLanguage();
   const badges = video.badges || [];
   const onSale = video.discountPercent > 0 && !video.isFree;
 
@@ -105,7 +107,7 @@ export default function VideoCard({ video }) {
                 key={b}
                 className={`rounded-full px-2 py-0.5 text-xs font-semibold ${BADGE_STYLES[b]}`}
               >
-                {BADGE_LABELS[b]}
+                {badgeLabel(b, t)}
               </span>
             ))}
           </div>
@@ -114,7 +116,7 @@ export default function VideoCard({ video }) {
 
       <div className="mt-2 flex items-baseline gap-2">
         {video.isFree ? (
-          <span className="font-semibold text-green-700 dark:text-green-400">Free</span>
+          <span className="font-semibold text-green-700 dark:text-green-400">{t.common.free}</span>
         ) : onSale ? (
           <>
             <span className="font-semibold text-gray-900 dark:text-gray-100">

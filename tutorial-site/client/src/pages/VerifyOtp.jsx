@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 export default function VerifyOtp() {
   const location = useLocation();
   const navigate = useNavigate();
   const { verifyOtp, resendOtp } = useAuth();
+  const { t } = useLanguage();
 
   const email = location.state?.email || new URLSearchParams(location.search).get("email") || "";
   const purpose = location.state?.purpose || "signup";
@@ -25,11 +27,11 @@ export default function VerifyOtp() {
   if (!email) {
     return (
       <div className="mx-auto max-w-sm px-4 py-16">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Verify your account</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.auth.verifyTitle}</h1>
         <p className="mt-6 text-sm text-red-600">
-          We couldn't tell which account to verify. Start again from{" "}
+          {t.auth.verifyNoEmailMessage}{" "}
           <Link to="/register" className="font-medium text-red-600 dark:text-red-400">
-            sign up
+            {t.auth.signUpLink}
           </Link>
           .
         </p>
@@ -66,15 +68,16 @@ export default function VerifyOtp() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Verify your account</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.auth.verifyTitle}</h1>
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-        We sent a 6-digit code to <span className="font-medium">{email}</span>
-        {channel === "phone" ? " by SMS" : " by email"}. Enter it below to continue.
+        {t.auth.verifySubtitlePrefix} <span className="font-medium">{email}</span>
+        {channel === "phone" ? t.auth.verifySubtitleBySms : t.auth.verifySubtitleByEmail}
+        {t.auth.verifySubtitleSuffix}
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Verification code</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.auth.verificationCode}</label>
           <input
             required
             inputMode="numeric"
@@ -93,7 +96,7 @@ export default function VerifyOtp() {
           disabled={submitting || code.length !== 6}
           className="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
         >
-          {submitting ? "Verifying…" : "Verify"}
+          {submitting ? t.auth.verifying : t.auth.verifyButton}
         </button>
       </form>
 
@@ -103,7 +106,11 @@ export default function VerifyOtp() {
         disabled={resending || cooldown > 0}
         className="mt-4 w-full text-center text-sm font-medium text-red-600 hover:underline disabled:cursor-not-allowed disabled:text-gray-400 disabled:no-underline dark:text-red-400"
       >
-        {cooldown > 0 ? `Resend code in ${cooldown}s` : resending ? "Sending…" : "Resend code"}
+        {cooldown > 0
+          ? `${t.auth.resendCodeIn} ${cooldown}s`
+          : resending
+            ? t.auth.sending
+            : t.auth.resendCode}
       </button>
     </div>
   );

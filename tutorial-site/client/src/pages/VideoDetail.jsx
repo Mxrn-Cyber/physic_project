@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import VideoPlayer from "../components/VideoPlayer.jsx";
 import PaymentModal from "../components/PaymentModal.jsx";
-import { BADGE_LABELS, BADGE_STYLES } from "../components/badges.js";
+import { badgeLabel, BADGE_STYLES } from "../components/badges.js";
 
 export default function VideoDetail() {
   const { id } = useParams();
@@ -126,7 +126,7 @@ export default function VideoDetail() {
                   key={b}
                   className={`rounded-full px-2 py-0.5 text-xs font-semibold ${BADGE_STYLES[b]}`}
                 >
-                  {BADGE_LABELS[b]}
+                  {badgeLabel(b, t)}
                 </span>
               ))}
             </div>

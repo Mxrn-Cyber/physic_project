@@ -2,25 +2,34 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Play, FileText, Lock } from "lucide-react";
 import { api } from "../api/client.js";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useLanguage } from "../context/LanguageContext.jsx";
 import VideoPlayer from "../components/VideoPlayer.jsx";
 import BookViewer from "../components/BookViewer.jsx";
 
+// Named/exported as CourseDetail (the file is still Lesson.jsx on disk --
+// renaming would leave the old file behind since files can't be deleted
+// from here, so the export name is the accurate part).
 export default function CourseDetail() {
   const { courseId } = useParams();
-  const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
+  const [status, setStatus] = useState("loading");
   const [activeType, setActiveType] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
   const [mediaUrl, setMediaUrl] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    api.getCourses().then(({ courses }) => {
-      const found = courses.find((c) => c._id === courseId);
-      setCourse(found || null);
-    });
+    setStatus("loading");
+    api
+      .getCourses()
+      .then(({ courses }) => {
+        const found = courses.find((c) => c._id === courseId);
+        setCourse(found || null);
+        setStatus(found ? "ready" : "notFound");
+      })
+      .catch(() => setStatus("error"));
   }, [courseId]);
 
   async function openVideo(video) {
@@ -51,21 +60,30 @@ export default function CourseDetail() {
     }
   }
 
-  if (!course)
-    return <div className="p-10 text-center text-sm text-gray-500">Loading…</div>;
+  if (status === "loading") {
+    return <div className="p-10 text-center text-sm text-gray-500">{t.courses.loadingCourse}</div>;
+  }
+  if (status === "error" || status === "notFound" || !course) {
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        <p className="text-sm text-red-600">{t.courses.loadError}</p>
+        <Link to="/courses" className="mt-3 inline-block text-sm font-medium text-red-600 hover:underline">
+          {t.courses.backToCourses}
+        </Link>
+      </div>
+    );
+  }
 
   const hasContent = course.videos.length > 0 || course.books.length > 0;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
       <Link to="/courses" className="text-sm font-medium text-red-600 hover:underline">
-        ← Back to courses
+        {t.courses.backToCourses}
       </Link>
       <h1 className="mt-2 text-2xl font-bold text-gray-900">{course.title}</h1>
 
-      {!hasContent && (
-        <p className="mt-6 text-sm text-gray-500">No videos or books in this course yet.</p>
-      )}
+      {!hasContent && <p className="mt-6 text-sm text-gray-500">{t.courses.noContent}</p>}
 
       {activeItem && (
         <div className="mt-6">
@@ -75,16 +93,23 @@ export default function CourseDetail() {
             }`}
           >
             {!activeItem.unlocked ? (
+              // Locked items unlock the same way everywhere else on the site:
+              // buy that specific video/book. There's no separate "plans" or
+              // "/pricing" page (there used to be a broken link to one) --
+              // this sends the visitor to the item's own page, where the
+              // real buy button and payment flow already live.
               <div className="flex h-full flex-col items-center justify-center text-center text-white">
                 <Lock className="h-12 w-12 text-gray-400" />
                 <p className="mt-2 text-sm text-gray-300">
-                  Upgrade to Paid to {activeType === "book" ? "view this book" : "watch this video"}
+                  {activeType === "book" ? t.courses.buyToUnlockBook : t.courses.buyToUnlockVideo}
                 </p>
                 <button
-                  onClick={() => navigate("/pricing")}
+                  onClick={() =>
+                    navigate(activeType === "book" ? `/books/${activeItem._id}` : `/videos/${activeItem._id}`)
+                  }
                   className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
                 >
-                  View plans
+                  {t.courses.viewItem}
                 </button>
               </div>
             ) : mediaUrl ? (
@@ -94,7 +119,7 @@ export default function CourseDetail() {
                 <VideoPlayer url={mediaUrl} title={activeItem.title} />
               )
             ) : (
-              <p className="p-4 text-sm text-gray-300">{error || "Loading…"}</p>
+              <p className="p-4 text-sm text-gray-300">{error || t.courses.loadingCourse}</p>
             )}
           </div>
           <p className="mt-2 font-medium text-gray-900">{activeItem.title}</p>
@@ -103,9 +128,7 @@ export default function CourseDetail() {
 
       <div className="mt-8 grid gap-8 sm:grid-cols-2">
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Videos
-          </h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">{t.courses.videosHeading}</h2>
           <ul className="mt-3 space-y-1.5">
             {course.videos.map((v) => (
               <li key={v._id}>
@@ -120,21 +143,17 @@ export default function CourseDetail() {
                     {v.title}
                   </span>
                   <span className="text-xs text-gray-500">
-                    {v.isFree ? "Free" : `$${v.effectivePrice}`}
+                    {v.isFree ? t.common.free : `$${v.effectivePrice}`}
                   </span>
                 </button>
               </li>
             ))}
-            {course.videos.length === 0 && (
-              <li className="text-sm text-gray-400">No videos yet.</li>
-            )}
+            {course.videos.length === 0 && <li className="text-sm text-gray-400">{t.courses.noVideosYet}</li>}
           </ul>
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-            Books
-          </h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">{t.courses.booksHeading}</h2>
           <ul className="mt-3 space-y-1.5">
             {course.books.map((b) => (
               <li key={b._id}>
@@ -149,14 +168,12 @@ export default function CourseDetail() {
                     {b.title}
                   </span>
                   <span className="text-xs text-gray-500">
-                    {b.isFree ? "Free" : `$${b.effectivePrice}`}
+                    {b.isFree ? t.common.free : `$${b.effectivePrice}`}
                   </span>
                 </button>
               </li>
             ))}
-            {course.books.length === 0 && (
-              <li className="text-sm text-gray-400">No books yet.</li>
-            )}
+            {course.books.length === 0 && <li className="text-sm text-gray-400">{t.courses.noBooksYet}</li>}
           </ul>
         </div>
       </div>

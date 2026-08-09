@@ -59,6 +59,8 @@ export const api = {
   resetPassword: (email, code, newPassword) =>
     request("/auth/reset-password", { method: "POST", body: { email, code, newPassword } }),
 
+  getCourses: () => request("/courses"),
+
   getVideos: (courseId) => request(courseId ? `/videos?course=${courseId}` : "/videos"),
   getVideo: (videoId) => request(`/videos/${videoId}`),
   getVideoPlayback: (videoId) => request(`/videos/${videoId}/playback`),
