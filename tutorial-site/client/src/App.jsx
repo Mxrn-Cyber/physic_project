@@ -1,9 +1,11 @@
 import { Suspense, lazy } from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Mail, Phone, Send, Facebook, Sun, Moon } from "lucide-react";
 import NavBar from "./components/NavBar.jsx";
 import BackgroundDecor from "./components/BackgroundDecor.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import { useLanguage } from "./context/LanguageContext.jsx";
+import { useDarkMode } from "./context/DarkModeContext.jsx";
 import Home from "./pages/Home.jsx";
 import Videos from "./pages/Videos.jsx";
 import Books from "./pages/Books.jsx";
@@ -25,6 +27,9 @@ import VerifyOtp from "./pages/VerifyOtp.jsx";
 const Admin = lazy(() => import("./pages/Admin.jsx"));
 
 export default function App() {
+  const { lang, toggleLang } = useLanguage();
+  const { mode, toggleMode } = useDarkMode();
+
   return (
     <div className="relative isolate min-h-screen bg-gray-50 font-sans dark:bg-gray-950">
       <BackgroundDecor />
@@ -72,31 +77,115 @@ export default function App() {
           }
         />
       </Routes>
-      <footer className="mt-16 border-t border-gray-200 bg-white/50 backdrop-blur dark:border-gray-800 dark:bg-gray-950/50">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-center sm:justify-between">
-          <Link to="/" className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-red-600 to-rose-500 text-white shadow-md shadow-red-500/30">
-              <BookOpen size={16} />
-            </span>
-            <span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-              ReanPhysics
-            </span>
-          </Link>
+      {/*
+        Single-section footer: one flex row (stacks on mobile) with the
+        brand mark, page links, contact icons, and the language/dark-mode
+        toggle -- no internal divider splitting it into separate blocks.
+        The copyright line at the bottom is still part of this same block,
+        not a separate bordered section.
 
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-            <Link to="/videos" className="hover:text-red-600 dark:hover:text-red-400">
-              Videos
+        PLACEHOLDER CONTACT DETAILS -- replace every href/title below with
+        your real ones before this goes live. Each is marked so they're easy
+        to find (search this file for "REPLACE").
+      */}
+      <footer className="relative mt-16 overflow-hidden border-t border-gray-200 bg-white/60 backdrop-blur dark:border-gray-800 dark:bg-gray-950/60">
+        <div className="h-1 w-full bg-gradient-to-r from-red-600 via-rose-500 to-amber-400" />
+
+        <div className="mx-auto max-w-6xl px-4 py-10">
+          <div className="flex flex-col items-center gap-6 lg:flex-row lg:justify-between">
+            <Link to="/" className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-red-600 to-rose-500 text-white shadow-md shadow-red-500/30">
+                <BookOpen size={16} />
+              </span>
+              <span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
+                ReanPhysics
+              </span>
             </Link>
-            <Link to="/books" className="hover:text-red-600 dark:hover:text-red-400">
-              Books
-            </Link>
-            <Link to="/about" className="hover:text-red-600 dark:hover:text-red-400">
-              About
-            </Link>
+
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+              <Link to="/videos" className="hover:text-red-600 dark:hover:text-red-400">
+                Videos
+              </Link>
+              <Link to="/books" className="hover:text-red-600 dark:hover:text-red-400">
+                Books
+              </Link>
+              <Link to="/about" className="hover:text-red-600 dark:hover:text-red-400">
+                About
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <a
+                  href="mailto:REPLACE_EMAIL@example.com"
+                  title="REPLACE_EMAIL@example.com"
+                  aria-label="Email"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
+                >
+                  <Mail className="h-4 w-4" />
+                </a>
+                <a
+                  href="tel:+855XXXXXXXX"
+                  title="+855 XX XXX XXX (REPLACE)"
+                  aria-label="Phone"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
+                >
+                  <Phone className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://t.me/REPLACE_TELEGRAM"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Telegram (REPLACE)"
+                  aria-label="Telegram"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
+                >
+                  <Send className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://facebook.com/REPLACE_FACEBOOK_PAGE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Facebook (REPLACE)"
+                  aria-label="Facebook"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
+                >
+                  <Facebook className="h-4 w-4" />
+                </a>
+              </div>
+
+              {/* Same language/dark-mode toggle as NavBar.jsx, mirrored here
+                  so it's reachable from the bottom of long pages too. */}
+              <span className="hidden h-6 w-px bg-gray-200 dark:bg-gray-800 lg:block" aria-hidden="true" />
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={toggleLang}
+                  title="Switch language"
+                  aria-label="Switch language"
+                  className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1.5 text-sm font-semibold text-gray-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-red-950/60 dark:hover:text-red-400"
+                >
+                  <span className="text-base leading-none" aria-hidden="true">
+                    {lang === "en" ? "🇰🇭" : "🇬🇧"}
+                  </span>
+                  {lang === "en" ? "KH" : "ENG"}
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleMode}
+                  title="Toggle dark mode"
+                  aria-label="Toggle dark mode"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
+                >
+                  {mode === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="border-t border-gray-200 py-4 text-center text-xs text-gray-400 dark:border-gray-800 dark:text-gray-500">
-          ReanPhysics — sample project, not production-hardened.
+
+          <p className="mt-8 text-center text-xs text-gray-400 dark:text-gray-500">
+            © {new Date().getFullYear()} ReanPhysics. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>
