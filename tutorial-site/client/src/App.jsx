@@ -9,8 +9,6 @@ import Videos from "./pages/Videos.jsx";
 import Books from "./pages/Books.jsx";
 import VideoDetail from "./pages/VideoDetail.jsx";
 import BookDetail from "./pages/BookDetail.jsx";
-import Courses from "./pages/Courses.jsx";
-import CourseDetail from "./pages/Lesson.jsx";
 import About from "./pages/About.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
@@ -37,8 +35,6 @@ export default function App() {
         <Route path="/videos/:id" element={<VideoDetail />} />
         <Route path="/books" element={<Books />} />
         <Route path="/books/:id" element={<BookDetail />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/courses/:courseId" element={<CourseDetail />} />
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

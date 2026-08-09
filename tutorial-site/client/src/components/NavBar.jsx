@@ -14,7 +14,6 @@ import {
 } from "@material-tailwind/react";
 import {
   BookOpen,
-  GraduationCap,
   Home,
   Info,
   User,
@@ -68,7 +67,6 @@ export default function NavBar() {
     { to: "/", label: t.nav.home, icon: Home },
     { to: "/videos", label: t.nav.videos, icon: Play },
     { to: "/books", label: t.nav.books, icon: FileText },
-    { to: "/courses", label: t.nav.courses, icon: GraduationCap },
     { to: "/about", label: t.nav.about, icon: Info },
   ];
   const navItems = user?.isAdmin
