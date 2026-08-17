@@ -17,13 +17,12 @@ function isUnlocked(book, user) {
   return (user.purchasedBooks || []).some((id) => String(id) === String(book._id));
 }
 
-function toDriveDownloadUrl(url) {
+function extractDriveFileId(url) {
   try {
     const u = new URL(url);
     if (!u.hostname.includes("drive.google.com")) return null;
     const match = u.pathname.match(/\/file\/d\/([^/]+)/);
-    const id = match ? match[1] : u.searchParams.get("id");
-    return id ? `https://drive.google.com/uc?export=download&id=${id}` : null;
+    return match ? match[1] : u.searchParams.get("id");
   } catch {
     return null;
   }
@@ -66,15 +65,46 @@ function parseDriveConfirmUrl(html) {
   return `${action}${separator}${params.toString()}`;
 }
 
-// Fetches a book's actual PDF bytes server-side, whether it lives on our
-// own storage or is a Google Drive share link. Used by every route that
-// needs to hand real PDF bytes to the client (full view, preview, cover
-// generation) -- fetching happens here, server-to-server, specifically so
-// the browser never has to fetch cross-origin from Drive directly (which
-// Drive doesn't allow via CORS, and which is also part of why the old
-// iframe-based viewer had to fall back to opening a new tab on mobile).
-async function fetchSourcePdfBytes(pdfUrl) {
-  const fetchUrl = toDriveDownloadUrl(pdfUrl) || pdfUrl;
+// The consumer "uc?export=download" endpoint is scraped, not an official
+// API -- and Google's anti-abuse system treats requests from datacenter/
+// cloud IPs (Render, AWS, this kind of hosting) far more suspiciously than
+// the same request from a home ISP IP. That's why this can 403 or serve a
+// warning page in production while working fine from a developer's laptop
+// on localhost: it's not about file size or sharing settings, it's about
+// where the request is coming from. When GOOGLE_DRIVE_API_KEY is set, use
+// the real Drive API instead -- it's the officially supported path, isn't
+// subject to that same scraping heuristic, and acknowledgeAbuse=true is
+// the documented way to still fetch a file Drive's scanner has flagged
+// (large file / "can't scan for viruses") without needing to parse any
+// interstitial HTML at all.
+//
+// Setup (one-time, in the Google Cloud project that already issues
+// GOOGLE_CLIENT_ID): APIs & Services > Library > enable "Google Drive
+// API", then APIs & Services > Credentials > Create Credentials > API key
+// (restrict it to the Drive API). Add the key as GOOGLE_DRIVE_API_KEY in
+// Render's env vars (and locally in .env) and redeploy. Only works for
+// files shared as "Anyone with the link" -- same requirement as before.
+async function fetchViaDriveApi(fileId) {
+  const apiKey = process.env.GOOGLE_DRIVE_API_KEY;
+  if (!apiKey) return null;
+
+  const apiUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&acknowledgeAbuse=true&key=${apiKey}`;
+  const response = await fetch(apiUrl);
+  if (!response.ok) {
+    const body = await response.text().catch(() => "");
+    throw new Error(
+      `Google Drive API refused file ${fileId} (${response.status} ${response.statusText}): ${body.slice(0, 300)}`
+    );
+  }
+  return Buffer.from(await response.arrayBuffer());
+}
+
+// Fallback for when GOOGLE_DRIVE_API_KEY isn't configured yet: scrapes the
+// consumer download page, following the virus-scan warning's confirmation
+// form when present. Kept as a safety net, but this is the path that's
+// unreliable from cloud-hosted servers -- see fetchViaDriveApi above for
+// the real fix.
+async function fetchViaDriveScrape(fetchUrl) {
   let response = await fetch(fetchUrl);
   if (!response.ok) {
     throw new Error(`Could not fetch source PDF (${response.status} ${response.statusText}) from ${fetchUrl}`);
@@ -95,14 +125,38 @@ async function fetchSourcePdfBytes(pdfUrl) {
     if (!confirmUrl || !response.ok || contentType.includes("text/html")) {
       throw new Error(
         `Fetched an HTML page instead of a PDF from ${fetchUrl} -- Google Drive likely served a ` +
-          `warning/confirmation page instead of the file. Try re-sharing the file as "Anyone with the ` +
-          `link", or upload the PDF directly instead of linking to Drive.`
+          `warning/confirmation page instead of the file (this is common from cloud-hosted servers, ` +
+          `even when the file works fine from a developer's laptop). Set GOOGLE_DRIVE_API_KEY to use ` +
+          `the real Drive API instead, re-share the file as "Anyone with the link", or upload the PDF ` +
+          `directly instead of linking to Drive.`
       );
     }
   }
 
-  const bytes = await response.arrayBuffer();
-  return Buffer.from(bytes);
+  return Buffer.from(await response.arrayBuffer());
+}
+
+// Fetches a book's actual PDF bytes server-side, whether it lives on our
+// own storage or is a Google Drive share link. Used by every route that
+// needs to hand real PDF bytes to the client (full view, preview, cover
+// generation) -- fetching happens here, server-to-server, specifically so
+// the browser never has to fetch cross-origin from Drive directly (which
+// Drive doesn't allow via CORS, and which is also part of why the old
+// iframe-based viewer had to fall back to opening a new tab on mobile).
+async function fetchSourcePdfBytes(pdfUrl) {
+  const driveId = extractDriveFileId(pdfUrl);
+  if (!driveId) {
+    const response = await fetch(pdfUrl);
+    if (!response.ok) {
+      throw new Error(`Could not fetch source PDF (${response.status} ${response.statusText}) from ${pdfUrl}`);
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
+
+  const viaApi = await fetchViaDriveApi(driveId);
+  if (viaApi) return viaApi;
+
+  return fetchViaDriveScrape(`https://drive.google.com/uc?export=download&id=${driveId}`);
 }
 
 async function buildPreviewPdf(pdfUrl, pages) {
