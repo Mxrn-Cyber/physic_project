@@ -29,6 +29,43 @@ function toDriveDownloadUrl(url) {
   }
 }
 
+// Node's fetch (undici) exposes multiple Set-Cookie headers via
+// getSetCookie(); headers.get("set-cookie") would silently join them with
+// commas and corrupt cookie values that themselves contain commas (e.g.
+// expiry dates). Fall back to .get() only on older runtimes that lack it.
+function extractCookieHeader(response) {
+  if (typeof response.headers.getSetCookie === "function") {
+    return response.headers.getSetCookie().map((c) => c.split(";")[0]).join("; ");
+  }
+  const raw = response.headers.get("set-cookie");
+  return raw ? raw.split(";")[0] : "";
+}
+
+// For large or frequently-downloaded files, Drive serves an HTML "Google
+// Drive can't scan this file for viruses" interstitial instead of the file,
+// even for server-to-server requests with correct "Anyone with the link"
+// sharing. That page contains a form (id="download-form") whose action URL
+// plus hidden fields (id, export, confirm, uuid -- exact set has changed
+// over the years, hence parsing them generically instead of hardcoding
+// names) is the real, confirmed download URL. Returns null if the HTML
+// doesn't match that shape, e.g. because it's actually a permission-denied
+// page -- in which case the caller's existing error is the correct outcome.
+function parseDriveConfirmUrl(html) {
+  const formMatch = html.match(/<form[^>]+id="download-form"[^>]*action="([^"]+)"/);
+  if (!formMatch) return null;
+
+  const action = formMatch[1].replace(/&amp;/g, "&");
+  const inputPattern = /<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]+value="([^"]*)"/g;
+  const params = new URLSearchParams();
+  let inputMatch;
+  while ((inputMatch = inputPattern.exec(html))) {
+    params.set(inputMatch[1], inputMatch[2]);
+  }
+
+  const separator = action.includes("?") ? "&" : "?";
+  return `${action}${separator}${params.toString()}`;
+}
+
 // Fetches a book's actual PDF bytes server-side, whether it lives on our
 // own storage or is a Google Drive share link. Used by every route that
 // needs to hand real PDF bytes to the client (full view, preview, cover
@@ -38,22 +75,33 @@ function toDriveDownloadUrl(url) {
 // iframe-based viewer had to fall back to opening a new tab on mobile).
 async function fetchSourcePdfBytes(pdfUrl) {
   const fetchUrl = toDriveDownloadUrl(pdfUrl) || pdfUrl;
-  const response = await fetch(fetchUrl);
+  let response = await fetch(fetchUrl);
   if (!response.ok) {
     throw new Error(`Could not fetch source PDF (${response.status} ${response.statusText}) from ${fetchUrl}`);
   }
 
-  const contentType = response.headers.get("content-type") || "";
-  const bytes = await response.arrayBuffer();
+  let contentType = response.headers.get("content-type") || "";
 
   if (contentType.includes("text/html")) {
-    throw new Error(
-      `Fetched an HTML page instead of a PDF from ${fetchUrl} -- Google Drive likely served a ` +
-        `warning/confirmation page instead of the file. Try re-sharing the file as "Anyone with the ` +
-        `link", or upload the PDF directly instead of linking to Drive.`
-    );
+    const html = await response.text();
+    const confirmUrl = parseDriveConfirmUrl(html);
+
+    if (confirmUrl) {
+      const cookie = extractCookieHeader(response);
+      response = await fetch(confirmUrl, cookie ? { headers: { cookie } } : undefined);
+      contentType = response.headers.get("content-type") || "";
+    }
+
+    if (!confirmUrl || !response.ok || contentType.includes("text/html")) {
+      throw new Error(
+        `Fetched an HTML page instead of a PDF from ${fetchUrl} -- Google Drive likely served a ` +
+          `warning/confirmation page instead of the file. Try re-sharing the file as "Anyone with the ` +
+          `link", or upload the PDF directly instead of linking to Drive.`
+      );
+    }
   }
 
+  const bytes = await response.arrayBuffer();
   return Buffer.from(bytes);
 }
 
