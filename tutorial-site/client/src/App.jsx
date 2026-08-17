@@ -1,9 +1,10 @@
 import { Suspense, lazy } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { BookOpen, Mail, Phone, Send, Facebook, Sun, Moon } from "lucide-react";
 import NavBar from "./components/NavBar.jsx";
 import BackgroundDecor from "./components/BackgroundDecor.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { useLanguage } from "./context/LanguageContext.jsx";
 import { useDarkMode } from "./context/DarkModeContext.jsx";
 import Home from "./pages/Home.jsx";
@@ -34,65 +35,80 @@ const BookDetail = lazy(() => import("./pages/BookDetail.jsx"));
 export default function App() {
   const { lang, toggleLang } = useLanguage();
   const { mode, toggleMode } = useDarkMode();
+  const location = useLocation();
 
   return (
     <div className="relative isolate min-h-screen bg-gray-50 font-sans dark:bg-gray-950">
       <BackgroundDecor />
       <NavBar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/videos" element={<Videos />} />
-        <Route path="/videos/:id" element={<VideoDetail />} />
-        <Route path="/books" element={<Books />} />
-        <Route
-          path="/books/:id"
-          element={
-            <Suspense
-              fallback={
-                <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>
+      {/*
+        `key={location.pathname}` forces this whole block to remount on every
+        route change. Two things ride on that remount:
+        1. ErrorBoundary's caught-error state resets automatically, so a
+           crash on one page (e.g. a stale lazy chunk after a deploy) no
+           longer leaves every later navigation stuck on a blank screen.
+        2. The fresh DOM node re-triggers the `animate-page-in` CSS
+           animation (defined in tailwind.config.js), giving every screen
+           change a smooth fade/slide-in instead of an instant hard cut.
+      */}
+      <ErrorBoundary key={location.pathname}>
+        <div className="animate-page-in">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/videos" element={<Videos />} />
+            <Route path="/videos/:id" element={<VideoDetail />} />
+            <Route path="/books" element={<Books />} />
+            <Route
+              path="/books/:id"
+              element={
+                <Suspense
+                  fallback={
+                    <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>
+                  }
+                >
+                  <BookDetail />
+                </Suspense>
               }
-            >
-              <BookDetail />
-            </Suspense>
-          }
-        />
-        <Route path="/about" element={<About />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <Suspense
-                fallback={
-                  <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>
-                }
-              >
-                <Admin />
-              </Suspense>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
+            />
+            <Route path="/about" element={<About />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-otp" element={<VerifyOtp />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <Suspense
+                    fallback={
+                      <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>
+                    }
+                  >
+                    <Admin />
+                  </Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </ErrorBoundary>
       {/*
         Single-section footer: one flex row (stacks on mobile) with the
         brand mark, page links, contact icons, and the language/dark-mode

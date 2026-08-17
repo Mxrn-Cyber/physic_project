@@ -67,14 +67,12 @@ function Slideshow() {
   const goTo = (i) => setIndex((i + SLIDES.length) % SLIDES.length);
 
   return (
-    <div className="relative mx-auto max-w-5xl">
-      {}
-      <div
-        aria-hidden="true"
-        className="absolute -inset-4 -z-10 rounded-[2.5rem] bg-gradient-to-r from-red-500/30 via-rose-500/20 to-orange-400/30 blur-2xl"
-      />
-
-      <div className="relative overflow-hidden rounded-[1.75rem] shadow-2xl shadow-red-900/10 dark:shadow-black/40">
+    // Full-bleed: breaks out of the page's max-w-5xl/px-4 container so the
+    // banner spans the whole viewport width edge-to-edge, and is tall
+    // enough on larger screens to read as a full-screen hero rather than a
+    // small boxed card.
+    <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen">
+      <div className="relative overflow-hidden shadow-2xl shadow-red-900/10 dark:shadow-black/40">
         <div
           className="flex transition-transform duration-700 ease-out"
           style={{ transform: `translateX(-${index * 100}%)` }}
@@ -82,7 +80,7 @@ function Slideshow() {
           {SLIDES.map((slide) => (
             <div
               key={slide.src}
-              className="relative h-64 w-full flex-shrink-0 sm:h-[420px]"
+              className="relative h-[46vh] min-h-[320px] w-full flex-shrink-0 sm:h-[60vh] sm:min-h-[420px] sm:max-h-[640px]"
             >
               <img
                 src={slide.src}
@@ -91,7 +89,7 @@ function Slideshow() {
               />
               {}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <p className="absolute bottom-6 left-6 right-16 text-left text-lg font-semibold text-white drop-shadow sm:text-xl">
+              <p className="absolute bottom-8 left-6 right-16 text-left text-lg font-semibold text-white drop-shadow sm:left-12 sm:text-2xl">
                 {slide.alt}
               </p>
             </div>
@@ -102,7 +100,7 @@ function Slideshow() {
           type="button"
           onClick={() => goTo(index - 1)}
           aria-label="Previous slide"
-          className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-white/10 p-2 text-white backdrop-blur-md transition hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600"
+          className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-white/10 p-2 text-white backdrop-blur-md transition hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 sm:left-6 sm:p-3"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -110,12 +108,12 @@ function Slideshow() {
           type="button"
           onClick={() => goTo(index + 1)}
           aria-label="Next slide"
-          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-white/10 p-2 text-white backdrop-blur-md transition hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600"
+          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-white/10 p-2 text-white backdrop-blur-md transition hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 sm:right-6 sm:p-3"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
 
-        <div className="absolute bottom-6 right-6 flex gap-1.5">
+        <div className="absolute bottom-8 right-6 flex gap-1.5 sm:right-12">
           {SLIDES.map((slide, i) => (
             <button
               key={slide.src}
