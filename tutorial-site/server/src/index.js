@@ -11,7 +11,33 @@ import userRoutes from "./routes/users.js";
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
+// process.env.CLIENT_URL is easy to mis-set with a trailing slash (e.g.
+// copy-pasted from a browser address bar), but a browser's Origin header
+// never has one -- CORS does an exact string match, so passing CLIENT_URL
+// straight to `origin` meant a stray "/" silently broke every request from
+// the frontend with a CORS error that gave no hint the trailing slash was
+// the cause. Support a comma-separated list too, so both a prod and a
+// preview/staging URL can be allowed at once.
+const allowedOrigins = (process.env.CLIENT_URL || "")
+  .split(",")
+  .map((o) => o.trim().replace(/\/+$/, ""))
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // No Origin header at all (curl, server-to-server calls, some mobile
+      // clients) -- nothing to check against, let it through.
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin.replace(/\/+$/, ""))) {
+        return callback(null, true);
+      }
+      callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
