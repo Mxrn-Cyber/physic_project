@@ -26,6 +26,7 @@ export default function BookViewer({ url, title, isPreview, onBuyClick }) {
     if (!url) return undefined;
 
     let cancelled = false;
+    let loadingTask = null;
     let pdfDoc = null;
     setStatus("loading");
     setErrorMessage("");
@@ -33,7 +34,7 @@ export default function BookViewer({ url, title, isPreview, onBuyClick }) {
     async function render() {
       try {
         const token = getAuthToken();
-        const loadingTask = getDocument({
+        loadingTask = getDocument({
           url,
           // Fetched with the user's token so the server can tell whether
           // they've bought this book (see GET /api/books/:id/pdf) --
@@ -86,7 +87,14 @@ export default function BookViewer({ url, title, isPreview, onBuyClick }) {
 
     return () => {
       cancelled = true;
-      pdfDoc?.destroy();
+      // pdfjs-dist v6 removed `.destroy()` from the resolved document
+      // object returned by `loadingTask.promise` -- calling it here threw a
+      // TypeError on every unmount, and because it happened during unmount
+      // it slipped past ErrorBoundary and blanked the whole app. The
+      // loadingTask (from getDocument()) still exposes `.destroy()` in v6,
+      // and destroying it also cleans up the underlying document/worker, so
+      // we destroy that instead.
+      loadingTask?.destroy();
     };
   }, [url]);
 
