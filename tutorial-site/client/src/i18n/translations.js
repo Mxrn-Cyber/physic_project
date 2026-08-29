@@ -158,7 +158,7 @@ export const translations = {
     },
     about: {
       title: "About Us",
-      lead: "ReanPhysics is a small library of practical video lessons and PDF books. Each item is sold on its own, so you only pay for what you actually want to learn.",
+      lead: "E-TnakRean is a small library of practical video lessons and PDF books. Each item is sold on its own, so you only pay for what you actually want to learn.",
       sections: [
         {
           heading: "What we make",
@@ -347,7 +347,7 @@ export const translations = {
     },
     about: {
       title: "អំពីយើង",
-      lead: "ReanPhysics គឺជាបណ្ណាល័យតូចមួយដែលមានវីដេអូមេរៀន និងសៀវភៅ PDF ជាក់ស្តែង។ ធាតុនីមួយៗត្រូវបានលក់ដោយឡែកៗពីគ្នា ដូច្នេះអ្នកបង់ថ្លៃតែសម្រាប់អ្វីដែលអ្នកចង់រៀនប៉ុណ្ណោះ។",
+      lead: "E-TnakRean គឺជាបណ្ណាល័យតូចមួយដែលមានវីដេអូមេរៀន និងសៀវភៅ PDF ជាក់ស្តែង។ ធាតុនីមួយៗត្រូវបានលក់ដោយឡែកៗពីគ្នា ដូច្នេះអ្នកបង់ថ្លៃតែសម្រាប់អ្វីដែលអ្នកចង់រៀនប៉ុណ្ណោះ។",
       sections: [
         {
           heading: "អ្វីដែលយើងបង្កើត",

@@ -13,7 +13,7 @@ import { RefreshCcw, AlertTriangle } from "lucide-react";
 const CHUNK_ERROR_PATTERN =
   /dynamically imported module|loading chunk|failed to fetch|importing a module script failed/i;
 
-const RELOAD_FLAG_KEY = "reanphysics_chunk_reload";
+const RELOAD_FLAG_KEY = "e_tnakrean_chunk_reload";
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {

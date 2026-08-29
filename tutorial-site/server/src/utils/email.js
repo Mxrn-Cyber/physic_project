@@ -11,17 +11,17 @@ function getClient() {
   return resendClient;
 }
 
-const FROM = process.env.RESET_EMAIL_FROM || "ReanPhysics <onboarding@resend.dev>";
+const FROM = process.env.RESET_EMAIL_FROM || "E-TnakRean <onboarding@resend.dev>";
 
 const SUBJECTS = {
-  signup: "Verify your ReanPhysics account",
-  reset: "Your ReanPhysics password reset code",
+  signup: "Verify your E-TnakRean account",
+  reset: "Your E-TnakRean password reset code",
 };
 
 function bodyFor(purpose, code, ttlMinutes) {
   const intro =
     purpose === "signup"
-      ? "Welcome to ReanPhysics! Use the code below to verify your email address."
+      ? "Welcome to E-TnakRean! Use the code below to verify your email address."
       : "Someone requested a password reset for this email address.";
 
   return `
@@ -37,7 +37,7 @@ export async function sendOtpEmail(toEmail, code, purpose = "signup") {
   const { error } = await client.emails.send({
     from: FROM,
     to: toEmail,
-    subject: SUBJECTS[purpose] || "Your ReanPhysics verification code",
+    subject: SUBJECTS[purpose] || "Your E-TnakRean verification code",
     html: bodyFor(purpose, code, ttlMinutes),
   });
   if (error) {

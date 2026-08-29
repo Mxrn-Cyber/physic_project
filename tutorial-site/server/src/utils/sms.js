@@ -22,6 +22,6 @@ export async function sendOtpSms(toPhone, code) {
   await client.messages.create({
     from,
     to: toPhone,
-    body: `Your ReanPhysics verification code is ${code}. It expires in ${ttlMinutes} minutes.`,
+    body: `Your E-TnakRean verification code is ${code}. It expires in ${ttlMinutes} minutes.`,
   });
 }

@@ -126,11 +126,13 @@ export default function App() {
         <div className="mx-auto max-w-6xl px-4 py-10">
           <div className="flex flex-col items-center gap-6 lg:flex-row lg:justify-between">
             <Link to="/" className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-red-600 to-rose-500 text-white shadow-md shadow-red-500/30">
-                <BookOpen size={16} />
-              </span>
+              <img
+                src="/logo.png"
+                alt="E-TnakRean logo"
+                className="h-8 w-8 rounded-lg object-contain shadow-md shadow-red-500/30"
+              />
               <span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-                ReanPhysics
+                E-TnakRean
               </span>
             </Link>
 
@@ -216,7 +218,7 @@ export default function App() {
           </div>
 
           <p className="mt-8 text-center text-xs text-gray-400 dark:text-gray-500">
-            © {new Date().getFullYear()} ReanPhysics. All rights reserved.
+            © {new Date().getFullYear()} E-TnakRean. All rights reserved.
           </p>
         </div>
       </footer>

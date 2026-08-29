@@ -246,11 +246,13 @@ export default function NavBar() {
           to="/"
           className="flex items-center gap-2 text-xl font-extrabold tracking-tight"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-red-600 to-rose-500 text-white shadow-md shadow-red-500/30">
-            <BookOpen size={18} />
-          </span>
+          <img
+            src="/logo.png"
+            alt="E-TnakRean logo"
+            className="h-8 w-8 rounded-lg object-contain shadow-md shadow-red-500/30"
+          />
           <span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-            ReanPhysics
+            E-TnakRean
           </span>
         </Link>
 
