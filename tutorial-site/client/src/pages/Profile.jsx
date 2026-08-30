@@ -49,6 +49,7 @@ export default function Profile() {
               `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user.email)}`
             }
             alt="Profile"
+            loading="lazy"
             className="h-full w-full object-cover"
           />
         </div>

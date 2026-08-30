@@ -4,7 +4,7 @@
   // Declaring assets explicitly here tells Cloudflare to deploy it as a
   // static-asset Worker and skips the framework auto-detection that was
   // incorrectly assuming React Router v7 and demanding an upgrade.
-  "name": "tutorial-site-client",
+  "name": "e-tnakrean",
   "compatibility_date": "2026-07-22",
   "assets": {
     "directory": "./dist",

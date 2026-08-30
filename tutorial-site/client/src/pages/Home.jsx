@@ -16,15 +16,23 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import BookCard from "../components/BookCard.jsx";
 
+// TODO (important): these three images are hotlinked from other people's
+// servers -- two are Google thumbnail URLs. They can vanish without warning,
+// they load slowly, and they are not licensed for reuse. Save your own
+// photos into client/public/images/ and change each `src` below to a local
+// path like "/images/hero-1.jpg".
 const SLIDES = [
   {
     src: "https://images.playgroundai.com/bee3455d-36bc-4fcc-99a7-6d0b938d7272.jpeg?c=1",
+    alt: "A student studying physics with a laptop and notebook",
   },
   {
     src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkLoI4VpNpzULZRyYMjVlCzAdO5dHxfrhlTM5PU0D60Hp6ZwiGj5PuvObA&s=10",
+    alt: "Physics formulas and diagrams on a whiteboard",
   },
   {
     src: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrJE2jwMd2F8q3Nu12UAh4FyhWPngtU9yx8dEqAO6EtZLFf2sfs7E5Esw&s=10",
+    alt: "Learners watching a video lesson together",
   },
 ];
 
@@ -37,7 +45,7 @@ function CategorySection({ title, seeMoreTo, seeMoreLabel, items }) {
     <div className="mt-16 text-left">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="flex items-center gap-2.5 text-2xl font-bold text-gray-900 dark:text-gray-100">
-          <span className="h-6 w-1.5 rounded-full bg-gradient-to-b from-red-600 to-rose-600" />
+          <span className="h-6 w-1.5 rounded-full bg-red-600" />
           {title}
         </h2>
         <Link
@@ -72,12 +80,12 @@ function Slideshow() {
     // enough on larger screens to read as a full-screen hero rather than a
     // small boxed card.
     <div className="relative left-1/2 right-1/2 -mx-[50vw] w-screen">
-      <div className="relative overflow-hidden shadow-2xl shadow-red-900/10 dark:shadow-black/40">
+      <div className="relative overflow-hidden">
         <div
           className="flex transition-transform duration-700 ease-out"
           style={{ transform: `translateX(-${index * 100}%)` }}
         >
-          {SLIDES.map((slide) => (
+          {SLIDES.map((slide, i) => (
             <div
               key={slide.src}
               className="relative h-[46vh] min-h-[320px] w-full flex-shrink-0 sm:h-[60vh] sm:min-h-[420px] sm:max-h-[640px]"
@@ -85,13 +93,11 @@ function Slideshow() {
               <img
                 src={slide.src}
                 alt={slide.alt}
+                loading={i === 0 ? "eager" : "lazy"}
                 className="h-full w-full object-cover"
               />
               {}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <p className="absolute bottom-8 left-6 right-16 text-left text-lg font-semibold text-white drop-shadow sm:left-12 sm:text-2xl">
-                {slide.alt}
-              </p>
             </div>
           ))}
         </div>
@@ -100,7 +106,7 @@ function Slideshow() {
           type="button"
           onClick={() => goTo(index - 1)}
           aria-label="Previous slide"
-          className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-white/10 p-2 text-white backdrop-blur-md transition hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 sm:left-6 sm:p-3"
+          className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-black/20 p-2 text-white transition-colors hover:bg-red-600 sm:left-6 sm:p-3"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
@@ -108,7 +114,7 @@ function Slideshow() {
           type="button"
           onClick={() => goTo(index + 1)}
           aria-label="Next slide"
-          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-white/10 p-2 text-white backdrop-blur-md transition hover:bg-gradient-to-r hover:from-red-600 hover:to-rose-600 sm:right-6 sm:p-3"
+          className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-black/20 p-2 text-white transition-colors hover:bg-red-600 sm:right-6 sm:p-3"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -121,9 +127,7 @@ function Slideshow() {
               onClick={() => goTo(i)}
               aria-label={`Go to slide ${i + 1}`}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === index
-                  ? "w-8 bg-gradient-to-r from-red-500 to-orange-400"
-                  : "w-2.5 bg-white/50 hover:bg-white/70"
+                i === index ? "w-8 bg-red-500" : "w-2.5 bg-white/50 hover:bg-white/70"
               }`}
             />
           ))}
@@ -141,11 +145,11 @@ function StatsStrip({ videoCount, bookCount, freeCount }) {
   ];
 
   return (
-    <div className="mx-auto mt-10 grid max-w-3xl grid-cols-3 divide-x divide-gray-200 rounded-2xl border border-gray-200 bg-white/70 shadow-sm backdrop-blur dark:divide-gray-800 dark:border-gray-800 dark:bg-gray-900/50">
+    <div className="mx-auto mt-10 grid max-w-3xl grid-cols-3 divide-x divide-gray-200 rounded-xl border border-gray-200 bg-white dark:divide-gray-800 dark:border-gray-800 dark:bg-gray-900">
       {stats.map(({ icon: Icon, value, label }) => (
         <div key={label} className="flex flex-col items-center gap-1 px-4 py-5">
           <Icon className="h-5 w-5 text-red-600 dark:text-red-400" />
-          <span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-2xl font-extrabold text-transparent">
+          <span className="text-2xl font-extrabold text-red-600 dark:text-red-400">
             {value}
           </span>
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
@@ -198,10 +202,7 @@ export default function Home() {
       </span>
 
       <h1 className="mt-4 text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-6xl">
-        {t.home.heroTitle1}{" "}
-        <span className="bg-gradient-to-r from-red-600 via-rose-600 to-orange-500 bg-clip-text text-transparent">
-          {t.home.heroTitle2}
-        </span>
+        {t.home.heroTitle1} <span className="text-red-600 dark:text-red-400">{t.home.heroTitle2}</span>
       </h1>
       <p className="mx-auto mt-4 max-w-2xl text-gray-600 dark:text-gray-400">
         {t.home.heroSubtitle}
@@ -209,13 +210,13 @@ export default function Home() {
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link
           to="/videos"
-          className="rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-5 py-2.5 font-semibold text-white shadow-lg shadow-red-500/30 transition hover:shadow-xl hover:shadow-red-500/40"
+          className="rounded-lg bg-red-600 px-5 py-2.5 font-semibold text-white transition-colors hover:bg-red-700"
         >
           {t.home.browse}
         </Link>
         <Link
           to="/about"
-          className="rounded-lg border border-gray-300 bg-white/60 px-5 py-2.5 font-semibold text-gray-700 backdrop-blur transition hover:bg-white dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300 dark:hover:bg-gray-800"
+          className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
         >
           {t.home.aboutCta}
         </Link>
@@ -247,7 +248,7 @@ export default function Home() {
         ].map(({ icon: Icon, title, body }) => (
           <div
             key={title}
-            className="group rounded-2xl border border-gray-200 bg-white/60 p-5 backdrop-blur transition hover:-translate-y-1 hover:border-red-300 hover:shadow-lg hover:shadow-red-500/10 dark:border-gray-800 dark:bg-gray-900/40 dark:hover:border-red-500/40"
+            className="group rounded-xl border border-gray-200 bg-white p-5 transition-colors hover:border-red-300 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-red-500/40"
           >
             <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 transition group-hover:bg-red-600 group-hover:text-white dark:bg-red-500/10 dark:text-red-400">
               <Icon className="h-5 w-5" />

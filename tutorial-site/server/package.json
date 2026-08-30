@@ -17,6 +17,7 @@
     "express-rate-limit": "^7.4.0",
     "file-type": "^19.6.0",
     "google-auth-library": "^9.14.0",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.0",
     "multer": "^1.4.5-lts.1",

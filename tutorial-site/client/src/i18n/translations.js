@@ -187,6 +187,21 @@ export const translations = {
       seeMore: "See more",
       loadError: "Couldn't load that right now. Please try again later.",
     },
+    notFound: {
+      title: "Page not found",
+      body: "The page you are looking for does not exist, or it has moved.",
+      backHome: "Back to home",
+      browseVideos: "Browse videos",
+    },
+    footer: {
+      tagline:
+        "Short video lessons and printable guides, in Khmer and English. Buy only what you need.",
+      explore: "Explore",
+      account: "Account",
+      connect: "Connect",
+      rights: "All rights reserved.",
+      linkNotSet: "Link not added yet",
+    },
   },
   km: {
     nav: {
@@ -375,6 +390,21 @@ export const translations = {
       loading: "កំពុងផ្ទុក…",
       seeMore: "មើលបន្ថែម",
       loadError: "មិនអាចផ្ទុកបានទេឥឡូវនេះ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។",
+    },
+    notFound: {
+      title: "រកមិនឃើញទំព័រ",
+      body: "ទំព័រដែលអ្នកកំពុងស្វែងរក មិនមាន ឬត្រូវបានផ្លាស់ទីហើយ។",
+      backHome: "ត្រឡប់ទៅទំព័រដើម",
+      browseVideos: "មើលវីដេអូ",
+    },
+    footer: {
+      tagline:
+        "មេរៀនវីដេអូខ្លីៗ និងឯកសារអាចបោះពុម្ពបាន ជាភាសាខ្មែរ និងអង់គ្លេស។ ទិញតែអ្វីដែលអ្នកត្រូវការ។",
+      explore: "មាតិកា",
+      account: "គណនី",
+      connect: "ទំនាក់ទំនង",
+      rights: "រក្សាសិទ្ធិគ្រប់យ៉ាង។",
+      linkNotSet: "មិនទាន់បានបញ្ចូលតំណ",
     },
   },
 };

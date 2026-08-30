@@ -41,3 +41,7 @@ coverage/
 # --- Misc scratch artifacts (zips, temp exports) ---
 *.zip
 *.tmp
+
+# --- Vite writes these scratch files next to vite.config.js on some runs ---
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*

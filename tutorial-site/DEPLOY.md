@@ -50,7 +50,7 @@ the `.r2.dev` dev URL, but the dev URL is fine to start.
    ```
    MONGO_URI=<from Atlas, step 1>
    JWT_SECRET=<any long random string>
-   CLIENT_URL=<your Cloudflare frontend URL, e.g. https://reanphysics.pages.dev>
+   CLIENT_URL=<your Cloudflare frontend URL, e.g. https://e-tnakrean.laothomorn.workers.dev>
    SERVER_URL=<filled in after first deploy -- see step 4>
    R2_ACCOUNT_ID=<from R2, step 2>
    R2_ACCESS_KEY_ID=<from R2, step 2>

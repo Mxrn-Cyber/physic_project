@@ -65,7 +65,7 @@ export default function Dashboard() {
             {ownedVideos.map((v) => (
               <li key={v._id}>
                 <Link
-                  to="/videos"
+                  to={`/videos/${v._id}`}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <Play className="h-3.5 w-3.5 text-red-600" /> {v.title}
@@ -91,7 +91,7 @@ export default function Dashboard() {
             {ownedBooks.map((b) => (
               <li key={b._id}>
                 <Link
-                  to="/books"
+                  to={`/books/${b._id}`}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
                   <FileText className="h-3.5 w-3.5 text-red-600" /> {b.title}

@@ -1,17 +1,11 @@
+// Kept intentionally minimal: a single soft glow at the top of the page
+// instead of multiple blurred blobs and a dotted grid, so the background
+// stays calm and doesn't compete with page content or slow down low-end
+// devices.
 export default function BackgroundDecor() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div className="absolute -top-32 -left-24 h-96 w-96 rounded-full bg-red-400/30 blur-3xl dark:bg-red-500/20" />
-      <div className="absolute -right-32 top-1/4 h-[26rem] w-[26rem] rounded-full bg-rose-400/25 blur-3xl dark:bg-rose-600/15" />
-      <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-orange-300/25 blur-3xl dark:bg-orange-500/10" />
-      <div
-        className="absolute inset-0 opacity-[0.35] dark:opacity-[0.15]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, rgba(239,68,68,0.35) 1px, transparent 0)",
-          backgroundSize: "28px 28px",
-        }}
-      />
+      <div className="absolute -top-40 left-1/2 h-72 w-[36rem] -translate-x-1/2 rounded-full bg-red-300/20 blur-3xl dark:bg-red-500/10" />
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import "dotenv/config";
 import express from "express";
+import helmet from "helmet";
+import mongoose from "mongoose";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.js";
@@ -10,6 +12,12 @@ import uploadRoutes from "./routes/uploads.js";
 import userRoutes from "./routes/users.js";
 
 const app = express();
+
+// Baseline security headers (HSTS, X-Content-Type-Options, frame denial,
+// referrer policy...). crossOriginResourcePolicy is relaxed because the
+// client is served from a different origin and needs to read uploaded
+// covers and PDFs from this API.
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 // process.env.CLIENT_URL is easy to mis-set with a trailing slash (e.g.
 // copy-pasted from a browser address bar), but a browser's Origin header
@@ -41,7 +49,23 @@ app.use(
 
 app.use(express.json());
 
-app.get("/api/health", (_req, res) => res.json({ ok: true }));
+const dbReady = () => mongoose.connection.readyState === 1;
+
+// Deliberately declared before the guard below so uptime checks still get an
+// answer while the database is down.
+app.get("/api/health", (_req, res) =>
+  res.json({ ok: true, db: dbReady() ? "connected" : "disconnected" })
+);
+
+// Without this, requests that arrive while the database is unreachable just
+// hang on Mongoose's buffer until it times out. A clear 503 lets the client
+// show "try again later" straight away.
+app.use("/api", (req, res, next) => {
+  if (dbReady()) return next();
+  res.status(503).json({
+    error: "The service is starting up or the database is unavailable. Please try again shortly.",
+  });
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/books", bookRoutes);
@@ -67,9 +91,22 @@ app.use((err, _req, res, _next) => {
 
 const PORT = process.env.PORT || 4000;
 
-connectDB()
-  .then(() => app.listen(PORT, () => console.log(`API listening on :${PORT}`)))
-  .catch((err) => {
-    console.error("Failed to connect to DB", err);
-    process.exit(1);
-  });
+// The server used to call process.exit(1) if the very first DB connection
+// failed, so a brief network blip at the database took the whole API down
+// and it never came back on its own. Now we always listen, and keep retrying
+// the connection in the background; the guard above answers 503 until it
+// succeeds.
+app.listen(PORT, () => console.log(`API listening on :${PORT}`));
+
+const RETRY_MS = 5000;
+
+async function connectWithRetry() {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error(`[db] connection failed, retrying in ${RETRY_MS}ms:`, err.message);
+    setTimeout(connectWithRetry, RETRY_MS);
+  }
+}
+
+connectWithRetry();

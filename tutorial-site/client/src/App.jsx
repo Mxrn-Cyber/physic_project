@@ -1,10 +1,11 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { BookOpen, Mail, Phone, Send, Facebook, Sun, Moon } from "lucide-react";
 import NavBar from "./components/NavBar.jsx";
 import BackgroundDecor from "./components/BackgroundDecor.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import { useAuth } from "./context/AuthContext.jsx";
 import { useLanguage } from "./context/LanguageContext.jsx";
 import { useDarkMode } from "./context/DarkModeContext.jsx";
 import Home from "./pages/Home.jsx";
@@ -19,6 +20,8 @@ import Register from "./pages/Register.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import VerifyOtp from "./pages/VerifyOtp.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import { CONTACT } from "./config/site.js";
 
 // Admin ships a large CRUD dashboard (users/videos/books management) that
 // only admins ever use, but it used to be bundled into every visitor's
@@ -32,28 +35,129 @@ const Admin = lazy(() => import("./pages/Admin.jsx"));
 // downloads when someone actually opens a book.
 const BookDetail = lazy(() => import("./pages/BookDetail.jsx"));
 
+// Compare the part of the URL that decides which page is shown. Using this
+// instead of `location.key` means a click on the link you're already on
+// doesn't replay the whole transition.
+// Footer contact icons. Every icon is always rendered so the footer design
+// stays complete while the real details are still missing. An entry whose
+// value is blank in src/config/site.js renders as a dimmed, non-clickable
+// placeholder rather than a link to nowhere -- fill the value in and it
+// turns into a real link automatically, no markup change needed.
+const SOCIAL_LINKS = [
+  {
+    key: "email",
+    href: CONTACT.email ? `mailto:${CONTACT.email}` : "",
+    title: CONTACT.email,
+    label: "Email",
+    Icon: Mail,
+  },
+  {
+    key: "phone",
+    href: CONTACT.phone ? `tel:${CONTACT.phone.replace(/\s+/g, "")}` : "",
+    title: CONTACT.phone,
+    label: "Phone",
+    Icon: Phone,
+  },
+  {
+    key: "telegram",
+    href: CONTACT.telegram,
+    title: "Telegram",
+    label: "Telegram",
+    Icon: Send,
+    external: true,
+  },
+  {
+    key: "facebook",
+    href: CONTACT.facebook,
+    title: "Facebook",
+    label: "Facebook",
+    Icon: Facebook,
+    external: true,
+  },
+];
+
+const routeHrefOf = (loc) => `${loc.pathname}${loc.search}`;
+
+// Longest the exit animation is ever allowed to hold the old page on screen.
+// Comfortably longer than the 150ms `page-out` animation, short enough that
+// nobody perceives it as a hang. See the failsafe timer below.
+const EXIT_TIMEOUT_MS = 260;
+
 export default function App() {
-  const { lang, toggleLang } = useLanguage();
+  const { user } = useAuth();
+  const { lang, toggleLang, t } = useLanguage();
   const { mode, toggleMode } = useDarkMode();
   const location = useLocation();
+
+  // Cross-fade between pages instead of the instant cut React Router does by
+  // default: `Routes` below renders `displayLocation` (frozen during the
+  // swap), not the live `location`. A URL change first plays a quick
+  // fade/slide-out of the page still on screen, then we adopt the new
+  // location and fade the new page in.
+  //
+  // The important part is that "adopt the new location" can NEVER be missed.
+  // An earlier version only committed from onAnimationEnd, which meant any
+  // browser that didn't deliver that event -- reduced-motion turning the
+  // animation off, a backgrounded tab, the element not being laid out --
+  // left the site frozen on the previous page with every further click doing
+  // nothing. Now a timer commits the swap regardless, and the animation event
+  // is only an optimisation that commits it sooner.
+  const [displayLocation, setDisplayLocation] = useState(location);
+  const [transitionStage, setTransitionStage] = useState("in");
+
+  // Read inside commit() so we always land on the newest URL, even if the
+  // person clicked two links faster than one animation.
+  const locationRef = useRef(location);
+  locationRef.current = location;
+  const exitTimerRef = useRef(null);
+
+  const commit = useCallback(() => {
+    clearTimeout(exitTimerRef.current);
+    // Leaving a long, scrolled-down page for a short one otherwise drops you
+    // below the new page's content -- it reads as a page that failed to load.
+    window.scrollTo(0, 0);
+    setDisplayLocation(locationRef.current);
+    setTransitionStage("in");
+  }, []);
+
+  useEffect(() => {
+    if (routeHrefOf(location) === routeHrefOf(displayLocation)) return;
+
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduceMotion) commit();
+    else setTransitionStage("out");
+  }, [location, displayLocation, commit]);
+
+  // The failsafe described above: once the exit starts, the swap happens on
+  // its own even if no animationend ever arrives.
+  useEffect(() => {
+    if (transitionStage !== "out") return undefined;
+    exitTimerRef.current = setTimeout(commit, EXIT_TIMEOUT_MS);
+    return () => clearTimeout(exitTimerRef.current);
+  }, [transitionStage, commit]);
 
   return (
     <div className="relative isolate min-h-screen bg-gray-50 font-sans dark:bg-gray-950">
       <BackgroundDecor />
       <NavBar />
-      {/*
-        `key={location.pathname}` forces this whole block to remount on every
-        route change. Two things ride on that remount:
-        1. ErrorBoundary's caught-error state resets automatically, so a
-           crash on one page (e.g. a stale lazy chunk after a deploy) no
-           longer leaves every later navigation stuck on a blank screen.
-        2. The fresh DOM node re-triggers the `animate-page-in` CSS
-           animation (defined in tailwind.config.js), giving every screen
-           change a smooth fade/slide-in instead of an instant hard cut.
-      */}
-      <ErrorBoundary key={location.pathname}>
-        <div className="animate-page-in">
-          <Routes>
+
+      <ErrorBoundary key={displayLocation.pathname}>
+        <div
+          className={transitionStage === "out" ? "animate-page-out" : "animate-page-in"}
+          onAnimationEnd={(e) => {
+            // animationend bubbles, so a spinner or any animated element
+            // *inside* the page would otherwise end the transition early and
+            // swap the content mid-exit. Only this wrapper's own animation
+            // counts.
+            if (e.target !== e.currentTarget) return;
+            if (transitionStage !== "out") return;
+            commit();
+          }}
+        >
+          <Routes location={displayLocation}>
             <Route path="/" element={<Home />} />
             <Route path="/videos" element={<Videos />} />
             <Route path="/videos/:id" element={<VideoDetail />} />
@@ -63,7 +167,9 @@ export default function App() {
               element={
                 <Suspense
                   fallback={
-                    <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>
+                    <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                      Loading…
+                    </div>
                   }
                 >
                   <BookDetail />
@@ -90,7 +196,9 @@ export default function App() {
                 <ProtectedRoute>
                   <Suspense
                     fallback={
-                      <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">Loading…</div>
+                      <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                        Loading…
+                      </div>
                     }
                   >
                     <Admin />
@@ -106,120 +214,156 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </ErrorBoundary>
-      {/*
-        Single-section footer: one flex row (stacks on mobile) with the
-        brand mark, page links, contact icons, and the language/dark-mode
-        toggle -- no internal divider splitting it into separate blocks.
-        The copyright line at the bottom is still part of this same block,
-        not a separate bordered section.
 
-        PLACEHOLDER CONTACT DETAILS -- replace every href/title below with
-        your real ones before this goes live. Each is marked so they're easy
-        to find (search this file for "REPLACE").
-      */}
-      <footer className="relative mt-16 overflow-hidden border-t border-gray-200 bg-white/60 backdrop-blur dark:border-gray-800 dark:bg-gray-950/60">
-        <div className="h-1 w-full bg-gradient-to-r from-red-600 via-rose-500 to-amber-400" />
-
-        <div className="mx-auto max-w-6xl px-4 py-10">
-          <div className="flex flex-col items-center gap-6 lg:flex-row lg:justify-between">
-            <Link to="/" className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
-              <img
-                src="/logo.png"
-                alt="E-TnakRean logo"
-                className="h-8 w-8 rounded-lg object-contain shadow-md shadow-red-500/30"
-              />
-              <span className="bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent">
-                E-TnakRean
-              </span>
-            </Link>
-
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-              <Link to="/videos" className="hover:text-red-600 dark:hover:text-red-400">
-                Videos
+      <footer className="mt-16 border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
+        <div className="mx-auto max-w-6xl px-4 py-12">
+          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Brand */}
+            <div className="sm:col-span-2 lg:col-span-1">
+              <Link
+                to="/"
+                className="flex items-center gap-2 text-lg font-extrabold tracking-tight"
+              >
+                <img
+                  src="/logo.png"
+                  alt="eTnakRean logo"
+                  loading="lazy"
+                  className="h-8 w-8 rounded-lg object-contain"
+                />
+                <span className="text-red-600 dark:text-red-400">eTnakRean</span>
               </Link>
-              <Link to="/books" className="hover:text-red-600 dark:hover:text-red-400">
-                Books
-              </Link>
-              <Link to="/about" className="hover:text-red-600 dark:hover:text-red-400">
-                About
-              </Link>
+              <p className="mt-3 max-w-xs text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                {t.footer.tagline}
+              </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <a
-                  href="mailto:REPLACE_EMAIL@example.com"
-                  title="REPLACE_EMAIL@example.com"
-                  aria-label="Email"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
-                >
-                  <Mail className="h-4 w-4" />
-                </a>
-                <a
-                  href="tel:+855XXXXXXXX"
-                  title="+855 XX XXX XXX (REPLACE)"
-                  aria-label="Phone"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
-                >
-                  <Phone className="h-4 w-4" />
-                </a>
-                <a
-                  href="https://t.me/REPLACE_TELEGRAM"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Telegram (REPLACE)"
-                  aria-label="Telegram"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
-                >
-                  <Send className="h-4 w-4" />
-                </a>
-                <a
-                  href="https://facebook.com/REPLACE_FACEBOOK_PAGE"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Facebook (REPLACE)"
-                  aria-label="Facebook"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
-                >
-                  <Facebook className="h-4 w-4" />
-                </a>
-              </div>
+            {/* Explore */}
+            <nav aria-label={t.footer.explore}>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">
+                {t.footer.explore}
+              </h2>
+              <ul className="mt-4 space-y-2.5 text-sm">
+                {[
+                  { to: "/", label: t.nav.home },
+                  { to: "/videos", label: t.nav.videos },
+                  { to: "/books", label: t.nav.books },
+                  { to: "/about", label: t.nav.about },
+                ].map(({ to, label }) => (
+                  <li key={to}>
+                    <Link
+                      to={to}
+                      className="text-gray-600 transition-colors hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
 
-              {/* Same language/dark-mode toggle as NavBar.jsx, mirrored here
-                  so it's reachable from the bottom of long pages too. */}
-              <span className="hidden h-6 w-px bg-gray-200 dark:bg-gray-800 lg:block" aria-hidden="true" />
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={toggleLang}
-                  title="Switch language"
-                  aria-label="Switch language"
-                  className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1.5 text-sm font-semibold text-gray-600 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-red-950/60 dark:hover:text-red-400"
-                >
-                  <span className="text-base leading-none" aria-hidden="true">
-                    {lang === "en" ? "🇰🇭" : "🇬🇧"}
-                  </span>
-                  {lang === "en" ? "KH" : "ENG"}
-                </button>
-                <button
-                  type="button"
-                  onClick={toggleMode}
-                  title="Toggle dark mode"
-                  aria-label="Toggle dark mode"
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 hover:shadow-sm dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-950/60 dark:hover:text-red-400"
-                >
-                  {mode === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                </button>
+            {/* Account */}
+            <nav aria-label={t.footer.account}>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">
+                {t.footer.account}
+              </h2>
+              <ul className="mt-4 space-y-2.5 text-sm">
+                {(user
+                  ? [
+                      { to: "/dashboard", label: t.nav.dashboard },
+                      { to: "/profile", label: t.nav.profile },
+                    ]
+                  : [
+                      { to: "/login", label: t.nav.login },
+                      { to: "/register", label: t.nav.getStarted },
+                    ]
+                ).map(({ to, label }) => (
+                  <li key={to}>
+                    <Link
+                      to={to}
+                      className="text-gray-600 transition-colors hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
+                    >
+                      {label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            {/* Connect */}
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">
+                {t.footer.connect}
+              </h2>
+              <div className="mt-4 flex items-center gap-2">
+                {SOCIAL_LINKS.map(({ key, href, title, label, Icon, external }) =>
+                  href ? (
+                    <a
+                      key={key}
+                      href={href}
+                      title={title || label}
+                      aria-label={label}
+                      {...(external
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                      className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-red-600 hover:text-white dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-600 dark:hover:text-white"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </a>
+                  ) : (
+                    <span
+                      key={key}
+                      title={`${label} — ${t.footer.linkNotSet}`}
+                      aria-hidden="true"
+                      className="flex h-9 w-9 cursor-default items-center justify-center rounded-full bg-gray-100 text-gray-300 dark:bg-gray-800 dark:text-gray-600"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </span>
+                  )
+                )}
               </div>
             </div>
           </div>
 
-          <p className="mt-8 text-center text-xs text-gray-400 dark:text-gray-500">
-            © {new Date().getFullYear()} E-TnakRean. All rights reserved.
-          </p>
+          {/* Bottom bar */}
+          <div className="mt-10 flex flex-col-reverse items-center gap-4 border-t border-gray-200 pt-6 dark:border-gray-800 sm:flex-row sm:justify-between">
+            <p className="text-xs text-gray-500 dark:text-gray-500">
+              © {new Date().getFullYear()} eTnakRean. {t.footer.rights}
+            </p>
+
+            {/* Mirrored from NavBar so the toggles are reachable from the
+                bottom of long pages too. */}
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={toggleLang}
+                title="Switch language"
+                aria-label="Switch language"
+                className="flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <span className="text-base leading-none" aria-hidden="true">
+                  {lang === "en" ? "🇰🇭" : "🇬🇧"}
+                </span>
+                {lang === "en" ? "KH" : "ENG"}
+              </button>
+              <button
+                type="button"
+                onClick={toggleMode}
+                title="Toggle dark mode"
+                aria-label="Toggle dark mode"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+              >
+                {mode === "dark" ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

@@ -4,9 +4,11 @@
 
 /* Respect the OS "reduce motion" setting for the page-change animation
    (tailwind.config.js) so it doesn't play for people who've turned off
-   motion effects. */
+   motion effects. App.jsx also skips the whole fade-out/fade-in sequence
+   in JS when this is set, so these are just a defensive fallback. */
 @media (prefers-reduced-motion: reduce) {
-  .animate-page-in {
+  .animate-page-in,
+  .animate-page-out {
     animation: none;
   }
 }
