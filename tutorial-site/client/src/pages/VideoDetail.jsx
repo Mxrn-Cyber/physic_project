@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Lock, ShoppingCart, Clock } from "lucide-react";
+import { ArrowLeft, Play, Lock, ShoppingCart, Clock, CheckCircle2 } from "lucide-react";
 import { api } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
@@ -20,6 +20,7 @@ export default function VideoDetail() {
   const [previewInfo, setPreviewInfo] = useState({ previewSeconds: 0, isPreview: false });
   const [playError, setPlayError] = useState(null);
   const [buying, setBuying] = useState(false);
+  const [markingComplete, setMarkingComplete] = useState(false);
 
   const load = () =>
     api
@@ -79,6 +80,20 @@ export default function VideoDetail() {
 
   const badges = video.badges || [];
   const onSale = video.discountPercent > 0 && !video.isFree;
+
+  // One-way: the server only exposes addToSet (see POST /videos/:id/complete),
+  // there is no "unmark" endpoint. Re-fetching afterward keeps this in sync
+  // with the same server response every other action already relies on,
+  // instead of hand-rolling local state that could drift from it.
+  function handleMarkComplete() {
+    if (markingComplete || video.completed) return;
+    setMarkingComplete(true);
+    api
+      .markVideoComplete(video._id)
+      .then(load)
+      .catch(() => {})
+      .finally(() => setMarkingComplete(false));
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
@@ -169,9 +184,25 @@ export default function VideoDetail() {
           </div>
 
           {video.unlocked ? (
-            <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
-              <Play className="h-4 w-4" /> {t.videos.youOwnThis}
-            </p>
+            <>
+              <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                <Play className="h-4 w-4" /> {t.videos.youOwnThis}
+              </p>
+              {video.completed ? (
+                <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                  <CheckCircle2 className="h-4 w-4" /> {t.videos.completed}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleMarkComplete}
+                  disabled={markingComplete}
+                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  <CheckCircle2 className="h-4 w-4" /> {t.videos.markComplete}
+                </button>
+              )}
+            </>
           ) : user ? (
             <button
               type="button"

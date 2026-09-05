@@ -4,7 +4,7 @@ import Video from "../models/Video.js";
 import { attachUserIfPresent, requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { isVideoUnlocked as isUnlocked, isPubliclyHostedVideo } from "../utils/access.js";
+import { isVideoUnlocked as isUnlocked, isVideoCompleted, isPubliclyHostedVideo } from "../utils/access.js";
 
 const router = Router();
 
@@ -53,7 +53,7 @@ function youTubeThumbnail(url) {
   }
 }
 
-function toPublic(v, unlocked) {
+function toPublic(v, unlocked, completed) {
   return {
     _id: v._id,
     course: v.course,
@@ -77,6 +77,10 @@ function toPublic(v, unlocked) {
       !v.isFree && v.freeUntil && new Date(v.freeUntil) > new Date() && "freeTrial",
     ].filter(Boolean),
     unlocked,
+    // Only meaningful once unlocked -- completedVideos can technically contain
+    // an id the user no longer owns (e.g. content changed hands), so this is
+    // deliberately AND-ed with unlocked rather than trusted on its own.
+    completed: unlocked && completed,
     createdAt: v.createdAt,
     thumbnailUrl: v.thumbnailUrl || youTubeThumbnail(v.videoUrl) || "",
     videoUrl: unlocked ? v.videoUrl : null,
@@ -100,7 +104,9 @@ router.get(
     }
 
     const videos = await Video.find(filter).sort({ order: 1, createdAt: -1 }).lean();
-    res.json({ videos: videos.map((v) => toPublic(v, isUnlocked(v, req.user))) });
+    res.json({
+      videos: videos.map((v) => toPublic(v, isUnlocked(v, req.user), isVideoCompleted(v, req.user))),
+    });
   })
 );
 
@@ -110,7 +116,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const video = await Video.findById(req.params.id).lean().catch(() => null);
     if (!video) return res.status(404).json({ error: "Video not found" });
-    res.json({ video: toPublic(video, isUnlocked(video, req.user)) });
+    res.json({ video: toPublic(video, isUnlocked(video, req.user), isVideoCompleted(video, req.user)) });
   })
 );
 

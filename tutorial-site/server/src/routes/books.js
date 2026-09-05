@@ -7,7 +7,7 @@ import Book from "../models/Book.js";
 import { attachUserIfPresent, requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { isBookUnlocked as isUnlocked } from "../utils/access.js";
+import { isBookUnlocked as isUnlocked, isBookCompleted } from "../utils/access.js";
 import { putToR2, randomKey } from "../utils/r2.js";
 import { renderFirstPageAsJpeg } from "../utils/pdfCover.js";
 
@@ -219,7 +219,7 @@ async function buildPreviewPdf(pdfUrl, pages) {
   return previewDoc.save();
 }
 
-function toPublic(b, unlocked) {
+function toPublic(b, unlocked, completed) {
   return {
     _id: b._id,
     course: b.course,
@@ -245,6 +245,8 @@ function toPublic(b, unlocked) {
       !b.isFree && b.freeUntil && new Date(b.freeUntil) > new Date() && "freeTrial",
     ].filter(Boolean),
     unlocked,
+    // Same reasoning as routes/videos.js: only meaningful once unlocked.
+    completed: unlocked && completed,
     createdAt: b.createdAt,
     // Deliberately no pdfUrl. The R2 bucket is served from a public URL, so
     // any link handed out here works forever for anyone it is forwarded to --
@@ -269,7 +271,9 @@ router.get(
     }
 
     const books = await Book.find(filter).sort({ order: 1, createdAt: -1 }).lean();
-    res.json({ books: books.map((b) => toPublic(b, isUnlocked(b, req.user))) });
+    res.json({
+      books: books.map((b) => toPublic(b, isUnlocked(b, req.user), isBookCompleted(b, req.user))),
+    });
   })
 );
 
@@ -279,7 +283,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const book = await Book.findById(req.params.id).lean().catch(() => null);
     if (!book) return res.status(404).json({ error: "Book not found" });
-    res.json({ book: toPublic(book, isUnlocked(book, req.user)) });
+    res.json({ book: toPublic(book, isUnlocked(book, req.user), isBookCompleted(book, req.user)) });
   })
 );
 

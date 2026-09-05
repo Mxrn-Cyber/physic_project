@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Play, FileText } from "lucide-react";
+import { Play, FileText, CheckCircle2 } from "lucide-react";
 import { api } from "../api/client.js";
 import { useLanguage } from "../context/LanguageContext.jsx";
 
@@ -28,6 +28,9 @@ export default function Dashboard() {
   const ownedVideos = videos.filter((v) => v.unlocked && !v.isFree);
   const ownedBooks = books.filter((b) => b.unlocked && !b.isFree);
   const totalUnlocked = videos.filter((v) => v.unlocked).length + books.filter((b) => b.unlocked).length;
+  const completedCount =
+    videos.filter((v) => v.unlocked && v.completed).length +
+    books.filter((b) => b.unlocked && b.completed).length;
 
   if (status === "loading") {
     return <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">{t.common.loading}</div>;
@@ -41,7 +44,7 @@ export default function Dashboard() {
     <div className="mx-auto max-w-5xl px-4 py-10">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.dashboard.title}</h1>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
           <p className="text-sm text-gray-500 dark:text-gray-400">{t.dashboard.videosOwned}</p>
           <p className="mt-1 text-xl font-bold text-gray-900 dark:text-gray-100">{ownedVideos.length}</p>
@@ -53,6 +56,10 @@ export default function Dashboard() {
         <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
           <p className="text-sm text-gray-500 dark:text-gray-400">{t.dashboard.totalUnlocked}</p>
           <p className="mt-1 text-xl font-bold text-gray-900 dark:text-gray-100">{totalUnlocked}</p>
+        </div>
+        <div className="rounded-xl border border-gray-200 p-5 dark:border-gray-700">
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t.dashboard.completedCount}</p>
+          <p className="mt-1 text-xl font-bold text-gray-900 dark:text-gray-100">{completedCount}</p>
         </div>
       </div>
 
@@ -68,7 +75,14 @@ export default function Dashboard() {
                   to={`/videos/${v._id}`}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
-                  <Play className="h-3.5 w-3.5 text-red-600" /> {v.title}
+                  <Play className="h-3.5 w-3.5 shrink-0 text-red-600" />
+                  <span className="min-w-0 flex-1 truncate">{v.title}</span>
+                  {v.completed && (
+                    <CheckCircle2
+                      className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400"
+                      aria-label={t.videos.completed}
+                    />
+                  )}
                 </Link>
               </li>
             ))}
@@ -94,7 +108,14 @@ export default function Dashboard() {
                   to={`/books/${b._id}`}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
-                  <FileText className="h-3.5 w-3.5 text-red-600" /> {b.title}
+                  <FileText className="h-3.5 w-3.5 shrink-0 text-red-600" />
+                  <span className="min-w-0 flex-1 truncate">{b.title}</span>
+                  {b.completed && (
+                    <CheckCircle2
+                      className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400"
+                      aria-label={t.books.completed}
+                    />
+                  )}
                 </Link>
               </li>
             ))}

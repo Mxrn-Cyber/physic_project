@@ -44,6 +44,8 @@ export const translations = {
       youOwnThis: "You own this video",
       buyToWatch: "Buy this video to watch it",
       notFound: "Couldn't find that video.",
+      markComplete: "Mark as watched",
+      completed: "Watched",
     },
     books: {
       title: "Books (PDFs)",
@@ -55,6 +57,8 @@ export const translations = {
       youOwnThis: "You own this book",
       buyToView: "Buy this book to view it",
       notFound: "Couldn't find that book.",
+      markComplete: "Mark as read",
+      completed: "Read",
     },
     courses: {
       title: "Course Library",
@@ -133,6 +137,7 @@ export const translations = {
       videosOwned: "Videos owned",
       booksOwned: "Books owned",
       totalUnlocked: "Total unlocked",
+      completedCount: "Completed",
       yourVideos: "Your videos",
       yourBooks: "Your books",
       noVideosYet: "No purchased videos yet.",
@@ -196,6 +201,10 @@ export const translations = {
       waiting: "Waiting for payment…",
       failed: "Payment failed or was cancelled. Please try again.",
       close: "Close",
+      slowNotice: "Taking longer than expected? If you've already paid, check again below.",
+      checkAgain: "Check again",
+      checking: "Checking…",
+      cancelAndGoBack: "Cancel and go back",
     },
     player: {
       previewEnded: "Preview ended.",
@@ -269,6 +278,8 @@ export const translations = {
       youOwnThis: "អ្នកមានវីដេអូនេះ",
       buyToWatch: "ទិញវីដេអូនេះដើម្បីមើល",
       notFound: "រកមិនឃើញវីដេអូនេះទេ។",
+      markComplete: "សម្គាល់ថាបានមើលរួច",
+      completed: "បានមើលរួច",
     },
     books: {
       title: "សៀវភៅ (PDF)",
@@ -280,6 +291,8 @@ export const translations = {
       youOwnThis: "អ្នកមានសៀវភៅនេះ",
       buyToView: "ទិញសៀវភៅនេះដើម្បីមើល",
       notFound: "រកមិនឃើញសៀវភៅនេះទេ។",
+      markComplete: "សម្គាល់ថាបានអានរួច",
+      completed: "បានអានរួច",
     },
     courses: {
       title: "បណ្ណាល័យវគ្គសិក្សា",
@@ -358,6 +371,7 @@ export const translations = {
       videosOwned: "វីដេអូដែលមាន",
       booksOwned: "សៀវភៅដែលមាន",
       totalUnlocked: "សរុបដែលបានបើក",
+      completedCount: "បានបញ្ចប់",
       yourVideos: "វីដេអូរបស់អ្នក",
       yourBooks: "សៀវភៅរបស់អ្នក",
       noVideosYet: "មិនទាន់មានវីដេអូដែលបានទិញនៅឡើយទេ។",
@@ -421,6 +435,10 @@ export const translations = {
       waiting: "កំពុងរង់ចាំការទូទាត់…",
       failed: "ការទូទាត់មិនបានសម្រេច ឬត្រូវបានលុបចោល។ សូមព្យាយាមម្តងទៀត។",
       close: "បិទ",
+      slowNotice: "យូរជាងធម្មតាមែនទេ? ប្រសិនបើអ្នកបានបង់ប្រាក់រួចហើយ សូមពិនិត្យម្តងទៀតខាងក្រោម។",
+      checkAgain: "ពិនិត្យម្តងទៀត",
+      checking: "កំពុងពិនិត្យ…",
+      cancelAndGoBack: "បោះបង់ ហើយត្រឡប់ក្រោយ",
     },
     player: {
       previewEnded: "ការមើលសាកល្បងបានបញ្ចប់។",

@@ -6,6 +6,7 @@ import {
   Lock,
   ShoppingCart,
   BookOpen,
+  CheckCircle2,
 } from "lucide-react";
 import { api } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -30,6 +31,7 @@ export default function BookDetail() {
   const [isPreview, setIsPreview] = useState(false);
   const [viewError, setViewError] = useState(null);
   const [buying, setBuying] = useState(false);
+  const [markingComplete, setMarkingComplete] = useState(false);
 
   const load = () =>
     api
@@ -88,6 +90,20 @@ export default function BookDetail() {
 
   const badges = book.badges || [];
   const onSale = book.discountPercent > 0 && !book.isFree;
+
+  // Same one-way reasoning as VideoDetail.jsx -- POST /books/:id/complete
+  // only ever adds, there's no unmark endpoint, so re-fetching the book after
+  // marking it keeps this in sync with the server rather than duplicating
+  // state that could drift.
+  function handleMarkComplete() {
+    if (markingComplete || book.completed) return;
+    setMarkingComplete(true);
+    api
+      .markBookComplete(book._id)
+      .then(load)
+      .catch(() => {})
+      .finally(() => setMarkingComplete(false));
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
@@ -189,9 +205,25 @@ export default function BookDetail() {
             </div>
 
             {book.unlocked ? (
-              <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
-                <FileText className="h-4 w-4" /> {t.books.youOwnThis}
-              </p>
+              <>
+                <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                  <FileText className="h-4 w-4" /> {t.books.youOwnThis}
+                </p>
+                {book.completed ? (
+                  <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                    <CheckCircle2 className="h-4 w-4" /> {t.books.completed}
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleMarkComplete}
+                    disabled={markingComplete}
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                  >
+                    <CheckCircle2 className="h-4 w-4" /> {t.books.markComplete}
+                  </button>
+                )}
+              </>
             ) : user ? (
               <button
                 type="button"

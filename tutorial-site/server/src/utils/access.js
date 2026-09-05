@@ -44,6 +44,17 @@ const PUBLIC_VIDEO_HOSTS = [
   "player.vimeo.com",
 ];
 
+// Whether a logged-in user has already marked this item done. Separate from
+// isUnlocked() above -- completion has nothing to do with free/paid/trial
+// status, it's purely "does this id appear in the user's completed list".
+function isItemCompleted(item, user, field) {
+  if (!item || !user) return false;
+  return (user[field] || []).some((id) => String(id) === String(item._id));
+}
+
+export const isVideoCompleted = (video, user) => isItemCompleted(video, user, "completedVideos");
+export const isBookCompleted = (book, user) => isItemCompleted(book, user, "completedBooks");
+
 export function isPubliclyHostedVideo(url) {
   try {
     return PUBLIC_VIDEO_HOSTS.includes(new URL(url).hostname.toLowerCase());
