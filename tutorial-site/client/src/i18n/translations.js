@@ -232,6 +232,11 @@ export const translations = {
       privacy: "Privacy",
       refund: "Refunds",
     },
+    legalPage: {
+      onThisPage: "On this page",
+      backToTop: "Back to top",
+      alsoRead: "Also read",
+    },
   },
   km: {
     nav: {
@@ -465,6 +470,11 @@ export const translations = {
       terms: "លក្ខខណ្ឌប្រើប្រាស់",
       privacy: "ភាពឯកជន",
       refund: "ការសងប្រាក់វិញ",
+    },
+    legalPage: {
+      onThisPage: "ក្នុងទំព័រនេះ",
+      backToTop: "ត្រឡប់ទៅខាងលើ",
+      alsoRead: "អានផងដែរ",
     },
   },
 };
