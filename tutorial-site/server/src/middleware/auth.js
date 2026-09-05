@@ -14,6 +14,15 @@ export async function requireAuth(req, res, next) {
     const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
     const user = await User.findById(payload.sub).select("-passwordHash");
     if (!user) return res.status(401).json({ error: "User no longer exists" });
+
+    // Tokens issued before the user's last password reset carry a stale `tv`
+    // and are refused here. Tokens minted before this field existed have no
+    // `tv` at all; treat those as version 0 so nobody is logged out by the
+    // deploy itself.
+    if ((payload.tv ?? 0) !== (user.tokenVersion ?? 0)) {
+      return res.status(401).json({ error: "Session expired. Please log in again." });
+    }
+
     req.user = user;
     next();
   } catch (err) {
@@ -27,7 +36,11 @@ export async function attachUserIfPresent(req, _res, next) {
   if (!token) return next();
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
-    req.user = await User.findById(payload.sub).select("-passwordHash");
+    const user = await User.findById(payload.sub).select("-passwordHash");
+    // Same staleness check as requireAuth. This path is used by the public
+    // catalogue routes to decide what a visitor has unlocked, so letting a
+    // revoked token through here would still hand out paid content.
+    if (user && (payload.tv ?? 0) === (user.tokenVersion ?? 0)) req.user = user;
   } catch {}
   next();
 }

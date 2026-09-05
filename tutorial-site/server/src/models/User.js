@@ -28,6 +28,14 @@ const userSchema = new mongoose.Schema(
     address: { type: String, default: "", trim: true },
     phoneVerified: { type: Boolean, default: false },
 
+    // Bumped whenever every existing session for this user must stop working
+    // (currently: a completed password reset). The value is embedded in each
+    // JWT as `tv` and re-checked on every authenticated request, which is what
+    // makes a reset actually kick out whoever knew the old password -- before
+    // this, a stolen 7-day token stayed valid for its full life even after the
+    // real owner reset their password.
+    tokenVersion: { type: Number, default: 0 },
+
     isAdmin: { type: Boolean, default: false },
     // Must be true before /login will issue a session -- set once signup OTP
     // is verified, or immediately for Google sign-ins.
