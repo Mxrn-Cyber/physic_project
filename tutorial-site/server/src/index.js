@@ -13,6 +13,16 @@ import userRoutes from "./routes/users.js";
 
 const app = express();
 
+// Render (like most hosting) puts a reverse proxy in front of this app, so
+// every request arrives from the proxy's IP and req.ip is that proxy unless
+// we say otherwise. Without this, express-rate-limit buckets ALL traffic
+// under one IP: the 20-attempts-per-15-minutes login limit becomes a global
+// limit shared by every real student, while a distributed attacker isn't
+// slowed down at all. Trust exactly one proxy hop (Render's) -- not `true`,
+// which would trust a client-supplied X-Forwarded-For and let anyone forge
+// their way around the limiter.
+app.set("trust proxy", 1);
+
 // Baseline security headers (HSTS, X-Content-Type-Options, frame denial,
 // referrer policy...). crossOriginResourcePolicy is relaxed because the
 // client is served from a different origin and needs to read uploaded
