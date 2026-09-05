@@ -1,20 +1,4 @@
-// DRAFT legal copy for the Terms, Privacy and Refund pages.
-//
-// ------------------------------------------------------------------
-// READ THIS BEFORE YOU PUBLISH
-//
-// These are working drafts written to match what this codebase actually
-// does -- the Privacy page in particular lists the real third parties this
-// app sends data to (ABA PayWay, Resend, Twilio, Google, Cloudflare R2,
-// MongoDB Atlas), so it is accurate rather than generic filler.
-//
-// They are NOT legal advice and have not been reviewed by a lawyer. Before
-// launch: replace every [BRACKETED] placeholder, and have someone qualified
-// check the result against Cambodian consumer and e-commerce law and against
-// whatever ABA PayWay requires of you as a merchant.
-// ------------------------------------------------------------------
-
-const LAST_UPDATED = "[DATE YOU PUBLISH]";
+const LAST_UPDATED = "2026-06-05";
 
 export const legal = {
   en: {
@@ -29,7 +13,7 @@ export const legal = {
       sections: [
         {
           heading: "Who runs this site",
-          body: "E-TnakRean is operated by [YOUR LEGAL NAME OR COMPANY NAME], [ADDRESS], Cambodia. You can reach us at [EMAIL] or [PHONE / TELEGRAM].",
+          body: "eTnakRean is operated by [YOUR LEGAL NAME OR COMPANY NAME], [ADDRESS], Cambodia. You can reach us at [EMAIL] or [PHONE / TELEGRAM].",
         },
         {
           heading: "Your account",
@@ -147,7 +131,7 @@ export const legal = {
       sections: [
         {
           heading: "អ្នកគ្រប់គ្រងគេហទំព័រ",
-          body: "E-TnakRean ដំណើរការដោយ [ឈ្មោះស្របច្បាប់ ឬឈ្មោះក្រុមហ៊ុន], [អាសយដ្ឋាន], ព្រះរាជាណាចក្រកម្ពុជា។ អ្នកអាចទាក់ទងមកយើងតាម [អ៊ីមែល] ឬ [លេខទូរស័ព្ទ / តេឡេក្រាម]។",
+          body: "eTnakRean ដំណើរការដោយ [ឈ្មោះស្របច្បាប់ ឬឈ្មោះក្រុមហ៊ុន], [អាសយដ្ឋាន], ព្រះរាជាណាចក្រកម្ពុជា។ អ្នកអាចទាក់ទងមកយើងតាម [អ៊ីមែល] ឬ [លេខទូរស័ព្ទ / តេឡេក្រាម]។",
         },
         {
           heading: "គណនីរបស់អ្នក",

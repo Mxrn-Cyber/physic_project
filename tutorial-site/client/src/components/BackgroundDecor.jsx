@@ -1,7 +1,3 @@
-// Kept intentionally minimal: a single soft glow at the top of the page
-// instead of multiple blurred blobs and a dotted grid, so the background
-// stays calm and doesn't compete with page content or slow down low-end
-// devices.
 export default function BackgroundDecor() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
