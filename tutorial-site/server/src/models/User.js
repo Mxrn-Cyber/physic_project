@@ -21,6 +21,11 @@ const userSchema = new mongoose.Schema(
 
     photoUrl: { type: String, default: "" },
     phone: { type: String, default: "" },
+    // Was missing from the schema while PATCH /api/auth/me and publicUser()
+    // both referenced it -- Mongoose's strict mode silently dropped the
+    // value on save, so a student could type an address, get a success
+    // response, and find the field empty again on reload.
+    address: { type: String, default: "", trim: true },
     phoneVerified: { type: Boolean, default: false },
 
     isAdmin: { type: Boolean, default: false },
