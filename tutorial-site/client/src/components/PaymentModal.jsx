@@ -3,35 +3,62 @@ import { X } from "lucide-react";
 import { api } from "../api/client.js";
 import { useLanguage } from "../context/LanguageContext.jsx";
 
+// How long the QR screen sits there before we admit it's taking a while and
+// offer a manual escape hatch. Not a failure -- ABA's own confirmation can
+// genuinely take a minute or two -- just long enough that a first-time buyer
+// staring at an unmoving screen starts to wonder if anything is happening.
+const SLOW_AFTER_MS = 3 * 60 * 1000;
+const POLL_INTERVAL_MS = 3000;
+
 export default function PaymentModal({ itemType, itemId, title, amount, onClose, onPaid }) {
   const { t } = useLanguage();
   const [state, setState] = useState("creating");
   const [payment, setPayment] = useState(null);
   const [error, setError] = useState("");
+  const [slow, setSlow] = useState(false);
+  const [manualChecking, setManualChecking] = useState(false);
   const pollRef = useRef(null);
+  const slowTimerRef = useRef(null);
+  const tranIdRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
+
+    // Shared by the automatic 3-second poll and the manual "Check again"
+    // button below, so there is exactly one place that decides what a status
+    // response means -- the two were never meant to disagree.
+    async function checkStatus() {
+      const { status } = await api.getPaymentStatus(tranIdRef.current);
+      if (cancelled) return status;
+      if (status === "completed") {
+        clearInterval(pollRef.current);
+        clearTimeout(slowTimerRef.current);
+        onPaid();
+      } else if (status === "failed") {
+        clearInterval(pollRef.current);
+        clearTimeout(slowTimerRef.current);
+        setError(t.payment.failed);
+        setState("error");
+      }
+      return status;
+    }
 
     api
       .createPayment(itemType, itemId)
       .then((data) => {
         if (cancelled) return;
+        tranIdRef.current = data.tranId;
         setPayment(data);
         setState("waiting");
-        pollRef.current = setInterval(async () => {
-          try {
-            const { status } = await api.getPaymentStatus(data.tranId);
-            if (status === "completed") {
-              clearInterval(pollRef.current);
-              onPaid();
-            } else if (status === "failed") {
-              clearInterval(pollRef.current);
-              setError(t.payment.failed);
-              setState("error");
-            }
-          } catch {}
-        }, 3000);
+        pollRef.current = setInterval(() => {
+          checkStatus().catch(() => {});
+        }, POLL_INTERVAL_MS);
+        // Purely a UI cue -- polling itself keeps running underneath so a
+        // payment that completes right after this fires is still caught by
+        // the very next automatic check, not just by the manual button.
+        slowTimerRef.current = setTimeout(() => {
+          if (!cancelled) setSlow(true);
+        }, SLOW_AFTER_MS);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -42,11 +69,35 @@ export default function PaymentModal({ itemType, itemId, title, amount, onClose,
     return () => {
       cancelled = true;
       if (pollRef.current) clearInterval(pollRef.current);
+      if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
     };
     // t is intentionally read at call time only; re-running this effect on a
     // language switch would create a second payment.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemType, itemId]);
+
+  function handleManualCheck() {
+    if (manualChecking || !tranIdRef.current) return;
+    setManualChecking(true);
+    api
+      .getPaymentStatus(tranIdRef.current)
+      .then(({ status }) => {
+        if (status === "completed") {
+          clearInterval(pollRef.current);
+          clearTimeout(slowTimerRef.current);
+          onPaid();
+        } else if (status === "failed") {
+          clearInterval(pollRef.current);
+          clearTimeout(slowTimerRef.current);
+          setError(t.payment.failed);
+          setState("error");
+        }
+        // Still pending: stay on the QR screen, the automatic poll (and this
+        // button) keep trying -- there is nothing else to tell the buyer yet.
+      })
+      .catch(() => {})
+      .finally(() => setManualChecking(false));
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -88,6 +139,31 @@ export default function PaymentModal({ itemType, itemId, title, amount, onClose,
                 {t.payment.scanInstructions}
               </p>
               <p className="mt-2 text-xs text-gray-400">{t.payment.waiting}</p>
+
+              {slow && (
+                <div className="mt-4 w-full border-t border-gray-200 pt-4 dark:border-gray-700">
+                  <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                    {t.payment.slowNotice}
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleManualCheck}
+                      disabled={manualChecking}
+                      className="flex-1 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+                    >
+                      {manualChecking ? t.payment.checking : t.payment.checkAgain}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                    >
+                      {t.payment.cancelAndGoBack}
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
 
