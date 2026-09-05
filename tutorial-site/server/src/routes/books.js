@@ -1,20 +1,43 @@
 import { Router } from "express";
+import { Readable } from "stream";
+import { pipeline } from "stream/promises";
 import mongoose from "mongoose";
 import { PDFDocument } from "pdf-lib";
 import Book from "../models/Book.js";
 import { attachUserIfPresent, requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { isBookUnlocked as isUnlocked } from "../utils/access.js";
 import { putToR2, randomKey } from "../utils/r2.js";
 import { renderFirstPageAsJpeg } from "../utils/pdfCover.js";
 
 const router = Router();
 
-function isUnlocked(book, user) {
-  if (book.isFree) return true;
-  if (book.freeUntil && new Date(book.freeUntil) > new Date()) return true;
-  if (!user) return false;
-  return (user.purchasedBooks || []).some((id) => String(id) === String(book._id));
+// See the note on VIDEO_WRITABLE in routes/videos.js -- same reasoning.
+const BOOK_WRITABLE = [
+  "course",
+  "title",
+  "description",
+  "order",
+  "pageCount",
+  "coverImageUrl",
+  "pdfUrl",
+  "isFree",
+  "price",
+  "freeUntil",
+  "previewSeconds",
+  "previewPages",
+  "isTopSeller",
+  "isMedium",
+  "discountPercent",
+];
+
+function pickWritable(body, allowed) {
+  const out = {};
+  for (const key of allowed) {
+    if (body?.[key] !== undefined) out[key] = body[key];
+  }
+  return out;
 }
 
 function extractDriveFileId(url) {
@@ -159,6 +182,31 @@ async function fetchSourcePdfBytes(pdfUrl) {
   return fetchViaDriveScrape(`https://drive.google.com/uc?export=download&id=${driveId}`);
 }
 
+// Streams a PDF straight from its origin to the client without ever holding
+// the whole file in memory. fetchSourcePdfBytes() buffers the entire document
+// into a Buffer, which is fine for cover generation (one page, admin-only) but
+// not for serving reads: a 30MB book requested by four students at once was
+// 120MB of heap on an instance that may only have 512MB.
+//
+// Only used for the "unlocked, not on Drive" path. Previews must be buffered
+// because pdf-lib needs the whole document to copy pages out of it, and Drive
+// links need the confirmation dance in fetchViaDriveScrape().
+async function streamPdfTo(res, pdfUrl) {
+  const upstream = await fetch(pdfUrl);
+  if (!upstream.ok || !upstream.body) {
+    throw new Error(`Could not fetch source PDF (${upstream.status} ${upstream.statusText}) from ${pdfUrl}`);
+  }
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "inline; filename=book.pdf");
+  const length = upstream.headers.get("content-length");
+  // Lets the viewer show a real progress bar instead of an unknown-length
+  // spinner, and lets pdf.js range-request rather than wait for everything.
+  if (length) res.setHeader("Content-Length", length);
+
+  await pipeline(Readable.fromWeb(upstream.body), res);
+}
+
 async function buildPreviewPdf(pdfUrl, pages) {
   const sourceBytes = await fetchSourcePdfBytes(pdfUrl);
   const sourceDoc = await PDFDocument.load(sourceBytes);
@@ -198,7 +246,11 @@ function toPublic(b, unlocked) {
     ].filter(Boolean),
     unlocked,
     createdAt: b.createdAt,
-    pdfUrl: unlocked ? b.pdfUrl : null,
+    // Deliberately no pdfUrl. The R2 bucket is served from a public URL, so
+    // any link handed out here works forever for anyone it is forwarded to --
+    // one buyer could share a permanent download link for a paid book. The
+    // frontend never needed it either: BookViewer fetches bytes through
+    // GET /api/books/:id/pdf, which re-checks ownership on every request.
   };
 }
 
@@ -238,12 +290,15 @@ router.get(
     const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ error: "Book not found" });
 
+    // Returns only *whether* the book can be read and in what mode -- never
+    // the underlying storage URL (see the note in toPublic above). The bytes
+    // come from GET /api/books/:id/pdf.
     if (isUnlocked(book, req.user)) {
-      return res.json({ pdfUrl: book.pdfUrl });
+      return res.json({ unlocked: true, isPreview: false });
     }
 
     if (book.previewPages > 0) {
-      return res.json({ previewPages: book.previewPages, isPreview: true });
+      return res.json({ unlocked: false, previewPages: book.previewPages, isPreview: true });
     }
 
     return res.status(403).json({ error: "Buy this book to view it" });
@@ -292,6 +347,11 @@ router.get(
     }
 
     try {
+      if (unlocked && !extractDriveFileId(book.pdfUrl)) {
+        await streamPdfTo(res, book.pdfUrl);
+        return;
+      }
+
       const bytes = unlocked
         ? await fetchSourcePdfBytes(book.pdfUrl)
         : await buildPreviewPdf(book.pdfUrl, book.previewPages);
@@ -300,6 +360,11 @@ router.get(
       res.send(Buffer.from(bytes));
     } catch (err) {
       console.error("Failed to serve book PDF", err);
+      // Once streaming has begun the status line is already on the wire, so a
+      // mid-transfer failure can only be signalled by dropping the connection
+      // -- sending a JSON body here would corrupt the PDF the client is
+      // already reading.
+      if (res.headersSent) return res.destroy(err);
       res.status(502).json({ error: "Could not load this PDF right now" });
     }
   })
@@ -370,7 +435,7 @@ router.post(
   requireAdmin,
   asyncHandler(async (req, res) => {
     try {
-      const book = await Book.create(req.body);
+      const book = await Book.create(pickWritable(req.body, BOOK_WRITABLE));
       res.status(201).json(book);
     } catch (err) {
       res.status(400).json({ error: err.message });
@@ -383,7 +448,7 @@ router.patch(
   requireAuth,
   requireAdmin,
   asyncHandler(async (req, res) => {
-    const book = await Book.findByIdAndUpdate(req.params.id, req.body, {
+    const book = await Book.findByIdAndUpdate(req.params.id, pickWritable(req.body, BOOK_WRITABLE), {
       new: true,
       runValidators: true,
     });

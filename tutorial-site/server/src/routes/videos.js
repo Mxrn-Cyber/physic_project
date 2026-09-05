@@ -4,14 +4,37 @@ import Video from "../models/Video.js";
 import { attachUserIfPresent, requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { isVideoUnlocked as isUnlocked, isPubliclyHostedVideo } from "../utils/access.js";
 
 const router = Router();
 
-function isUnlocked(video, user) {
-  if (video.isFree) return true;
-  if (video.freeUntil && new Date(video.freeUntil) > new Date()) return true;
-  if (!user) return false;
-  return (user.purchasedVideos || []).some((id) => String(id) === String(video._id));
+// Only these may be set from an admin request body. Previously req.body was
+// handed straight to Mongoose: a typo'd field name silently wrote nothing,
+// and anything the schema later gains (say an internal flag) would have been
+// writable from the browser the moment it was added.
+const VIDEO_WRITABLE = [
+  "course",
+  "title",
+  "description",
+  "order",
+  "durationSeconds",
+  "videoUrl",
+  "thumbnailUrl",
+  "isFree",
+  "price",
+  "freeUntil",
+  "previewSeconds",
+  "isTopSeller",
+  "isMedium",
+  "discountPercent",
+];
+
+function pickWritable(body, allowed) {
+  const out = {};
+  for (const key of allowed) {
+    if (body?.[key] !== undefined) out[key] = body[key];
+  }
+  return out;
 }
 
 function youTubeThumbnail(url) {
@@ -102,7 +125,16 @@ router.get(
       return res.json({ playbackUrl: video.videoUrl });
     }
 
-    if (video.previewSeconds > 0) {
+    // A preview used to hand back the FULL video URL and rely on a
+    // setTimeout in VideoPlayer.jsx to stop playback. That is not a lock --
+    // the URL is sitting in the network tab, and once someone has it they
+    // have the whole video forever.
+    //
+    // It is only acceptable when the host is already serving the video
+    // publicly (YouTube/Vimeo), where the link leaks nothing the platform
+    // wasn't leaking anyway. For a self-hosted file the URL is the content,
+    // so we refuse rather than pretend the timer protected anything.
+    if (video.previewSeconds > 0 && isPubliclyHostedVideo(video.videoUrl)) {
       return res.json({ playbackUrl: video.videoUrl, previewSeconds: video.previewSeconds, isPreview: true });
     }
 
@@ -143,7 +175,7 @@ router.post(
   requireAdmin,
   asyncHandler(async (req, res) => {
     try {
-      const video = await Video.create(req.body);
+      const video = await Video.create(pickWritable(req.body, VIDEO_WRITABLE));
       res.status(201).json(video);
     } catch (err) {
       res.status(400).json({ error: err.message });
@@ -156,7 +188,7 @@ router.patch(
   requireAuth,
   requireAdmin,
   asyncHandler(async (req, res) => {
-    const video = await Video.findByIdAndUpdate(req.params.id, req.body, {
+    const video = await Video.findByIdAndUpdate(req.params.id, pickWritable(req.body, VIDEO_WRITABLE), {
       new: true,
       runValidators: true,
     });

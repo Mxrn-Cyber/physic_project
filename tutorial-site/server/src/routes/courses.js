@@ -5,6 +5,7 @@ import Book from "../models/Book.js";
 import { attachUserIfPresent, requireAuth } from "../middleware/auth.js";
 import { requireAdmin } from "../middleware/requireAdmin.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { isVideoUnlocked, isBookUnlocked } from "../utils/access.js";
 
 const router = Router();
 
@@ -14,20 +15,6 @@ const router = Router();
 // specific item. (This used to check `req.user?.plan === "paid"`, but User
 // has no `plan` field, so that was always false and this endpoint never
 // reflected anyone's real purchases or free-trial windows.)
-function isVideoUnlocked(video, user) {
-  if (video.isFree) return true;
-  if (video.freeUntil && new Date(video.freeUntil) > new Date()) return true;
-  if (!user) return false;
-  return (user.purchasedVideos || []).some((id) => String(id) === String(video._id));
-}
-
-function isBookUnlocked(book, user) {
-  if (book.isFree) return true;
-  if (book.freeUntil && new Date(book.freeUntil) > new Date()) return true;
-  if (!user) return false;
-  return (user.purchasedBooks || []).some((id) => String(id) === String(book._id));
-}
-
 function publicVideo(v, unlocked) {
   return {
     _id: v._id,
