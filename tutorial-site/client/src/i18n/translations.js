@@ -191,6 +191,8 @@ export const translations = {
       loading: "Loading…",
       seeMore: "See more",
       loadError: "Couldn't load that right now. Please try again later.",
+      previous: "Previous",
+      next: "Next",
     },
     payment: {
       settingUp: "Setting up payment…",
@@ -430,6 +432,8 @@ export const translations = {
       loading: "កំពុងផ្ទុក…",
       seeMore: "មើលបន្ថែម",
       loadError: "មិនអាចផ្ទុកបានទេឥឡូវនេះ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។",
+      previous: "មុន",
+      next: "បន្ទាប់",
     },
     payment: {
       settingUp: "កំពុងរៀបចំការទូទាត់…",

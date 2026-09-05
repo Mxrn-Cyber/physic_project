@@ -36,7 +36,7 @@ const SLIDES = [
   },
 ];
 
-const PREVIEW_COUNT = 6;
+const PREVIEW_COUNT = 4;
 
 function CategorySection({ title, seeMoreTo, seeMoreLabel, items }) {
   if (items.length === 0) return null;
@@ -55,7 +55,7 @@ function CategorySection({ title, seeMoreTo, seeMoreLabel, items }) {
           {seeMoreLabel} &rarr;
         </Link>
       </div>
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {items}
       </div>
     </div>

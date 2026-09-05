@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import BookCard from "../components/BookCard.jsx";
+import Pagination from "../components/Pagination.jsx";
+
+// Matches the grid below (3 columns at lg), so a full page is exactly 3 neat
+// rows instead of ending mid-row.
+const PAGE_SIZE = 9;
 
 export default function Books() {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [books, setBooks] = useState([]);
   const [status, setStatus] = useState("loading");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     api
@@ -19,6 +25,17 @@ export default function Books() {
       })
       .catch(() => setStatus("error"));
   }, []);
+
+  const totalPages = Math.max(1, Math.ceil(books.length / PAGE_SIZE));
+  const pageBooks = useMemo(
+    () => books.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [books, page]
+  );
+
+  const goToPage = (next) => {
+    setPage(Math.min(Math.max(next, 1), totalPages));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
@@ -39,11 +56,20 @@ export default function Books() {
         <p className="mt-6 text-sm text-gray-500 dark:text-gray-400">No books yet.</p>
       )}
       {status === "ready" && books.length > 0 && (
-        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {books.map((book) => (
-            <BookCard key={book._id} book={book} />
-          ))}
-        </div>
+        <>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {pageBooks.map((book) => (
+              <BookCard key={book._id} book={book} />
+            ))}
+          </div>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onChange={goToPage}
+            previousLabel={t.common.previous}
+            nextLabel={t.common.next}
+          />
+        </>
       )}
     </div>
   );
