@@ -218,6 +218,10 @@ export const translations = {
       connect: "Connect",
       rights: "All rights reserved.",
       linkNotSet: "Link not added yet",
+      legal: "Legal",
+      terms: "Terms",
+      privacy: "Privacy",
+      refund: "Refunds",
     },
   },
   km: {
@@ -439,6 +443,10 @@ export const translations = {
       connect: "ទំនាក់ទំនង",
       rights: "រក្សាសិទ្ធិគ្រប់យ៉ាង។",
       linkNotSet: "មិនទាន់បានបញ្ចូលតំណ",
+      legal: "ផ្លូវច្បាប់",
+      terms: "លក្ខខណ្ឌប្រើប្រាស់",
+      privacy: "ភាពឯកជន",
+      refund: "ការសងប្រាក់វិញ",
     },
   },
 };

@@ -21,6 +21,7 @@ import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import VerifyOtp from "./pages/VerifyOtp.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Legal from "./pages/Legal.jsx";
 import { CONTACT } from "./config/site.js";
 
 // Admin ships a large CRUD dashboard (users/videos/books management) that
@@ -177,6 +178,9 @@ export default function App() {
               }
             />
             <Route path="/about" element={<About />} />
+            <Route path="/terms" element={<Legal doc="terms" />} />
+            <Route path="/privacy" element={<Legal doc="privacy" />} />
+            <Route path="/refund" element={<Legal doc="refund" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -330,9 +334,28 @@ export default function App() {
 
           {/* Bottom bar */}
           <div className="mt-10 flex flex-col-reverse items-center gap-4 border-t border-gray-200 pt-6 dark:border-gray-800 sm:flex-row sm:justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-500">
-              © {new Date().getFullYear()} eTnakRean. {t.footer.rights}
-            </p>
+            <div className="flex flex-col items-center gap-2 sm:items-start">
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                © {new Date().getFullYear()} eTnakRean. {t.footer.rights}
+              </p>
+              {/* Required reading for anyone paying money: kept in the bottom
+                  bar so they are reachable from every page. */}
+              <nav aria-label={t.footer.legal} className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+                {[
+                  { to: "/terms", label: t.footer.terms },
+                  { to: "/privacy", label: t.footer.privacy },
+                  { to: "/refund", label: t.footer.refund },
+                ].map(({ to, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    className="text-xs text-gray-500 transition-colors hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
 
             {/* Mirrored from NavBar so the toggles are reachable from the
                 bottom of long pages too. */}
