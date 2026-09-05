@@ -13,6 +13,13 @@
 
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
+    <!-- Installable app: manifest + iOS's own (non-standard) equivalents,
+         since Safari on iOS still doesn't read the manifest for these bits. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="eTnakRean" />
+
     <meta
       name="description"
       content="E-TnakRean is an online learning platform offering high-quality courses, expert instructors, and flexible learning."
