@@ -13,9 +13,17 @@ const router = Router();
 
 // Admin content uploads: video thumbnails, book covers, book PDFs. These can
 // be large, so this stays admin-only -- R2 storage isn't free.
+// memoryStorage means the whole file sits in RAM before it reaches R2, so
+// this limit is really "how much of the instance's memory may one request
+// claim". 500MB was well past what a small Render instance has, so a single
+// large upload could take the API down for everyone. 100MB comfortably covers
+// a book PDF or a video thumbnail; genuinely large video files belong on a
+// video host, not in this bucket.
+const ADMIN_UPLOAD_MAX_BYTES = 100 * 1024 * 1024;
+
 const adminUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 500 * 1024 * 1024 },
+  limits: { fileSize: ADMIN_UPLOAD_MAX_BYTES },
 });
 
 router.post(
