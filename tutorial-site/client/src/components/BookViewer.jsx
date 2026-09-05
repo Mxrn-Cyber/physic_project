@@ -6,6 +6,7 @@ import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { Lock, ShoppingCart, AlertTriangle } from "lucide-react";
 import { getAuthToken } from "../api/client.js";
+import { useLanguage } from "../context/LanguageContext.jsx";
 
 GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
 
@@ -18,6 +19,7 @@ GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
 // instead of showing the book. Rendering the pages ourselves with pdf.js
 // means the exact same code path runs everywhere.
 export default function BookViewer({ url, title, isPreview, onBuyClick }) {
+  const { t } = useLanguage();
   const containerRef = useRef(null);
   const [status, setStatus] = useState("loading"); // loading | ready | error
   const [errorMessage, setErrorMessage] = useState("");
@@ -110,7 +112,7 @@ export default function BookViewer({ url, title, isPreview, onBuyClick }) {
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-gray-100 px-4 text-center dark:bg-gray-800">
           <AlertTriangle className="h-6 w-6 text-gray-400" />
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Couldn't load this PDF. {errorMessage}
+            {t.player.pdfError} {errorMessage}
           </p>
         </div>
       )}
@@ -126,7 +128,7 @@ export default function BookViewer({ url, title, isPreview, onBuyClick }) {
         <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-2 bg-gradient-to-t from-gray-900/95 via-gray-900/80 to-transparent px-3 pb-3 pt-8 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4">
           <span className="flex items-center gap-1.5 text-xs font-medium text-white sm:text-sm">
             <Lock className="h-3.5 w-3.5 shrink-0" />
-            Preview only — buy to read the rest of the book.
+            {t.player.previewOnly}
           </span>
           <button
             type="button"
@@ -134,7 +136,7 @@ export default function BookViewer({ url, title, isPreview, onBuyClick }) {
             className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-red-700 active:scale-95 sm:text-sm"
           >
             <ShoppingCart className="h-3.5 w-3.5" />
-            Buy now
+            {t.player.buyNow}
           </button>
         </div>
       )}

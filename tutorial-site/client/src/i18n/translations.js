@@ -187,6 +187,23 @@ export const translations = {
       seeMore: "See more",
       loadError: "Couldn't load that right now. Please try again later.",
     },
+    payment: {
+      settingUp: "Setting up payment…",
+      scanInstructions:
+        "Scan this KHQR code with ABA Mobile or any participating bank app to complete your purchase.",
+      qrAlt: "Scan with your banking app (KHQR)",
+      qrUnavailable: "QR code unavailable — check the ABA PayWay configuration.",
+      waiting: "Waiting for payment…",
+      failed: "Payment failed or was cancelled. Please try again.",
+      close: "Close",
+    },
+    player: {
+      previewEnded: "Preview ended.",
+      buyToKeepWatching: "Buy to keep watching",
+      previewOnly: "Preview only — buy to read the rest of the book.",
+      buyNow: "Buy now",
+      pdfError: "Couldn't load this PDF.",
+    },
     notFound: {
       title: "Page not found",
       body: "The page you are looking for does not exist, or it has moved.",
@@ -390,6 +407,23 @@ export const translations = {
       loading: "កំពុងផ្ទុក…",
       seeMore: "មើលបន្ថែម",
       loadError: "មិនអាចផ្ទុកបានទេឥឡូវនេះ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។",
+    },
+    payment: {
+      settingUp: "កំពុងរៀបចំការទូទាត់…",
+      scanInstructions:
+        "ស្កេនកូដ KHQR នេះដោយប្រើ ABA Mobile ឬកម្មវិធីធនាគារផ្សេងទៀត ដើម្បីបញ្ចប់ការទិញ។",
+      qrAlt: "ស្កេនដោយប្រើកម្មវិធីធនាគាររបស់អ្នក (KHQR)",
+      qrUnavailable: "មិនមានកូដ QR ទេ — សូមពិនិត្យការកំណត់ ABA PayWay។",
+      waiting: "កំពុងរង់ចាំការទូទាត់…",
+      failed: "ការទូទាត់មិនបានសម្រេច ឬត្រូវបានលុបចោល។ សូមព្យាយាមម្តងទៀត។",
+      close: "បិទ",
+    },
+    player: {
+      previewEnded: "ការមើលសាកល្បងបានបញ្ចប់។",
+      buyToKeepWatching: "ទិញដើម្បីមើលបន្ត",
+      previewOnly: "មើលសាកល្បងតែប៉ុណ្ណោះ — ទិញដើម្បីអានសៀវភៅទាំងមូល។",
+      buyNow: "ទិញឥឡូវនេះ",
+      pdfError: "មិនអាចផ្ទុកឯកសារ PDF នេះបានទេ។",
     },
     notFound: {
       title: "រកមិនឃើញទំព័រ",

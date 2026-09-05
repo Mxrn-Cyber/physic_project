@@ -168,7 +168,7 @@ export default function App() {
                 <Suspense
                   fallback={
                     <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">
-                      Loading…
+                      {t.common.loading}
                     </div>
                   }
                 >
@@ -197,7 +197,7 @@ export default function App() {
                   <Suspense
                     fallback={
                       <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">
-                        Loading…
+                        {t.common.loading}
                       </div>
                     }
                   >
