@@ -5,10 +5,6 @@
 ### *Making Physics Learning Interactive, Modern, and Accessible*
 
 <p align="center">
-  <img src="./public/logo.png" alt="Physics Project Logo" width="150"/>
-</p>
-
-<p align="center">
   <strong>An interactive web platform designed to simplify physics concepts through engaging lessons, visual learning, and modern web technologies.</strong>
 </p>
 
@@ -54,16 +50,6 @@ The platform is designed with usability in mind, providing an engaging interface
 - 🔐 User Authentication
 - 📊 Student Dashboard
 - 🎯 Easy Navigation
-
----
-
-# 🖼️ Preview
-
-> Add screenshots inside the **docs/** folder.
-
-| Home | Learning |
-|------|----------|
-| ![](docs/home.png) | ![](docs/course.png) |
 
 ---
 
