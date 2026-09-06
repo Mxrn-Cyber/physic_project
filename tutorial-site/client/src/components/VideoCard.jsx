@@ -5,6 +5,7 @@ import { badgeLabel, BADGE_STYLES } from "./badges.js";
 import { api } from "../api/client.js";
 import { toVideoEmbedUrl } from "../utils/media.js";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import { gradeLabel } from "../utils/grades.js";
 
 function toHoverEmbedUrl(embedUrl) {
   try {
@@ -113,6 +114,19 @@ export default function VideoCard({ video }) {
           </div>
         )}
       </div>
+
+      {(video.grades || []).length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {video.grades.map((g) => (
+            <span
+              key={g}
+              className="rounded-full border border-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600 dark:border-gray-700 dark:text-gray-300"
+            >
+              {gradeLabel(g, t)}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="mt-2 flex items-baseline gap-2">
         {video.isFree ? (

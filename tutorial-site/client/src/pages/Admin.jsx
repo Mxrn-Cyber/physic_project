@@ -15,6 +15,7 @@ import {
 import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../api/client.js";
 import FileOrUrlField from "../components/FileOrUrlField.jsx";
+import { GRADES, matchesQuery } from "../utils/grades.js";
 
 /* ------------------------------------------------------------------ *
  * Shared styling
@@ -368,6 +369,7 @@ function UsersSection({ onCount }) {
 const emptyVideo = {
   title: "",
   description: "",
+  grades: [],
   order: 0,
   durationSeconds: 0,
   videoUrl: "",
@@ -384,6 +386,7 @@ const emptyVideo = {
 const emptyBook = {
   title: "",
   description: "",
+  grades: [],
   order: 0,
   pageCount: 0,
   coverImageUrl: "",
@@ -522,6 +525,47 @@ function AccessFields({ form, setForm, previewField = "previewSeconds" }) {
   );
 }
 
+function GradeField({ form, setForm, hint }) {
+  const selected = form.grades || [];
+
+  const toggle = (grade) => {
+    const next = selected.includes(grade)
+      ? selected.filter((g) => g !== grade)
+      : [...selected, grade];
+    setForm({ ...form, grades: GRADES.filter((g) => next.includes(g)) });
+  };
+
+  return (
+    <div className="sm:col-span-2">
+      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Grade</label>
+      <div className="mt-1.5 flex flex-wrap gap-2">
+        {GRADES.map((grade) => {
+          const active = selected.includes(grade);
+          return (
+            <label
+              key={grade}
+              className={`cursor-pointer rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+                active
+                  ? "border-red-600 bg-red-600 text-white shadow-sm shadow-red-600/20"
+                  : "border-gray-300 text-gray-600 hover:border-red-300 hover:text-red-700 dark:border-gray-700 dark:text-gray-300 dark:hover:border-red-500 dark:hover:text-red-300"
+              }`}
+            >
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={active}
+                onChange={() => toggle(grade)}
+              />
+              Grade {grade}
+            </label>
+          );
+        })}
+      </div>
+      <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{hint}</p>
+    </div>
+  );
+}
+
 function LabeledNumberField({ label, value, onChange }) {
   return (
     <div>
@@ -608,6 +652,12 @@ function VideoForm({ initial, onSave, onCancel }) {
           rows={2}
         />
       </div>
+
+      <GradeField
+        form={form}
+        setForm={setForm}
+        hint="Tick every grade this video suits. Students use these to filter the video list. Leave all unticked if it is not tied to a grade."
+      />
 
       <AccessFields form={form} setForm={setForm} />
 
@@ -743,6 +793,12 @@ function BookForm({ initial, onSave, onCancel }) {
         onChange={(v) => setForm({ ...form, order: v })}
       />
 
+      <GradeField
+        form={form}
+        setForm={setForm}
+        hint="Tick every grade this book suits. Students use these to filter the book list. Leave all unticked if it is not tied to a grade."
+      />
+
       <AccessFields form={form} setForm={setForm} previewField="previewPages" />
 
       <p className="rounded-xl bg-white/70 p-3 text-xs text-gray-500 dark:bg-gray-900/50 dark:text-gray-400 sm:col-span-2">
@@ -779,6 +835,9 @@ function ItemRow({ item, kindLabel, media, meta, onEdit, onDelete }) {
           <Pill tone={priceTone(item)}>{priceLabel(item)}</Pill>
           {item.isTopSeller && <Pill tone="red">top seller</Pill>}
           {item.isMedium && <Pill tone="amber">popular</Pill>}
+          {(item.grades || []).map((g) => (
+            <Pill key={g}>Grade {g}</Pill>
+          ))}
           {meta}
         </div>
       </div>
@@ -860,11 +919,7 @@ function VideosSection({ onCount }) {
     }
   };
 
-  const shown = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return videos;
-    return videos.filter((v) => (v.title || "").toLowerCase().includes(q));
-  }, [videos, query]);
+  const shown = useMemo(() => videos.filter((v) => matchesQuery(v, query)), [videos, query]);
 
   return (
     <SectionCard
@@ -875,7 +930,7 @@ function VideosSection({ onCount }) {
       actionLabel="Add video"
       onAction={() => setAdding(true)}
       actionHidden={adding}
-      search={videos.length > 0 && <SearchBox value={query} onChange={setQuery} placeholder="Search videos by title…" />}
+      search={videos.length > 0 && <SearchBox value={query} onChange={setQuery} placeholder="Search videos by title, description, or grade…" />}
     >
       <ErrorNote>{error}</ErrorNote>
 
@@ -969,11 +1024,7 @@ function BooksSection({ onCount }) {
     }
   };
 
-  const shown = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return books;
-    return books.filter((b) => (b.title || "").toLowerCase().includes(q));
-  }, [books, query]);
+  const shown = useMemo(() => books.filter((b) => matchesQuery(b, query)), [books, query]);
 
   return (
     <SectionCard
@@ -984,7 +1035,7 @@ function BooksSection({ onCount }) {
       actionLabel="Add book"
       onAction={() => setAdding(true)}
       actionHidden={adding}
-      search={books.length > 0 && <SearchBox value={query} onChange={setQuery} placeholder="Search books by title…" />}
+      search={books.length > 0 && <SearchBox value={query} onChange={setQuery} placeholder="Search books by title, description, or grade…" />}
     >
       <ErrorNote>{error}</ErrorNote>
 

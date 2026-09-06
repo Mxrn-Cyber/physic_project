@@ -16,6 +16,7 @@ const VIDEO_WRITABLE = [
   "course",
   "title",
   "description",
+  "grades",
   "order",
   "durationSeconds",
   "videoUrl",
@@ -29,10 +30,19 @@ const VIDEO_WRITABLE = [
   "discountPercent",
 ];
 
+const GRADES = ["10", "11", "12"];
+
+function normalizeGrades(value) {
+  const list = Array.isArray(value) ? value : [value];
+  const asStrings = list.map((v) => String(v));
+  return GRADES.filter((g) => asStrings.includes(g));
+}
+
 function pickWritable(body, allowed) {
   const out = {};
   for (const key of allowed) {
-    if (body?.[key] !== undefined) out[key] = body[key];
+    if (body?.[key] === undefined) continue;
+    out[key] = key === "grades" ? normalizeGrades(body[key]) : body[key];
   }
   return out;
 }
@@ -59,6 +69,7 @@ function toPublic(v, unlocked, completed) {
     course: v.course,
     title: v.title,
     description: v.description,
+    grades: v.grades || [],
     order: v.order,
     durationSeconds: v.durationSeconds,
     isFree: v.isFree,
