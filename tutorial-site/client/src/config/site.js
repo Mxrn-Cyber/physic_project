@@ -13,10 +13,11 @@ export const SITE_URL = (
 
 export const SITE_NAME = "E-TnakRean";
 
-// 1200x630 is the size Facebook, Telegram and Twitter crop to. logo.png is
-// square (512x512), which those scrapers letterbox -- fine for now, but a
-// proper 1200x630 banner at /og-image.png would look better in a shared link.
-export const SITE_IMAGE = "/logo.png";
+// The picture Facebook, Telegram and Messenger show on a shared link.
+// 1200x630 is the shape they crop to -- the square logo.png used to be
+// letterboxed into a small thumbnail here, which made every shared link
+// look like an afterthought. public/og-image.png is built for that shape.
+export const SITE_IMAGE = "/og-image.png";
 
 // Every public contact detail for the site lives here, in one place.
 //
