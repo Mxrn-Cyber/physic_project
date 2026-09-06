@@ -90,7 +90,7 @@ export default function seoAssets() {
 
     config(_config, { mode }) {
       const env = loadEnv(mode, process.cwd(), "");
-      siteUrl = (env.VITE_SITE_URL || "https://REPLACE-WITH-YOUR-DOMAIN").replace(/\/+$/, "");
+      siteUrl = (env.VITE_SITE_URL || "https://e-tnakrean.laothomorn.workers.dev").replace(/\/+$/, "");
       apiUrl = (env.VITE_API_URL || "").replace(/\/+$/, "");
     },
 
@@ -102,10 +102,11 @@ export default function seoAssets() {
     },
 
     async generateBundle() {
-      if (siteUrl.includes("REPLACE-WITH-YOUR-DOMAIN")) {
+      if (siteUrl.includes(".workers.dev")) {
         this.warn(
-          "SEO: no real domain set. Put your domain in VITE_SITE_URL (or src/config/site.js) " +
-            "-- until then the canonical URLs, sitemap and link previews all point at a placeholder."
+          `SEO: building for ${siteUrl}. A *.workers.dev subdomain is shared with every other ` +
+            "Cloudflare Worker, so Google will not rank it like a domain you own -- set VITE_SITE_URL " +
+            "to your own domain once you have one and everything below follows automatically."
         );
       }
 

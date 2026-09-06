@@ -8,7 +8,7 @@
 // It can also be overridden at build time with VITE_SITE_URL, which is what
 // the Cloudflare build environment should set once the real domain is live.
 export const SITE_URL = (
-  import.meta.env?.VITE_SITE_URL || "https://REPLACE-WITH-YOUR-DOMAIN"
+  import.meta.env?.VITE_SITE_URL || "https://e-tnakrean.laothomorn.workers.dev"
 ).replace(/\/+$/, "");
 
 export const SITE_NAME = "E-TnakRean";
