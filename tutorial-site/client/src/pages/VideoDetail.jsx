@@ -7,11 +7,13 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 import VideoPlayer from "../components/VideoPlayer.jsx";
 import PaymentModal from "../components/PaymentModal.jsx";
 import { badgeLabel, BADGE_STYLES } from "../components/badges.js";
+import Seo, { fill } from "../components/Seo.jsx";
+import { videoSchema, breadcrumbSchema } from "../utils/schema.js";
 
 export default function VideoDetail() {
   const { id } = useParams();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const navigate = useNavigate();
 
   const [video, setVideo] = useState(null);
@@ -95,8 +97,28 @@ export default function VideoDetail() {
       .finally(() => setMarkingComplete(false));
   }
 
+  const seoDescription =
+    video.description || fill(t.seo.videoDescription, { title: video.title });
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
+      <Seo
+        title={video.title}
+        description={seoDescription}
+        image={video.thumbnailUrl}
+        type="video.other"
+        jsonLd={[
+          videoSchema(video, { description: seoDescription, lang }),
+          breadcrumbSchema(
+            [
+              { name: t.nav.home, path: "/" },
+              { name: t.seo.videos.title, path: "/videos" },
+              { name: video.title, path: `/videos/${video._id}` },
+            ],
+            lang
+          ),
+        ]}
+      />
       <Link
         to="/videos"
         className="inline-flex items-center gap-1 text-sm font-medium text-red-600 hover:underline dark:text-red-400"

@@ -32,10 +32,11 @@
          renders as a bare URL with no title, description or picture -- which
          matters a lot when those apps are the main way people find you.
 
-         TODO before launch: replace the URL below with your real domain, and
-         make sure /logo.png (1200x630 works best) is the image you want to
-         appear in the preview card. og:url and og:image must be ABSOLUTE
-         URLs -- relative paths are ignored by every scraper. -->
+         The domain below is rewritten at build time from VITE_SITE_URL
+         (see vite-plugin-seo.js), so it is defined in one place only.
+         og:url and og:image must be ABSOLUTE URLs -- relative paths are
+         ignored by every scraper. /logo.png is square; a 1200x630 banner
+         would fill the preview card better. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="E-TnakRean" />
     <meta property="og:title" content="E-TnakRean | Learn Anytime, Anywhere" />

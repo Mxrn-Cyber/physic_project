@@ -81,6 +81,40 @@ VITE_API_URL=https://reanphysics-api.onrender.com/api
 (use your actual Render URL + `/api`), then trigger a rebuild/redeploy of
 the frontend so it picks it up.
 
+## 4b. Tell the site its own domain (needed for Google)
+
+Add a second build environment variable in Cloudflare, alongside
+`VITE_API_URL`:
+
+```
+VITE_SITE_URL=https://your-real-domain.com
+```
+
+No trailing slash. Everything Google reads is built from this one value:
+the `<link rel="canonical">` on every page, the `hreflang` pairs that
+connect each English page to its Khmer twin, `sitemap.xml`, `robots.txt`,
+and the absolute `og:image` / `og:url` that Facebook, Telegram and
+Messenger use for link previews. Leave it unset and the build still
+succeeds, but it prints a warning and every one of those URLs points at a
+placeholder, which is worse than having none.
+
+`sitemap.xml` and `robots.txt` are generated during `npm run build`
+(`client/vite-plugin-seo.js`). The sitemap lists every fixed page plus
+every video and book, in both languages -- the build asks the API for the
+catalogue, so **the API has to be awake when you build** or you get a
+sitemap with only the fixed pages and a warning saying so. Because it is
+built rather than live, publishing a new video means redeploying the
+frontend for it to appear in the sitemap.
+
+Once the site is live on the real domain:
+
+1. Add the site in [Google Search Console](https://search.google.com/search-console)
+   and verify it (DNS TXT record is the easiest with Cloudflare).
+2. Submit `https://your-real-domain.com/sitemap.xml` there.
+3. Paste a video page and a book page into the
+   [Rich Results Test](https://search.google.com/test/rich-results) to
+   confirm the VideoObject / Book data is being read.
+
 ## 5. Double-check CORS
 
 `CLIENT_URL` on Render must exactly match the frontend's real deployed

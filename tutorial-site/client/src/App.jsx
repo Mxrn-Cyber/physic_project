@@ -4,6 +4,7 @@ import { BookOpen, Mail, Phone, Send, Facebook, Sun, Moon } from "lucide-react";
 import NavBar from "./components/NavBar.jsx";
 import BackgroundDecor from "./components/BackgroundDecor.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import RouteSeo from "./components/RouteSeo.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import { useLanguage } from "./context/LanguageContext.jsx";
@@ -158,6 +159,7 @@ export default function App() {
             commit();
           }}
         >
+          <RouteSeo />
           <Routes location={displayLocation}>
             <Route path="/" element={<Home />} />
             <Route path="/videos" element={<Videos />} />

@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { FileText, ShieldCheck, Undo2, ArrowUp, CalendarDays } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import { legal } from "../i18n/legal.js";
+import Seo, { clamp } from "../components/Seo.jsx";
+import { breadcrumbSchema } from "../utils/schema.js";
 
 // One icon per document, reused for both the switcher and the page's own
 // header -- gives a reader a quick visual anchor for which of the three they
@@ -85,6 +87,18 @@ export default function Legal({ doc }) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+      <Seo
+        title={content.title}
+        description={clamp(content.intro)}
+        type="article"
+        jsonLd={breadcrumbSchema(
+          [
+            { name: t.nav.home, path: "/" },
+            { name: content.title, path: DOC_META[doc].path },
+          ],
+          lang
+        )}
+      />
       {/* Switcher: reads which of the three you're on and lets you jump to
           the others without going back to the footer. */}
       <nav aria-label={t.footer.legal} className="flex flex-wrap gap-2">

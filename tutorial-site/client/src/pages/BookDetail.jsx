@@ -14,11 +14,13 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 import BookViewer from "../components/BookViewer.jsx";
 import PaymentModal from "../components/PaymentModal.jsx";
 import { badgeLabel, BADGE_STYLES } from "../components/badges.js";
+import Seo, { fill } from "../components/Seo.jsx";
+import { bookSchema, breadcrumbSchema } from "../utils/schema.js";
 
 export default function BookDetail() {
   const { id } = useParams();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const navigate = useNavigate();
 
   const [book, setBook] = useState(null);
@@ -105,8 +107,28 @@ export default function BookDetail() {
       .finally(() => setMarkingComplete(false));
   }
 
+  const seoDescription =
+    book.description || fill(t.seo.bookDescription, { title: book.title });
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
+      <Seo
+        title={book.title}
+        description={seoDescription}
+        image={book.coverImageUrl}
+        type="book"
+        jsonLd={[
+          bookSchema(book, { description: seoDescription, lang }),
+          breadcrumbSchema(
+            [
+              { name: t.nav.home, path: "/" },
+              { name: t.seo.books.title, path: "/books" },
+              { name: book.title, path: `/books/${book._id}` },
+            ],
+            lang
+          ),
+        ]}
+      />
       <Link
         to="/books"
         className="inline-flex items-center gap-1 text-sm font-medium text-red-600 hover:underline dark:text-red-400"

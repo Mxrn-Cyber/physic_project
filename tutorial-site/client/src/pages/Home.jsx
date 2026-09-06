@@ -15,6 +15,8 @@ import { api } from "../api/client.js";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import VideoCard from "../components/VideoCard.jsx";
 import BookCard from "../components/BookCard.jsx";
+import Seo from "../components/Seo.jsx";
+import { organizationSchema, webSiteSchema } from "../utils/schema.js";
 
 // TODO (important): these three images are hotlinked from other people's
 // servers -- two are Google thumbnail URLs. They can vanish without warning,
@@ -162,7 +164,7 @@ function StatsStrip({ videoCount, bookCount, freeCount }) {
 }
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [videos, setVideos] = useState([]);
   const [books, setBooks] = useState([]);
   const [status, setStatus] = useState("loading");
@@ -192,6 +194,14 @@ export default function Home() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-16 text-center">
+      <Seo
+        title={t.seo.home.title}
+        description={t.seo.home.description}
+        jsonLd={[
+          organizationSchema({ description: t.seo.organizationDescription }),
+          webSiteSchema({ lang }),
+        ]}
+      />
       <div className="mb-12">
         <Slideshow />
       </div>

@@ -4,6 +4,8 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import BookCard from "../components/BookCard.jsx";
 import Pagination from "../components/Pagination.jsx";
+import Seo from "../components/Seo.jsx";
+import { itemListSchema, breadcrumbSchema } from "../utils/schema.js";
 
 // Matches the grid below (3 columns at lg), so a full page is exactly 3 neat
 // rows instead of ending mid-row.
@@ -11,7 +13,7 @@ const PAGE_SIZE = 9;
 
 export default function Books() {
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [books, setBooks] = useState([]);
   const [status, setStatus] = useState("loading");
   const [page, setPage] = useState(1);
@@ -39,6 +41,27 @@ export default function Books() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
+      <Seo
+        title={t.seo.books.title}
+        description={t.seo.books.description}
+        jsonLd={[
+          breadcrumbSchema(
+            [
+              { name: t.nav.home, path: "/" },
+              { name: t.seo.books.title, path: "/books" },
+            ],
+            lang
+          ),
+          books.length
+            ? itemListSchema({
+                name: t.seo.bookListName,
+                items: books,
+                basePath: "/books",
+                lang,
+              })
+            : null,
+        ].filter(Boolean)}
+      />
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.books.title}</h1>
       <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
         {user ? t.books.loggedInSubtitle : t.books.loggedOutSubtitle}
