@@ -5,7 +5,8 @@ export const translations = {
     // pages so both languages stay side by side and can't drift apart.
     seo: {
       home: {
-        title: "Video lessons & PDF guides, one at a time",
+        title:
+          "Video lessons and PDF guides, where develop by Khmer Lecturers, Khmer Documents, and Khmer Teachers",
         description:
           "Short, practical video tutorials paired with printable PDF guides, in Khmer and English. Buy only the lesson you want -- no subscription.",
       },
@@ -26,7 +27,8 @@ export const translations = {
       },
       login: {
         title: "Log in",
-        description: "Log in to eTnakRean to watch the videos and read the PDF guides you have bought.",
+        description:
+          "Log in to eTnakRean to watch the videos and read the PDF guides you have bought.",
       },
       register: {
         title: "Create an account",
@@ -88,7 +90,8 @@ export const translations = {
       featurePdfTitle: "Companion PDFs",
       featurePdfBody: "Cheat sheets and worksheets for every lesson.",
       featureProgressTitle: "Track your progress",
-      featureProgressBody: "See what you've completed and pick up where you left off.",
+      featureProgressBody:
+        "See what you've completed and pick up where you left off.",
       browseSectionTitle: "Browse videos & books",
       filterAll: "All",
       filterVideos: "Videos",
@@ -99,8 +102,10 @@ export const translations = {
     },
     videos: {
       title: "Videos",
-      loggedInSubtitle: "Free previews are unlocked. Buy individual videos to unlock the rest.",
-      loggedOutSubtitle: "Browse free previews, or log in to buy individual videos.",
+      loggedInSubtitle:
+        "Free previews are unlocked. Buy individual videos to unlock the rest.",
+      loggedOutSubtitle:
+        "Browse free previews, or log in to buy individual videos.",
       buy: "Buy for",
       loginToBuy: "Log in to buy",
       backToList: "All videos",
@@ -112,8 +117,10 @@ export const translations = {
     },
     books: {
       title: "Books (PDFs)",
-      loggedInSubtitle: "Free previews are unlocked. Buy individual books to unlock the rest.",
-      loggedOutSubtitle: "Browse free previews, or log in to buy individual books.",
+      loggedInSubtitle:
+        "Free previews are unlocked. Buy individual books to unlock the rest.",
+      loggedOutSubtitle:
+        "Browse free previews, or log in to buy individual books.",
       buy: "Buy for",
       loginToBuy: "Log in to buy",
       backToList: "All books",
@@ -125,7 +132,8 @@ export const translations = {
     },
     courses: {
       title: "Course Library",
-      subtitle: "Free preview lessons are unlocked. Buy individual videos or books to unlock the rest.",
+      subtitle:
+        "Free preview lessons are unlocked. Buy individual videos or books to unlock the rest.",
       startCourse: "Start course",
       previewCourse: "Preview / browse",
       videosLabel: "videos",
@@ -164,13 +172,15 @@ export const translations = {
       loginLink: "Log in",
 
       forgotTitle: "Forgot password",
-      forgotSubtitle: "Enter your email and we'll send you a 6-digit code to reset your password.",
+      forgotSubtitle:
+        "Enter your email and we'll send you a 6-digit code to reset your password.",
       sendCode: "Send code",
       sending: "Sending…",
       backToLogin: "Back to log in",
 
       resetTitle: "Reset password",
-      resetNoEmailMessage: "We don't know which account to reset. Start again from",
+      resetNoEmailMessage:
+        "We don't know which account to reset. Start again from",
       forgotPasswordLink: "forgot password",
       resetSubtitlePrefix: "Enter the 6-digit code we sent to",
       resetSubtitleSuffix: ", then choose a new password.",
@@ -189,7 +199,8 @@ export const translations = {
       verifySubtitleSuffix: ". Enter it below to continue.",
       verifyButton: "Verify",
       verifying: "Verifying…",
-      verifyNoEmailMessage: "We couldn't tell which account to verify. Start again from",
+      verifyNoEmailMessage:
+        "We couldn't tell which account to verify. Start again from",
       signUpLink: "sign up",
 
       resendCode: "Resend code",
@@ -207,11 +218,13 @@ export const translations = {
       browseVideos: "Browse videos",
       noBooksYet: "No purchased books yet.",
       browseBooks: "Browse books",
-      loadError: "Couldn't load your dashboard right now. Please try again later.",
+      loadError:
+        "Couldn't load your dashboard right now. Please try again later.",
     },
     profile: {
       title: "Your Profile",
-      subtitle: "Update your contact details. Email and password are managed elsewhere.",
+      subtitle:
+        "Update your contact details. Email and password are managed elsewhere.",
       adminBadge: "Admin",
       verifiedBadge: "Verified",
       googleBadge: "Google account",
@@ -219,7 +232,8 @@ export const translations = {
       booksOwned: "Books",
       viewLibrary: "View my library",
       detailsHeading: "Your details",
-      detailsSubtitle: "These are used for receipts and for getting in touch about your purchases.",
+      detailsSubtitle:
+        "These are used for receipts and for getting in touch about your purchases.",
       emailLabel: "Email",
       emailLocked: "Your email is your sign-in name and can't be changed here.",
       nameLabel: "Name",
@@ -270,14 +284,28 @@ export const translations = {
       scanInstructions:
         "Scan this KHQR code with ABA Mobile or any participating bank app to complete your purchase.",
       qrAlt: "Scan with your banking app (KHQR)",
-      qrUnavailable: "QR code unavailable — check the ABA PayWay configuration.",
+      qrUnavailable:
+        "QR code unavailable — check the ABA PayWay configuration.",
       waiting: "Waiting for payment…",
       failed: "Payment failed or was cancelled. Please try again.",
       close: "Close",
-      slowNotice: "Taking longer than expected? If you've already paid, check again below.",
+      slowNotice:
+        "Taking longer than expected? If you've already paid, check again below.",
       checkAgain: "Check again",
       checking: "Checking…",
       cancelAndGoBack: "Cancel and go back",
+    },
+    reader: {
+      page: "Page",
+      goToPage: "Go to page",
+      previousPage: "Previous page",
+      nextPage: "Next page",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      fitWidth: "Fit to width",
+      fullscreen: "Read full screen",
+      exitFullscreen: "Close full screen",
+      download: "Download PDF",
     },
     player: {
       previewEnded: "Preview ended.",
@@ -335,7 +363,8 @@ export const translations = {
       },
       login: {
         title: "ចូលគណនី",
-        description: "ចូលគណនី eTnakRean ដើម្បីមើលវីដេអូ និងអានសៀវភៅ PDF ដែលអ្នកបានទិញ។",
+        description:
+          "ចូលគណនី eTnakRean ដើម្បីមើលវីដេអូ និងអានសៀវភៅ PDF ដែលអ្នកបានទិញ។",
       },
       register: {
         title: "បង្កើតគណនី",
@@ -348,7 +377,8 @@ export const translations = {
       },
       dashboard: {
         title: "បណ្ណាល័យរបស់អ្នក",
-        description: "អ្វីៗទាំងអស់ដែលអ្នកបានទិញនៅលើ eTnakRean ក្នុងកន្លែងតែមួយ។",
+        description:
+          "អ្វីៗទាំងអស់ដែលអ្នកបានទិញនៅលើ eTnakRean ក្នុងកន្លែងតែមួយ។",
       },
       profile: {
         title: "ប្រវត្តិរូបរបស់អ្នក",
@@ -408,7 +438,8 @@ export const translations = {
     },
     videos: {
       title: "វីដេអូ",
-      loggedInSubtitle: "ការមើលឥតគិតថ្លៃត្រូវបានបើក។ ទិញវីដេអូនីមួយៗដើម្បីបើកឲ្យអស់។",
+      loggedInSubtitle:
+        "ការមើលឥតគិតថ្លៃត្រូវបានបើក។ ទិញវីដេអូនីមួយៗដើម្បីបើកឲ្យអស់។",
       loggedOutSubtitle: "រកមើលការមើលឥតគិតថ្លៃ ឬចូលគណនីដើម្បីទិញវីដេអូនីមួយៗ។",
       buy: "ទិញក្នុងតម្លៃ",
       loginToBuy: "ចូលដើម្បីទិញ",
@@ -421,7 +452,8 @@ export const translations = {
     },
     books: {
       title: "សៀវភៅ (PDF)",
-      loggedInSubtitle: "ការមើលឥតគិតថ្លៃត្រូវបានបើក។ ទិញសៀវភៅនីមួយៗដើម្បីបើកឲ្យអស់។",
+      loggedInSubtitle:
+        "ការមើលឥតគិតថ្លៃត្រូវបានបើក។ ទិញសៀវភៅនីមួយៗដើម្បីបើកឲ្យអស់។",
       loggedOutSubtitle: "រកមើលការមើលឥតគិតថ្លៃ ឬចូលគណនីដើម្បីទិញសៀវភៅនីមួយៗ។",
       buy: "ទិញក្នុងតម្លៃ",
       loginToBuy: "ចូលដើម្បីទិញ",
@@ -434,7 +466,8 @@ export const translations = {
     },
     courses: {
       title: "បណ្ណាល័យវគ្គសិក្សា",
-      subtitle: "មេរៀនសាកល្បងឥតគិតថ្លៃត្រូវបានបើក។ ទិញវីដេអូ ឬសៀវភៅនីមួយៗដើម្បីបើកឲ្យអស់។",
+      subtitle:
+        "មេរៀនសាកល្បងឥតគិតថ្លៃត្រូវបានបើក។ ទិញវីដេអូ ឬសៀវភៅនីមួយៗដើម្បីបើកឲ្យអស់។",
       startCourse: "ចាប់ផ្តើមវគ្គសិក្សា",
       previewCourse: "សាកល្បង / រកមើល",
       videosLabel: "វីដេអូ",
@@ -473,13 +506,15 @@ export const translations = {
       loginLink: "ចូល",
 
       forgotTitle: "ភ្លេចពាក្យសម្ងាត់",
-      forgotSubtitle: "បញ្ចូលអ៊ីមែលរបស់អ្នក ហើយយើងនឹងផ្ញើលេខកូដ ៦ខ្ទង់ដើម្បីកំណត់ពាក្យសម្ងាត់ថ្មី។",
+      forgotSubtitle:
+        "បញ្ចូលអ៊ីមែលរបស់អ្នក ហើយយើងនឹងផ្ញើលេខកូដ ៦ខ្ទង់ដើម្បីកំណត់ពាក្យសម្ងាត់ថ្មី។",
       sendCode: "ផ្ញើលេខកូដ",
       sending: "កំពុងផ្ញើ…",
       backToLogin: "ត្រឡប់ទៅចូលគណនី",
 
       resetTitle: "កំណត់ពាក្យសម្ងាត់ថ្មី",
-      resetNoEmailMessage: "យើងមិនដឹងគណនីមួយណាត្រូវកំណត់ឡើងវិញទេ។ ចាប់ផ្តើមម្តងទៀតពី",
+      resetNoEmailMessage:
+        "យើងមិនដឹងគណនីមួយណាត្រូវកំណត់ឡើងវិញទេ។ ចាប់ផ្តើមម្តងទៀតពី",
       forgotPasswordLink: "ភ្លេចពាក្យសម្ងាត់",
       resetSubtitlePrefix: "បញ្ចូលលេខកូដ ៦ខ្ទង់ដែលយើងបានផ្ញើទៅ",
       resetSubtitleSuffix: " បន្ទាប់មកជ្រើសរើសពាក្យសម្ងាត់ថ្មី។",
@@ -498,7 +533,8 @@ export const translations = {
       verifySubtitleSuffix: "។ បញ្ចូលវាខាងក្រោមដើម្បីបន្ត។",
       verifyButton: "ផ្ទៀងផ្ទាត់",
       verifying: "កំពុងផ្ទៀងផ្ទាត់…",
-      verifyNoEmailMessage: "យើងមិនអាចដឹងថាគណនីមួយណាត្រូវផ្ទៀងផ្ទាត់ទេ។ ចាប់ផ្តើមម្តងទៀតពី",
+      verifyNoEmailMessage:
+        "យើងមិនអាចដឹងថាគណនីមួយណាត្រូវផ្ទៀងផ្ទាត់ទេ។ ចាប់ផ្តើមម្តងទៀតពី",
       signUpLink: "ចុះឈ្មោះ",
 
       resendCode: "ផ្ញើលេខកូដម្តងទៀត",
@@ -516,11 +552,13 @@ export const translations = {
       browseVideos: "រកមើលវីដេអូ",
       noBooksYet: "មិនទាន់មានសៀវភៅដែលបានទិញនៅឡើយទេ។",
       browseBooks: "រកមើលសៀវភៅ",
-      loadError: "មិនអាចផ្ទុកផ្ទាំងគ្រប់គ្រងរបស់អ្នកបានទេ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។",
+      loadError:
+        "មិនអាចផ្ទុកផ្ទាំងគ្រប់គ្រងរបស់អ្នកបានទេ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។",
     },
     profile: {
       title: "ប្រវត្តិរូបរបស់អ្នក",
-      subtitle: "កែប្រែព័ត៌មានទំនាក់ទំនងរបស់អ្នក។ អ៊ីមែល និងពាក្យសម្ងាត់ត្រូវបានគ្រប់គ្រងដាច់ដោយឡែក។",
+      subtitle:
+        "កែប្រែព័ត៌មានទំនាក់ទំនងរបស់អ្នក។ អ៊ីមែល និងពាក្យសម្ងាត់ត្រូវបានគ្រប់គ្រងដាច់ដោយឡែក។",
       adminBadge: "អ្នកគ្រប់គ្រង",
       verifiedBadge: "បានផ្ទៀងផ្ទាត់",
       googleBadge: "គណនី Google",
@@ -528,9 +566,11 @@ export const translations = {
       booksOwned: "សៀវភៅ",
       viewLibrary: "មើលបណ្ណាល័យរបស់ខ្ញុំ",
       detailsHeading: "ព័ត៌មានរបស់អ្នក",
-      detailsSubtitle: "ព័ត៌មាននេះត្រូវបានប្រើសម្រាប់វិក្កយបត្រ និងការទាក់ទងអំពីការទិញរបស់អ្នក។",
+      detailsSubtitle:
+        "ព័ត៌មាននេះត្រូវបានប្រើសម្រាប់វិក្កយបត្រ និងការទាក់ទងអំពីការទិញរបស់អ្នក។",
       emailLabel: "អ៊ីមែល",
-      emailLocked: "អ៊ីមែលគឺជាឈ្មោះចូលគណនីរបស់អ្នក ហើយមិនអាចកែប្រែនៅទីនេះបានទេ។",
+      emailLocked:
+        "អ៊ីមែលគឺជាឈ្មោះចូលគណនីរបស់អ្នក ហើយមិនអាចកែប្រែនៅទីនេះបានទេ។",
       nameLabel: "ឈ្មោះ",
       photoLabel: "រូបភាពប្រវត្តិរូប",
       photoPlaceholder: "https://… (តំណភ្ជាប់ទៅរូបភាពរបស់អ្នក)",
@@ -583,10 +623,23 @@ export const translations = {
       waiting: "កំពុងរង់ចាំការទូទាត់…",
       failed: "ការទូទាត់មិនបានសម្រេច ឬត្រូវបានលុបចោល។ សូមព្យាយាមម្តងទៀត។",
       close: "បិទ",
-      slowNotice: "យូរជាងធម្មតាមែនទេ? ប្រសិនបើអ្នកបានបង់ប្រាក់រួចហើយ សូមពិនិត្យម្តងទៀតខាងក្រោម។",
+      slowNotice:
+        "យូរជាងធម្មតាមែនទេ? ប្រសិនបើអ្នកបានបង់ប្រាក់រួចហើយ សូមពិនិត្យម្តងទៀតខាងក្រោម។",
       checkAgain: "ពិនិត្យម្តងទៀត",
       checking: "កំពុងពិនិត្យ…",
       cancelAndGoBack: "បោះបង់ ហើយត្រឡប់ក្រោយ",
+    },
+    reader: {
+      page: "ទំព័រ",
+      goToPage: "ទៅកាន់ទំព័រ",
+      previousPage: "ទំព័រមុន",
+      nextPage: "ទំព័របន្ទាប់",
+      zoomIn: "ពង្រីក",
+      zoomOut: "បង្រួម",
+      fitWidth: "សមនឹងទទឹងអេក្រង់",
+      fullscreen: "អានពេញអេក្រង់",
+      exitFullscreen: "បិទរបៀបពេញអេក្រង់",
+      download: "ទាញយក PDF",
     },
     player: {
       previewEnded: "ការមើលសាកល្បងបានបញ្ចប់។",

@@ -137,13 +137,19 @@ export default function BookDetail() {
       </Link>
 
       <div className="mt-4 grid grid-cols-1 gap-6 sm:mt-6 sm:gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(260px,1fr)] lg:items-start">
-        <div className="aspect-[3/4] max-h-[80vh] w-full sm:max-h-[75vh] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)]">
+        {/* A fixed height rather than an aspect ratio: the reader now has a
+            toolbar of its own, and a 3:4 box left the page area shorter than
+            a single PDF page on most screens. */}
+        <div className="h-[70vh] w-full sm:h-[75vh] lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
           {canView ? (
             <BookViewer
               url={api.getBookPdfUrl(id)}
               title={book.title}
               isPreview={isPreview}
               onBuyClick={() => setBuying(true)}
+              // Buyers only. During a preview the file is a server-trimmed
+              // extract, so offering to save it would imply otherwise.
+              allowDownload={canView && !isPreview}
             />
           ) : viewError ? (
             <div

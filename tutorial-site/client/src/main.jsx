@@ -1,3 +1,6 @@
+// Must be first: patches JavaScript built-ins that pdf.js 6 assumes exist
+// but browsers older than roughly Chrome 142 do not have.
+import "./utils/polyfills.js";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";

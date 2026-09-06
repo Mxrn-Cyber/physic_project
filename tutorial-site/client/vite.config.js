@@ -12,6 +12,11 @@ export default defineConfig({
     entries: ["index.html"],
   },
 
+  // The pdf.js worker is an ES module and is wrapped by
+  // src/utils/pdf-worker.js, which cannot be emitted in Vite's default IIFE
+  // worker format.
+  worker: { format: "es" },
+
   server: {
     proxy: {
       "/api": "http://localhost:4000",
