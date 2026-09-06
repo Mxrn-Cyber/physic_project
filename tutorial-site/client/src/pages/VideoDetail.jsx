@@ -154,7 +154,12 @@ export default function VideoDetail() {
         )}
       </div>
 
-      <div className="mt-6 flex flex-wrap items-start justify-between gap-6">
+      {/* Stacked on phones, side by side from `sm` up. This used to be a
+          single flex-wrap row: with `flex-1 min-w-0` on the left and a
+          320px `shrink-0` card on the right, the row never wrapped -- the
+          title column just shrank to a sliver, clipping the heading and
+          breaking "19 min" across two lines. */}
+      <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           {badges.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
@@ -183,7 +188,7 @@ export default function VideoDetail() {
           ) : null}
         </div>
 
-        <div className="w-full max-w-xs shrink-0 rounded-xl border border-gray-200 p-5 dark:border-gray-700">
+        <div className="w-full rounded-xl border border-gray-200 p-5 dark:border-gray-700 sm:max-w-xs sm:shrink-0">
           <div className="flex items-baseline gap-2">
             {video.isFree ? (
               <span className="text-2xl font-bold text-green-700 dark:text-green-400">
