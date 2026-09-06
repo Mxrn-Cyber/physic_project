@@ -5,63 +5,63 @@ export const translations = {
     // pages so both languages stay side by side and can't drift apart.
     seo: {
       home: {
-        title: "Video lessons and PDF guides you can buy one at a time",
+        title: "Video lessons & PDF guides, one at a time",
         description:
           "Short, practical video tutorials paired with printable PDF guides, in Khmer and English. Buy only the lesson you want -- no subscription.",
       },
       videos: {
         title: "Video lessons",
         description:
-          "Browse every video lesson on E-TnakRean. Short, practical tutorials in Khmer and English, each sold on its own with its own price.",
+          "Browse every video lesson on eTnakRean. Short, practical tutorials in Khmer and English, each sold on its own with its own price.",
       },
       books: {
         title: "PDF books and guides",
         description:
-          "Browse every printable PDF guide and workbook on E-TnakRean. Preview the pages before you buy, then keep what you paid for.",
+          "Browse every printable PDF guide and workbook on eTnakRean. Preview the pages before you buy, then keep what you paid for.",
       },
       about: {
         title: "About us",
         description:
-          "E-TnakRean is a small library of practical video lessons and PDF books, sold one at a time so you only pay for what you want to learn.",
+          "eTnakRean is a small library of practical video lessons and PDF books, sold one at a time so you only pay for what you want to learn.",
       },
       login: {
         title: "Log in",
-        description: "Log in to E-TnakRean to watch the videos and read the PDF guides you have bought.",
+        description: "Log in to eTnakRean to watch the videos and read the PDF guides you have bought.",
       },
       register: {
         title: "Create an account",
         description:
-          "Create a free E-TnakRean account to buy video lessons and printable PDF guides one at a time and keep them for good.",
+          "Create a free eTnakRean account to buy video lessons and printable PDF guides one at a time and keep them for good.",
       },
       forgotPassword: {
         title: "Reset your password",
-        description: "Reset the password for your E-TnakRean account.",
+        description: "Reset the password for your eTnakRean account.",
       },
       dashboard: {
         title: "Your library",
-        description: "Everything you have bought on E-TnakRean, in one place.",
+        description: "Everything you have bought on eTnakRean, in one place.",
       },
       profile: {
         title: "Your profile",
-        description: "Update your E-TnakRean contact details.",
+        description: "Update your eTnakRean contact details.",
       },
       admin: {
         title: "Manage content",
-        description: "Admin area for E-TnakRean.",
+        description: "Admin area for eTnakRean.",
       },
       notFound: {
         title: "Page not found",
         description:
-          "That page does not exist. Browse the video lessons and printable PDF guides on E-TnakRean instead.",
+          "That page does not exist. Browse the video lessons and printable PDF guides on eTnakRean instead.",
       },
       videoDescription:
-        "Watch \u201c{title}\u201d on E-TnakRean -- a short, practical video lesson in Khmer and English.",
+        "Watch \u201c{title}\u201d on eTnakRean -- a short, practical video lesson in Khmer and English.",
       bookDescription:
-        "\u201c{title}\u201d -- a printable PDF guide from E-TnakRean. Preview the pages before you buy.",
+        "\u201c{title}\u201d -- a printable PDF guide from eTnakRean. Preview the pages before you buy.",
       videoListName: "Video lessons",
       bookListName: "PDF books and guides",
       organizationDescription:
-        "E-TnakRean sells short, practical video lessons and printable PDF guides in Khmer and English, one item at a time.",
+        "eTnakRean sells short, practical video lessons and printable PDF guides in Khmer and English, one item at a time.",
     },
     nav: {
       home: "Home",
@@ -234,7 +234,7 @@ export const translations = {
     },
     about: {
       title: "About Us",
-      lead: "E-TnakRean is a small library of practical video lessons and PDF books. Each item is sold on its own, so you only pay for what you actually want to learn.",
+      lead: "eTnakRean is a small library of practical video lessons and PDF books. Each item is sold on its own, so you only pay for what you actually want to learn.",
       sections: [
         {
           heading: "What we make",
@@ -314,63 +314,63 @@ export const translations = {
   km: {
     seo: {
       home: {
-        title: "មេរៀនវីដេអូ និងសៀវភៅ PDF ដែលអ្នកអាចទិញម្តងមួយៗ",
+        title: "មេរៀនវីដេអូ និងសៀវភៅ PDF ទិញម្តងមួយៗ",
         description:
           "វីដេអូមេរៀនខ្លីៗ និងជាក់ស្តែង ភ្ជាប់ជាមួយសៀវភៅណែនាំ PDF សម្រាប់បោះពុម្ព ជាភាសាខ្មែរ និងអង់គ្លេស។ ទិញតែមេរៀនដែលអ្នកចង់រៀន ដោយមិនចាំបាច់ជាវប្រចាំខែ។",
       },
       videos: {
         title: "មេរៀនវីដេអូ",
         description:
-          "រកមើលមេរៀនវីដេអូទាំងអស់នៅលើ E-TnakRean។ វីដេអូខ្លីៗ និងជាក់ស្តែង ជាភាសាខ្មែរ និងអង់គ្លេស ដែលនីមួយៗលក់ដោយឡែក និងមានតម្លៃផ្ទាល់ខ្លួន។",
+          "រកមើលមេរៀនវីដេអូទាំងអស់នៅលើ eTnakRean។ វីដេអូខ្លីៗ និងជាក់ស្តែង ជាភាសាខ្មែរ និងអង់គ្លេស ដែលនីមួយៗលក់ដោយឡែក និងមានតម្លៃផ្ទាល់ខ្លួន។",
       },
       books: {
         title: "សៀវភៅ និងឯកសារណែនាំ PDF",
         description:
-          "រកមើលសៀវភៅណែនាំ PDF ទាំងអស់នៅលើ E-TnakRean។ មើលសាកល្បងទំព័រមុនពេលទិញ រួចរក្សាទុកអ្វីដែលអ្នកបានបង់ថ្លៃ។",
+          "រកមើលសៀវភៅណែនាំ PDF ទាំងអស់នៅលើ eTnakRean។ មើលសាកល្បងទំព័រមុនពេលទិញ រួចរក្សាទុកអ្វីដែលអ្នកបានបង់ថ្លៃ។",
       },
       about: {
         title: "អំពីយើង",
         description:
-          "E-TnakRean គឺជាបណ្ណាល័យតូចមួយដែលមានវីដេអូមេរៀន និងសៀវភៅ PDF ជាក់ស្តែង លក់ម្តងមួយៗ ដូច្នេះអ្នកបង់ថ្លៃតែសម្រាប់អ្វីដែលអ្នកចង់រៀន។",
+          "eTnakRean គឺជាបណ្ណាល័យតូចមួយដែលមានវីដេអូមេរៀន និងសៀវភៅ PDF ជាក់ស្តែង លក់ម្តងមួយៗ ដូច្នេះអ្នកបង់ថ្លៃតែសម្រាប់អ្វីដែលអ្នកចង់រៀន។",
       },
       login: {
         title: "ចូលគណនី",
-        description: "ចូលគណនី E-TnakRean ដើម្បីមើលវីដេអូ និងអានសៀវភៅ PDF ដែលអ្នកបានទិញ។",
+        description: "ចូលគណនី eTnakRean ដើម្បីមើលវីដេអូ និងអានសៀវភៅ PDF ដែលអ្នកបានទិញ។",
       },
       register: {
         title: "បង្កើតគណនី",
         description:
-          "បង្កើតគណនី E-TnakRean ដោយឥតគិតថ្លៃ ដើម្បីទិញមេរៀនវីដេអូ និងសៀវភៅណែនាំ PDF ម្តងមួយៗ ហើយរក្សាទុកបានជារៀងរហូត។",
+          "បង្កើតគណនី eTnakRean ដោយឥតគិតថ្លៃ ដើម្បីទិញមេរៀនវីដេអូ និងសៀវភៅណែនាំ PDF ម្តងមួយៗ ហើយរក្សាទុកបានជារៀងរហូត។",
       },
       forgotPassword: {
         title: "កំណត់ពាក្យសម្ងាត់ឡើងវិញ",
-        description: "កំណត់ពាក្យសម្ងាត់សម្រាប់គណនី E-TnakRean របស់អ្នកឡើងវិញ។",
+        description: "កំណត់ពាក្យសម្ងាត់សម្រាប់គណនី eTnakRean របស់អ្នកឡើងវិញ។",
       },
       dashboard: {
         title: "បណ្ណាល័យរបស់អ្នក",
-        description: "អ្វីៗទាំងអស់ដែលអ្នកបានទិញនៅលើ E-TnakRean ក្នុងកន្លែងតែមួយ។",
+        description: "អ្វីៗទាំងអស់ដែលអ្នកបានទិញនៅលើ eTnakRean ក្នុងកន្លែងតែមួយ។",
       },
       profile: {
         title: "ប្រវត្តិរូបរបស់អ្នក",
-        description: "កែប្រែព័ត៌មានទំនាក់ទំនង E-TnakRean របស់អ្នក។",
+        description: "កែប្រែព័ត៌មានទំនាក់ទំនង eTnakRean របស់អ្នក។",
       },
       admin: {
         title: "គ្រប់គ្រងមាតិកា",
-        description: "ផ្ទាំងគ្រប់គ្រងសម្រាប់ E-TnakRean។",
+        description: "ផ្ទាំងគ្រប់គ្រងសម្រាប់ eTnakRean។",
       },
       notFound: {
         title: "រកមិនឃើញទំព័រ",
         description:
-          "ទំព័រនេះមិនមានទេ។ សូមរកមើលមេរៀនវីដេអូ និងសៀវភៅណែនាំ PDF នៅលើ E-TnakRean ជំនួសវិញ។",
+          "ទំព័រនេះមិនមានទេ។ សូមរកមើលមេរៀនវីដេអូ និងសៀវភៅណែនាំ PDF នៅលើ eTnakRean ជំនួសវិញ។",
       },
       videoDescription:
-        "មើល «{title}» នៅលើ E-TnakRean — មេរៀនវីដេអូខ្លី និងជាក់ស្តែង ជាភាសាខ្មែរ និងអង់គ្លេស។",
+        "មើល «{title}» នៅលើ eTnakRean — មេរៀនវីដេអូខ្លី និងជាក់ស្តែង ជាភាសាខ្មែរ និងអង់គ្លេស។",
       bookDescription:
-        "«{title}» — សៀវភៅណែនាំ PDF ពី E-TnakRean។ មើលសាកល្បងទំព័រមុនពេលទិញ។",
+        "«{title}» — សៀវភៅណែនាំ PDF ពី eTnakRean។ មើលសាកល្បងទំព័រមុនពេលទិញ។",
       videoListName: "មេរៀនវីដេអូ",
       bookListName: "សៀវភៅ និងឯកសារណែនាំ PDF",
       organizationDescription:
-        "E-TnakRean លក់មេរៀនវីដេអូខ្លីៗ និងជាក់ស្តែង និងសៀវភៅណែនាំ PDF សម្រាប់បោះពុម្ព ជាភាសាខ្មែរ និងអង់គ្លេស ម្តងមួយៗ។",
+        "eTnakRean លក់មេរៀនវីដេអូខ្លីៗ និងជាក់ស្តែង និងសៀវភៅណែនាំ PDF សម្រាប់បោះពុម្ព ជាភាសាខ្មែរ និងអង់គ្លេស ម្តងមួយៗ។",
     },
     nav: {
       home: "ទំព័រដើម",
@@ -543,7 +543,7 @@ export const translations = {
     },
     about: {
       title: "អំពីយើង",
-      lead: "E-TnakRean គឺជាបណ្ណាល័យតូចមួយដែលមានវីដេអូមេរៀន និងសៀវភៅ PDF ជាក់ស្តែង។ ធាតុនីមួយៗត្រូវបានលក់ដោយឡែកៗពីគ្នា ដូច្នេះអ្នកបង់ថ្លៃតែសម្រាប់អ្វីដែលអ្នកចង់រៀនប៉ុណ្ណោះ។",
+      lead: "eTnakRean គឺជាបណ្ណាល័យតូចមួយដែលមានវីដេអូមេរៀន និងសៀវភៅ PDF ជាក់ស្តែង។ ធាតុនីមួយៗត្រូវបានលក់ដោយឡែកៗពីគ្នា ដូច្នេះអ្នកបង់ថ្លៃតែសម្រាប់អ្វីដែលអ្នកចង់រៀនប៉ុណ្ណោះ។",
       sections: [
         {
           heading: "អ្វីដែលយើងបង្កើត",

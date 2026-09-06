@@ -3,14 +3,17 @@ import { X } from "lucide-react";
 import { api } from "../api/client.js";
 import { useLanguage } from "../context/LanguageContext.jsx";
 
-// How long the QR screen sits there before we admit it's taking a while and
-// offer a manual escape hatch. Not a failure -- ABA's own confirmation can
-// genuinely take a minute or two -- just long enough that a first-time buyer
-// staring at an unmoving screen starts to wonder if anything is happening.
 const SLOW_AFTER_MS = 3 * 60 * 1000;
 const POLL_INTERVAL_MS = 3000;
 
-export default function PaymentModal({ itemType, itemId, title, amount, onClose, onPaid }) {
+export default function PaymentModal({
+  itemType,
+  itemId,
+  title,
+  amount,
+  onClose,
+  onPaid,
+}) {
   const { t } = useLanguage();
   const [state, setState] = useState("creating");
   const [payment, setPayment] = useState(null);
@@ -24,9 +27,6 @@ export default function PaymentModal({ itemType, itemId, title, amount, onClose,
   useEffect(() => {
     let cancelled = false;
 
-    // Shared by the automatic 3-second poll and the manual "Check again"
-    // button below, so there is exactly one place that decides what a status
-    // response means -- the two were never meant to disagree.
     async function checkStatus() {
       const { status } = await api.getPaymentStatus(tranIdRef.current);
       if (cancelled) return status;
@@ -104,8 +104,12 @@ export default function PaymentModal({ itemType, itemId, title, amount, onClose,
       <div className="w-full max-w-sm rounded-xl bg-white p-6 dark:bg-gray-900">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">${amount?.toFixed?.(2) ?? amount}</p>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+              {title}
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              ${amount?.toFixed?.(2) ?? amount}
+            </p>
           </div>
           <button
             type="button"
@@ -119,7 +123,9 @@ export default function PaymentModal({ itemType, itemId, title, amount, onClose,
 
         <div className="mt-4 flex flex-col items-center">
           {state === "creating" && (
-            <p className="py-10 text-sm text-gray-500 dark:text-gray-400">{t.payment.settingUp}</p>
+            <p className="py-10 text-sm text-gray-500 dark:text-gray-400">
+              {t.payment.settingUp}
+            </p>
           )}
 
           {state === "waiting" && payment && (
@@ -152,7 +158,9 @@ export default function PaymentModal({ itemType, itemId, title, amount, onClose,
                       disabled={manualChecking}
                       className="flex-1 rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
                     >
-                      {manualChecking ? t.payment.checking : t.payment.checkAgain}
+                      {manualChecking
+                        ? t.payment.checking
+                        : t.payment.checkAgain}
                     </button>
                     <button
                       type="button"

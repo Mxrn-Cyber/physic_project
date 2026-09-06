@@ -11,7 +11,7 @@ export const SITE_URL = (
   import.meta.env?.VITE_SITE_URL || "https://e-tnakrean.laothomorn.workers.dev"
 ).replace(/\/+$/, "");
 
-export const SITE_NAME = "E-TnakRean";
+export const SITE_NAME = "eTnakRean";
 
 // The picture Facebook, Telegram and Messenger show on a shared link.
 // 1200x630 is the shape they crop to -- the square logo.png used to be

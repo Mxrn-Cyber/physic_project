@@ -9,7 +9,7 @@ export const legal = {
     terms: {
       title: "Terms of Service",
       intro:
-        "These terms apply to everyone who uses E-TnakRean. By creating an account or buying anything on this site, you agree to them.",
+        "These terms apply to everyone who uses eTnakRean. By creating an account or buying anything on this site, you agree to them.",
       sections: [
         {
           heading: "Who runs this site",
@@ -49,7 +49,7 @@ export const legal = {
     privacy: {
       title: "Privacy Policy",
       intro:
-        "This page explains what personal information E-TnakRean collects, why, and who else sees it.",
+        "This page explains what personal information eTnakRean collects, why, and who else sees it.",
       sections: [
         {
           heading: "What we collect",
@@ -93,7 +93,7 @@ export const legal = {
     refund: {
       title: "Refund Policy",
       intro:
-        "Videos and books on E-TnakRean are digital products that you can open immediately after paying, so refunds work a little differently from physical goods.",
+        "Videos and books on eTnakRean are digital products that you can open immediately after paying, so refunds work a little differently from physical goods.",
       sections: [
         {
           heading: "Check before you buy",
@@ -127,7 +127,7 @@ export const legal = {
     terms: {
       title: "លក្ខខណ្ឌប្រើប្រាស់",
       intro:
-        "លក្ខខណ្ឌទាំងនេះអនុវត្តចំពោះអ្នកប្រើប្រាស់គ្រប់រូបនៃ E-TnakRean។ ការបង្កើតគណនី ឬការទិញនៅលើគេហទំព័រនេះ មានន័យថាអ្នកយល់ព្រមតាមលក្ខខណ្ឌទាំងនេះ។",
+        "លក្ខខណ្ឌទាំងនេះអនុវត្តចំពោះអ្នកប្រើប្រាស់គ្រប់រូបនៃ eTnakRean។ ការបង្កើតគណនី ឬការទិញនៅលើគេហទំព័រនេះ មានន័យថាអ្នកយល់ព្រមតាមលក្ខខណ្ឌទាំងនេះ។",
       sections: [
         {
           heading: "អ្នកគ្រប់គ្រងគេហទំព័រ",
@@ -167,7 +167,7 @@ export const legal = {
     privacy: {
       title: "គោលការណ៍ភាពឯកជន",
       intro:
-        "ទំព័រនេះពន្យល់ពីព័ត៌មានផ្ទាល់ខ្លួនដែល E-TnakRean ប្រមូល ហេតុអ្វី និងអ្នកណាខ្លះដែលឃើញវា។",
+        "ទំព័រនេះពន្យល់ពីព័ត៌មានផ្ទាល់ខ្លួនដែល eTnakRean ប្រមូល ហេតុអ្វី និងអ្នកណាខ្លះដែលឃើញវា។",
       sections: [
         {
           heading: "ព័ត៌មានដែលយើងប្រមូល",
@@ -211,7 +211,7 @@ export const legal = {
     refund: {
       title: "គោលការណ៍សងប្រាក់វិញ",
       intro:
-        "វីដេអូ និងសៀវភៅនៅលើ E-TnakRean ជាផលិតផលឌីជីថល ដែលអ្នកអាចបើកមើលភ្លាមៗបន្ទាប់ពីបង់ប្រាក់ ដូច្នេះការសងប្រាក់វិញខុសពីទំនិញធម្មតាបន្តិច។",
+        "វីដេអូ និងសៀវភៅនៅលើ eTnakRean ជាផលិតផលឌីជីថល ដែលអ្នកអាចបើកមើលភ្លាមៗបន្ទាប់ពីបង់ប្រាក់ ដូច្នេះការសងប្រាក់វិញខុសពីទំនិញធម្មតាបន្តិច។",
       sections: [
         {
           heading: "សូមពិនិត្យមុនទិញ",

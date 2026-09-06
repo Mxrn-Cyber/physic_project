@@ -98,7 +98,10 @@ export default function Seo({
 
   useEffect(() => {
     const canonical = `${SITE_URL}${pathFor(route, lang)}`;
-    const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | Learn Anytime, Anywhere`;
+    // Name first. A browser tab is narrow enough that it usually shows only
+    // the first ~12 characters, so a page-first title left every tab reading
+    // "Video l..." with the brand cut off entirely.
+    const fullTitle = title ? `${SITE_NAME} | ${title}` : `${SITE_NAME} | Learn Anytime, Anywhere`;
     const desc = clamp(description);
     const img = absoluteUrl(image || SITE_IMAGE);
 
