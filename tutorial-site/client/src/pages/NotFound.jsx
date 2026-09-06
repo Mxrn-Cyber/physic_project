@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { MapPinOff } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext.jsx";
+import Seo from "../components/Seo.jsx";
 
 // Catch-all for any URL that matches no route (App.jsx, path="*"). Without
 // this, a mistyped or dead link rendered the navbar and footer with nothing
@@ -11,6 +12,7 @@ export default function NotFound() {
 
   return (
     <div className="mx-auto flex max-w-lg flex-col items-center gap-4 px-4 py-24 text-center">
+      <Seo title={t.seo.notFound.title} description={t.seo.notFound.description} noindex />
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400">
         <MapPinOff className="h-7 w-7" />
       </div>

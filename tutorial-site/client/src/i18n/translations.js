@@ -1,5 +1,70 @@
 export const translations = {
   en: {
+    // Titles and descriptions Google shows in its results, and that
+    // Facebook/Telegram show on a shared link. Kept here rather than in the
+    // pages so both languages stay side by side and can't drift apart.
+    seo: {
+      home: {
+        title:
+          "Video lessons and PDF guides, where develop by Khmer Lecturers, Khmer Documents, and Khmer Teachers",
+        description:
+          "Short, practical video tutorials paired with printable PDF guides, in Khmer and English. Buy only the lesson you want -- no subscription.",
+      },
+      videos: {
+        title: "Video lessons",
+        description:
+          "Browse every video lesson on eTnakRean. Short, practical tutorials in Khmer and English, each sold on its own with its own price.",
+      },
+      books: {
+        title: "PDF books and guides",
+        description:
+          "Browse every printable PDF guide and workbook on eTnakRean. Preview the pages before you buy, then keep what you paid for.",
+      },
+      about: {
+        title: "About us",
+        description:
+          "eTnakRean is a small library of practical video lessons and PDF books, sold one at a time so you only pay for what you want to learn.",
+      },
+      login: {
+        title: "Log in",
+        description:
+          "Log in to eTnakRean to watch the videos and read the PDF guides you have bought.",
+      },
+      register: {
+        title: "Create an account",
+        description:
+          "Create a free eTnakRean account to buy video lessons and printable PDF guides one at a time and keep them for good.",
+      },
+      forgotPassword: {
+        title: "Reset your password",
+        description: "Reset the password for your eTnakRean account.",
+      },
+      dashboard: {
+        title: "Your library",
+        description: "Everything you have bought on eTnakRean, in one place.",
+      },
+      profile: {
+        title: "Your profile",
+        description: "Update your eTnakRean contact details.",
+      },
+      admin: {
+        title: "Manage content",
+        description: "Admin area for eTnakRean.",
+      },
+      notFound: {
+        title: "Page not found",
+        description:
+          "That page does not exist. Browse the video lessons and printable PDF guides on eTnakRean instead.",
+      },
+      videoDescription:
+        "Watch \u201c{title}\u201d on eTnakRean -- a short, practical video lesson in Khmer and English.",
+      bookDescription:
+        "\u201c{title}\u201d -- a printable PDF guide from eTnakRean. Preview the pages before you buy.",
+      videoListName: "Video lessons",
+      bookListName: "PDF books and guides",
+      organizationDescription:
+        "eTnakRean sells short, practical video lessons and printable PDF guides in Khmer and English, one item at a time.",
+    },
     nav: {
       home: "Home",
       videos: "Videos",
@@ -25,7 +90,8 @@ export const translations = {
       featurePdfTitle: "Companion PDFs",
       featurePdfBody: "Cheat sheets and worksheets for every lesson.",
       featureProgressTitle: "Track your progress",
-      featureProgressBody: "See what you've completed and pick up where you left off.",
+      featureProgressBody:
+        "See what you've completed and pick up where you left off.",
       browseSectionTitle: "Browse videos & books",
       filterAll: "All",
       filterVideos: "Videos",
@@ -36,29 +102,38 @@ export const translations = {
     },
     videos: {
       title: "Videos",
-      loggedInSubtitle: "Free previews are unlocked. Buy individual videos to unlock the rest.",
-      loggedOutSubtitle: "Browse free previews, or log in to buy individual videos.",
+      loggedInSubtitle:
+        "Free previews are unlocked. Buy individual videos to unlock the rest.",
+      loggedOutSubtitle:
+        "Browse free previews, or log in to buy individual videos.",
       buy: "Buy for",
       loginToBuy: "Log in to buy",
       backToList: "All videos",
       youOwnThis: "You own this video",
       buyToWatch: "Buy this video to watch it",
       notFound: "Couldn't find that video.",
+      markComplete: "Mark as watched",
+      completed: "Watched",
     },
     books: {
       title: "Books (PDFs)",
-      loggedInSubtitle: "Free previews are unlocked. Buy individual books to unlock the rest.",
-      loggedOutSubtitle: "Browse free previews, or log in to buy individual books.",
+      loggedInSubtitle:
+        "Free previews are unlocked. Buy individual books to unlock the rest.",
+      loggedOutSubtitle:
+        "Browse free previews, or log in to buy individual books.",
       buy: "Buy for",
       loginToBuy: "Log in to buy",
       backToList: "All books",
       youOwnThis: "You own this book",
       buyToView: "Buy this book to view it",
       notFound: "Couldn't find that book.",
+      markComplete: "Mark as read",
+      completed: "Read",
     },
     courses: {
       title: "Course Library",
-      subtitle: "Free preview lessons are unlocked. Buy individual videos or books to unlock the rest.",
+      subtitle:
+        "Free preview lessons are unlocked. Buy individual videos or books to unlock the rest.",
       startCourse: "Start course",
       previewCourse: "Preview / browse",
       videosLabel: "videos",
@@ -97,13 +172,15 @@ export const translations = {
       loginLink: "Log in",
 
       forgotTitle: "Forgot password",
-      forgotSubtitle: "Enter your email and we'll send you a 6-digit code to reset your password.",
+      forgotSubtitle:
+        "Enter your email and we'll send you a 6-digit code to reset your password.",
       sendCode: "Send code",
       sending: "Sending…",
       backToLogin: "Back to log in",
 
       resetTitle: "Reset password",
-      resetNoEmailMessage: "We don't know which account to reset. Start again from",
+      resetNoEmailMessage:
+        "We don't know which account to reset. Start again from",
       forgotPasswordLink: "forgot password",
       resetSubtitlePrefix: "Enter the 6-digit code we sent to",
       resetSubtitleSuffix: ", then choose a new password.",
@@ -122,7 +199,8 @@ export const translations = {
       verifySubtitleSuffix: ". Enter it below to continue.",
       verifyButton: "Verify",
       verifying: "Verifying…",
-      verifyNoEmailMessage: "We couldn't tell which account to verify. Start again from",
+      verifyNoEmailMessage:
+        "We couldn't tell which account to verify. Start again from",
       signUpLink: "sign up",
 
       resendCode: "Resend code",
@@ -133,19 +211,31 @@ export const translations = {
       videosOwned: "Videos owned",
       booksOwned: "Books owned",
       totalUnlocked: "Total unlocked",
+      completedCount: "Completed",
       yourVideos: "Your videos",
       yourBooks: "Your books",
       noVideosYet: "No purchased videos yet.",
       browseVideos: "Browse videos",
       noBooksYet: "No purchased books yet.",
       browseBooks: "Browse books",
-      loadError: "Couldn't load your dashboard right now. Please try again later.",
+      loadError:
+        "Couldn't load your dashboard right now. Please try again later.",
     },
     profile: {
       title: "Your Profile",
-      subtitle: "Update your contact details. Email and password are managed elsewhere.",
-      itemsOwned: "items owned",
-      itemOwned: "item owned",
+      subtitle:
+        "Update your contact details. Email and password are managed elsewhere.",
+      adminBadge: "Admin",
+      verifiedBadge: "Verified",
+      googleBadge: "Google account",
+      videosOwned: "Videos",
+      booksOwned: "Books",
+      viewLibrary: "View my library",
+      detailsHeading: "Your details",
+      detailsSubtitle:
+        "These are used for receipts and for getting in touch about your purchases.",
+      emailLabel: "Email",
+      emailLocked: "Your email is your sign-in name and can't be changed here.",
       nameLabel: "Name",
       photoLabel: "Profile photo",
       photoPlaceholder: "https://… (link to your photo)",
@@ -158,7 +248,7 @@ export const translations = {
     },
     about: {
       title: "About Us",
-      lead: "E-TnakRean is a small library of practical video lessons and PDF books. Each item is sold on its own, so you only pay for what you actually want to learn.",
+      lead: "eTnakRean is a small library of practical video lessons and PDF books. Each item is sold on its own, so you only pay for what you actually want to learn.",
       sections: [
         {
           heading: "What we make",
@@ -186,6 +276,57 @@ export const translations = {
       loading: "Loading…",
       seeMore: "See more",
       loadError: "Couldn't load that right now. Please try again later.",
+      previous: "Previous",
+      next: "Next",
+    },
+    filters: {
+      searchBooks: "Search books…",
+      searchVideos: "Search videos…",
+      clearSearch: "Clear search",
+      allGrades: "All grades",
+      grade10: "Grade 10",
+      grade11: "Grade 11",
+      grade12: "Grade 12",
+      gradeLabel: "Grade",
+      priceLabel: "Price",
+      allAccess: "All",
+      paid: "Paid",
+      noMatches: "Nothing matches your search. Try another word, grade, or price filter.",
+    },
+    payment: {
+      settingUp: "Setting up payment…",
+      scanInstructions:
+        "Scan this KHQR code with ABA Mobile or any participating bank app to complete your purchase.",
+      qrAlt: "Scan with your banking app (KHQR)",
+      qrUnavailable:
+        "QR code unavailable — check the ABA PayWay configuration.",
+      waiting: "Waiting for payment…",
+      failed: "Payment failed or was cancelled. Please try again.",
+      close: "Close",
+      slowNotice:
+        "Taking longer than expected? If you've already paid, check again below.",
+      checkAgain: "Check again",
+      checking: "Checking…",
+      cancelAndGoBack: "Cancel and go back",
+    },
+    reader: {
+      page: "Page",
+      goToPage: "Go to page",
+      previousPage: "Previous page",
+      nextPage: "Next page",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      fitWidth: "Fit to width",
+      fullscreen: "Read full screen",
+      exitFullscreen: "Close full screen",
+      download: "Download PDF",
+    },
+    player: {
+      previewEnded: "Preview ended.",
+      buyToKeepWatching: "Buy to keep watching",
+      previewOnly: "Preview only — buy to read the rest of the book.",
+      buyNow: "Buy now",
+      pdfError: "Couldn't load this PDF.",
     },
     notFound: {
       title: "Page not found",
@@ -201,9 +342,80 @@ export const translations = {
       connect: "Connect",
       rights: "All rights reserved.",
       linkNotSet: "Link not added yet",
+      legal: "Legal",
+      terms: "Terms",
+      privacy: "Privacy",
+      refund: "Refunds",
+    },
+    legalPage: {
+      onThisPage: "On this page",
+      backToTop: "Back to top",
+      alsoRead: "Also read",
     },
   },
   km: {
+    seo: {
+      home: {
+        title: "មេរៀនវីដេអូ និងសៀវភៅ PDF ទិញម្តងមួយៗ",
+        description:
+          "វីដេអូមេរៀនខ្លីៗ និងជាក់ស្តែង ភ្ជាប់ជាមួយសៀវភៅណែនាំ PDF សម្រាប់បោះពុម្ព ជាភាសាខ្មែរ និងអង់គ្លេស។ ទិញតែមេរៀនដែលអ្នកចង់រៀន ដោយមិនចាំបាច់ជាវប្រចាំខែ។",
+      },
+      videos: {
+        title: "មេរៀនវីដេអូ",
+        description:
+          "រកមើលមេរៀនវីដេអូទាំងអស់នៅលើ eTnakRean។ វីដេអូខ្លីៗ និងជាក់ស្តែង ជាភាសាខ្មែរ និងអង់គ្លេស ដែលនីមួយៗលក់ដោយឡែក និងមានតម្លៃផ្ទាល់ខ្លួន។",
+      },
+      books: {
+        title: "សៀវភៅ និងឯកសារណែនាំ PDF",
+        description:
+          "រកមើលសៀវភៅណែនាំ PDF ទាំងអស់នៅលើ eTnakRean។ មើលសាកល្បងទំព័រមុនពេលទិញ រួចរក្សាទុកអ្វីដែលអ្នកបានបង់ថ្លៃ។",
+      },
+      about: {
+        title: "អំពីយើង",
+        description:
+          "eTnakRean គឺជាបណ្ណាល័យតូចមួយដែលមានវីដេអូមេរៀន និងសៀវភៅ PDF ជាក់ស្តែង លក់ម្តងមួយៗ ដូច្នេះអ្នកបង់ថ្លៃតែសម្រាប់អ្វីដែលអ្នកចង់រៀន។",
+      },
+      login: {
+        title: "ចូលគណនី",
+        description:
+          "ចូលគណនី eTnakRean ដើម្បីមើលវីដេអូ និងអានសៀវភៅ PDF ដែលអ្នកបានទិញ។",
+      },
+      register: {
+        title: "បង្កើតគណនី",
+        description:
+          "បង្កើតគណនី eTnakRean ដោយឥតគិតថ្លៃ ដើម្បីទិញមេរៀនវីដេអូ និងសៀវភៅណែនាំ PDF ម្តងមួយៗ ហើយរក្សាទុកបានជារៀងរហូត។",
+      },
+      forgotPassword: {
+        title: "កំណត់ពាក្យសម្ងាត់ឡើងវិញ",
+        description: "កំណត់ពាក្យសម្ងាត់សម្រាប់គណនី eTnakRean របស់អ្នកឡើងវិញ។",
+      },
+      dashboard: {
+        title: "បណ្ណាល័យរបស់អ្នក",
+        description:
+          "អ្វីៗទាំងអស់ដែលអ្នកបានទិញនៅលើ eTnakRean ក្នុងកន្លែងតែមួយ។",
+      },
+      profile: {
+        title: "ប្រវត្តិរូបរបស់អ្នក",
+        description: "កែប្រែព័ត៌មានទំនាក់ទំនង eTnakRean របស់អ្នក។",
+      },
+      admin: {
+        title: "គ្រប់គ្រងមាតិកា",
+        description: "ផ្ទាំងគ្រប់គ្រងសម្រាប់ eTnakRean។",
+      },
+      notFound: {
+        title: "រកមិនឃើញទំព័រ",
+        description:
+          "ទំព័រនេះមិនមានទេ។ សូមរកមើលមេរៀនវីដេអូ និងសៀវភៅណែនាំ PDF នៅលើ eTnakRean ជំនួសវិញ។",
+      },
+      videoDescription:
+        "មើល «{title}» នៅលើ eTnakRean — មេរៀនវីដេអូខ្លី និងជាក់ស្តែង ជាភាសាខ្មែរ និងអង់គ្លេស។",
+      bookDescription:
+        "«{title}» — សៀវភៅណែនាំ PDF ពី eTnakRean។ មើលសាកល្បងទំព័រមុនពេលទិញ។",
+      videoListName: "មេរៀនវីដេអូ",
+      bookListName: "សៀវភៅ និងឯកសារណែនាំ PDF",
+      organizationDescription:
+        "eTnakRean លក់មេរៀនវីដេអូខ្លីៗ និងជាក់ស្តែង និងសៀវភៅណែនាំ PDF សម្រាប់បោះពុម្ព ជាភាសាខ្មែរ និងអង់គ្លេស ម្តងមួយៗ។",
+    },
     nav: {
       home: "ទំព័រដើម",
       videos: "វីដេអូ",
@@ -240,7 +452,8 @@ export const translations = {
     },
     videos: {
       title: "វីដេអូ",
-      loggedInSubtitle: "ការមើលឥតគិតថ្លៃត្រូវបានបើក។ ទិញវីដេអូនីមួយៗដើម្បីបើកឲ្យអស់។",
+      loggedInSubtitle:
+        "ការមើលឥតគិតថ្លៃត្រូវបានបើក។ ទិញវីដេអូនីមួយៗដើម្បីបើកឲ្យអស់។",
       loggedOutSubtitle: "រកមើលការមើលឥតគិតថ្លៃ ឬចូលគណនីដើម្បីទិញវីដេអូនីមួយៗ។",
       buy: "ទិញក្នុងតម្លៃ",
       loginToBuy: "ចូលដើម្បីទិញ",
@@ -248,10 +461,13 @@ export const translations = {
       youOwnThis: "អ្នកមានវីដេអូនេះ",
       buyToWatch: "ទិញវីដេអូនេះដើម្បីមើល",
       notFound: "រកមិនឃើញវីដេអូនេះទេ។",
+      markComplete: "សម្គាល់ថាបានមើលរួច",
+      completed: "បានមើលរួច",
     },
     books: {
       title: "សៀវភៅ (PDF)",
-      loggedInSubtitle: "ការមើលឥតគិតថ្លៃត្រូវបានបើក។ ទិញសៀវភៅនីមួយៗដើម្បីបើកឲ្យអស់។",
+      loggedInSubtitle:
+        "ការមើលឥតគិតថ្លៃត្រូវបានបើក។ ទិញសៀវភៅនីមួយៗដើម្បីបើកឲ្យអស់។",
       loggedOutSubtitle: "រកមើលការមើលឥតគិតថ្លៃ ឬចូលគណនីដើម្បីទិញសៀវភៅនីមួយៗ។",
       buy: "ទិញក្នុងតម្លៃ",
       loginToBuy: "ចូលដើម្បីទិញ",
@@ -259,10 +475,13 @@ export const translations = {
       youOwnThis: "អ្នកមានសៀវភៅនេះ",
       buyToView: "ទិញសៀវភៅនេះដើម្បីមើល",
       notFound: "រកមិនឃើញសៀវភៅនេះទេ។",
+      markComplete: "សម្គាល់ថាបានអានរួច",
+      completed: "បានអានរួច",
     },
     courses: {
       title: "បណ្ណាល័យវគ្គសិក្សា",
-      subtitle: "មេរៀនសាកល្បងឥតគិតថ្លៃត្រូវបានបើក។ ទិញវីដេអូ ឬសៀវភៅនីមួយៗដើម្បីបើកឲ្យអស់។",
+      subtitle:
+        "មេរៀនសាកល្បងឥតគិតថ្លៃត្រូវបានបើក។ ទិញវីដេអូ ឬសៀវភៅនីមួយៗដើម្បីបើកឲ្យអស់។",
       startCourse: "ចាប់ផ្តើមវគ្គសិក្សា",
       previewCourse: "សាកល្បង / រកមើល",
       videosLabel: "វីដេអូ",
@@ -301,13 +520,15 @@ export const translations = {
       loginLink: "ចូល",
 
       forgotTitle: "ភ្លេចពាក្យសម្ងាត់",
-      forgotSubtitle: "បញ្ចូលអ៊ីមែលរបស់អ្នក ហើយយើងនឹងផ្ញើលេខកូដ ៦ខ្ទង់ដើម្បីកំណត់ពាក្យសម្ងាត់ថ្មី។",
+      forgotSubtitle:
+        "បញ្ចូលអ៊ីមែលរបស់អ្នក ហើយយើងនឹងផ្ញើលេខកូដ ៦ខ្ទង់ដើម្បីកំណត់ពាក្យសម្ងាត់ថ្មី។",
       sendCode: "ផ្ញើលេខកូដ",
       sending: "កំពុងផ្ញើ…",
       backToLogin: "ត្រឡប់ទៅចូលគណនី",
 
       resetTitle: "កំណត់ពាក្យសម្ងាត់ថ្មី",
-      resetNoEmailMessage: "យើងមិនដឹងគណនីមួយណាត្រូវកំណត់ឡើងវិញទេ។ ចាប់ផ្តើមម្តងទៀតពី",
+      resetNoEmailMessage:
+        "យើងមិនដឹងគណនីមួយណាត្រូវកំណត់ឡើងវិញទេ។ ចាប់ផ្តើមម្តងទៀតពី",
       forgotPasswordLink: "ភ្លេចពាក្យសម្ងាត់",
       resetSubtitlePrefix: "បញ្ចូលលេខកូដ ៦ខ្ទង់ដែលយើងបានផ្ញើទៅ",
       resetSubtitleSuffix: " បន្ទាប់មកជ្រើសរើសពាក្យសម្ងាត់ថ្មី។",
@@ -326,7 +547,8 @@ export const translations = {
       verifySubtitleSuffix: "។ បញ្ចូលវាខាងក្រោមដើម្បីបន្ត។",
       verifyButton: "ផ្ទៀងផ្ទាត់",
       verifying: "កំពុងផ្ទៀងផ្ទាត់…",
-      verifyNoEmailMessage: "យើងមិនអាចដឹងថាគណនីមួយណាត្រូវផ្ទៀងផ្ទាត់ទេ។ ចាប់ផ្តើមម្តងទៀតពី",
+      verifyNoEmailMessage:
+        "យើងមិនអាចដឹងថាគណនីមួយណាត្រូវផ្ទៀងផ្ទាត់ទេ។ ចាប់ផ្តើមម្តងទៀតពី",
       signUpLink: "ចុះឈ្មោះ",
 
       resendCode: "ផ្ញើលេខកូដម្តងទៀត",
@@ -337,19 +559,32 @@ export const translations = {
       videosOwned: "វីដេអូដែលមាន",
       booksOwned: "សៀវភៅដែលមាន",
       totalUnlocked: "សរុបដែលបានបើក",
+      completedCount: "បានបញ្ចប់",
       yourVideos: "វីដេអូរបស់អ្នក",
       yourBooks: "សៀវភៅរបស់អ្នក",
       noVideosYet: "មិនទាន់មានវីដេអូដែលបានទិញនៅឡើយទេ។",
       browseVideos: "រកមើលវីដេអូ",
       noBooksYet: "មិនទាន់មានសៀវភៅដែលបានទិញនៅឡើយទេ។",
       browseBooks: "រកមើលសៀវភៅ",
-      loadError: "មិនអាចផ្ទុកផ្ទាំងគ្រប់គ្រងរបស់អ្នកបានទេ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។",
+      loadError:
+        "មិនអាចផ្ទុកផ្ទាំងគ្រប់គ្រងរបស់អ្នកបានទេ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។",
     },
     profile: {
       title: "ប្រវត្តិរូបរបស់អ្នក",
-      subtitle: "កែប្រែព័ត៌មានទំនាក់ទំនងរបស់អ្នក។ អ៊ីមែល និងពាក្យសម្ងាត់ត្រូវបានគ្រប់គ្រងដាច់ដោយឡែក។",
-      itemsOwned: "ធាតុដែលមាន",
-      itemOwned: "ធាតុដែលមាន",
+      subtitle:
+        "កែប្រែព័ត៌មានទំនាក់ទំនងរបស់អ្នក។ អ៊ីមែល និងពាក្យសម្ងាត់ត្រូវបានគ្រប់គ្រងដាច់ដោយឡែក។",
+      adminBadge: "អ្នកគ្រប់គ្រង",
+      verifiedBadge: "បានផ្ទៀងផ្ទាត់",
+      googleBadge: "គណនី Google",
+      videosOwned: "វីដេអូ",
+      booksOwned: "សៀវភៅ",
+      viewLibrary: "មើលបណ្ណាល័យរបស់ខ្ញុំ",
+      detailsHeading: "ព័ត៌មានរបស់អ្នក",
+      detailsSubtitle:
+        "ព័ត៌មាននេះត្រូវបានប្រើសម្រាប់វិក្កយបត្រ និងការទាក់ទងអំពីការទិញរបស់អ្នក។",
+      emailLabel: "អ៊ីមែល",
+      emailLocked:
+        "អ៊ីមែលគឺជាឈ្មោះចូលគណនីរបស់អ្នក ហើយមិនអាចកែប្រែនៅទីនេះបានទេ។",
       nameLabel: "ឈ្មោះ",
       photoLabel: "រូបភាពប្រវត្តិរូប",
       photoPlaceholder: "https://… (តំណភ្ជាប់ទៅរូបភាពរបស់អ្នក)",
@@ -362,7 +597,7 @@ export const translations = {
     },
     about: {
       title: "អំពីយើង",
-      lead: "E-TnakRean គឺជាបណ្ណាល័យតូចមួយដែលមានវីដេអូមេរៀន និងសៀវភៅ PDF ជាក់ស្តែង។ ធាតុនីមួយៗត្រូវបានលក់ដោយឡែកៗពីគ្នា ដូច្នេះអ្នកបង់ថ្លៃតែសម្រាប់អ្វីដែលអ្នកចង់រៀនប៉ុណ្ណោះ។",
+      lead: "eTnakRean គឺជាបណ្ណាល័យតូចមួយដែលមានវីដេអូមេរៀន និងសៀវភៅ PDF ជាក់ស្តែង។ ធាតុនីមួយៗត្រូវបានលក់ដោយឡែកៗពីគ្នា ដូច្នេះអ្នកបង់ថ្លៃតែសម្រាប់អ្វីដែលអ្នកចង់រៀនប៉ុណ្ណោះ។",
       sections: [
         {
           heading: "អ្វីដែលយើងបង្កើត",
@@ -390,6 +625,56 @@ export const translations = {
       loading: "កំពុងផ្ទុក…",
       seeMore: "មើលបន្ថែម",
       loadError: "មិនអាចផ្ទុកបានទេឥឡូវនេះ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។",
+      previous: "មុន",
+      next: "បន្ទាប់",
+    },
+    filters: {
+      searchBooks: "ស្វែងរកសៀវភៅ…",
+      searchVideos: "ស្វែងរកវីដេអូ…",
+      clearSearch: "សម្អាតការស្វែងរក",
+      allGrades: "គ្រប់ថ្នាក់",
+      grade10: "ថ្នាក់ទី១០",
+      grade11: "ថ្នាក់ទី១១",
+      grade12: "ថ្នាក់ទី១២",
+      gradeLabel: "ថ្នាក់",
+      priceLabel: "តម្លៃ",
+      allAccess: "ទាំងអស់",
+      paid: "បង់ប្រាក់",
+      noMatches: "រកមិនឃើញលទ្ធផលត្រូវនឹងការស្វែងរករបស់អ្នកទេ។ សូមសាកល្បងពាក្យ ថ្នាក់ ឬតម្រងតម្លៃផ្សេង។",
+    },
+    payment: {
+      settingUp: "កំពុងរៀបចំការទូទាត់…",
+      scanInstructions:
+        "ស្កេនកូដ KHQR នេះដោយប្រើ ABA Mobile ឬកម្មវិធីធនាគារផ្សេងទៀត ដើម្បីបញ្ចប់ការទិញ។",
+      qrAlt: "ស្កេនដោយប្រើកម្មវិធីធនាគាររបស់អ្នក (KHQR)",
+      qrUnavailable: "មិនមានកូដ QR ទេ — សូមពិនិត្យការកំណត់ ABA PayWay។",
+      waiting: "កំពុងរង់ចាំការទូទាត់…",
+      failed: "ការទូទាត់មិនបានសម្រេច ឬត្រូវបានលុបចោល។ សូមព្យាយាមម្តងទៀត។",
+      close: "បិទ",
+      slowNotice:
+        "យូរជាងធម្មតាមែនទេ? ប្រសិនបើអ្នកបានបង់ប្រាក់រួចហើយ សូមពិនិត្យម្តងទៀតខាងក្រោម។",
+      checkAgain: "ពិនិត្យម្តងទៀត",
+      checking: "កំពុងពិនិត្យ…",
+      cancelAndGoBack: "បោះបង់ ហើយត្រឡប់ក្រោយ",
+    },
+    reader: {
+      page: "ទំព័រ",
+      goToPage: "ទៅកាន់ទំព័រ",
+      previousPage: "ទំព័រមុន",
+      nextPage: "ទំព័របន្ទាប់",
+      zoomIn: "ពង្រីក",
+      zoomOut: "បង្រួម",
+      fitWidth: "សមនឹងទទឹងអេក្រង់",
+      fullscreen: "អានពេញអេក្រង់",
+      exitFullscreen: "បិទរបៀបពេញអេក្រង់",
+      download: "ទាញយក PDF",
+    },
+    player: {
+      previewEnded: "ការមើលសាកល្បងបានបញ្ចប់។",
+      buyToKeepWatching: "ទិញដើម្បីមើលបន្ត",
+      previewOnly: "មើលសាកល្បងតែប៉ុណ្ណោះ — ទិញដើម្បីអានសៀវភៅទាំងមូល។",
+      buyNow: "ទិញឥឡូវនេះ",
+      pdfError: "មិនអាចផ្ទុកឯកសារ PDF នេះបានទេ។",
     },
     notFound: {
       title: "រកមិនឃើញទំព័រ",
@@ -405,6 +690,15 @@ export const translations = {
       connect: "ទំនាក់ទំនង",
       rights: "រក្សាសិទ្ធិគ្រប់យ៉ាង។",
       linkNotSet: "មិនទាន់បានបញ្ចូលតំណ",
+      legal: "ផ្លូវច្បាប់",
+      terms: "លក្ខខណ្ឌប្រើប្រាស់",
+      privacy: "ភាពឯកជន",
+      refund: "ការសងប្រាក់វិញ",
+    },
+    legalPage: {
+      onThisPage: "ក្នុងទំព័រនេះ",
+      backToTop: "ត្រឡប់ទៅខាងលើ",
+      alsoRead: "អានផងដែរ",
     },
   },
 };

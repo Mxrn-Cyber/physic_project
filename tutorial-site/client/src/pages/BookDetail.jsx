@@ -6,6 +6,7 @@ import {
   Lock,
   ShoppingCart,
   BookOpen,
+  CheckCircle2,
 } from "lucide-react";
 import { api } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -13,11 +14,13 @@ import { useLanguage } from "../context/LanguageContext.jsx";
 import BookViewer from "../components/BookViewer.jsx";
 import PaymentModal from "../components/PaymentModal.jsx";
 import { badgeLabel, BADGE_STYLES } from "../components/badges.js";
+import Seo, { fill } from "../components/Seo.jsx";
+import { bookSchema, breadcrumbSchema } from "../utils/schema.js";
 
 export default function BookDetail() {
   const { id } = useParams();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const navigate = useNavigate();
 
   const [book, setBook] = useState(null);
@@ -30,6 +33,7 @@ export default function BookDetail() {
   const [isPreview, setIsPreview] = useState(false);
   const [viewError, setViewError] = useState(null);
   const [buying, setBuying] = useState(false);
+  const [markingComplete, setMarkingComplete] = useState(false);
 
   const load = () =>
     api
@@ -89,8 +93,42 @@ export default function BookDetail() {
   const badges = book.badges || [];
   const onSale = book.discountPercent > 0 && !book.isFree;
 
+  // Same one-way reasoning as VideoDetail.jsx -- POST /books/:id/complete
+  // only ever adds, there's no unmark endpoint, so re-fetching the book after
+  // marking it keeps this in sync with the server rather than duplicating
+  // state that could drift.
+  function handleMarkComplete() {
+    if (markingComplete || book.completed) return;
+    setMarkingComplete(true);
+    api
+      .markBookComplete(book._id)
+      .then(load)
+      .catch(() => {})
+      .finally(() => setMarkingComplete(false));
+  }
+
+  const seoDescription =
+    book.description || fill(t.seo.bookDescription, { title: book.title });
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
+      <Seo
+        title={book.title}
+        description={seoDescription}
+        image={book.coverImageUrl}
+        type="book"
+        jsonLd={[
+          bookSchema(book, { description: seoDescription, lang }),
+          breadcrumbSchema(
+            [
+              { name: t.nav.home, path: "/" },
+              { name: t.seo.books.title, path: "/books" },
+              { name: book.title, path: `/books/${book._id}` },
+            ],
+            lang
+          ),
+        ]}
+      />
       <Link
         to="/books"
         className="inline-flex items-center gap-1 text-sm font-medium text-red-600 hover:underline dark:text-red-400"
@@ -99,13 +137,19 @@ export default function BookDetail() {
       </Link>
 
       <div className="mt-4 grid grid-cols-1 gap-6 sm:mt-6 sm:gap-8 lg:grid-cols-[minmax(0,1.5fr)_minmax(260px,1fr)] lg:items-start">
-        <div className="aspect-[3/4] max-h-[80vh] w-full sm:max-h-[75vh] lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)]">
+        {/* A fixed height rather than an aspect ratio: the reader now has a
+            toolbar of its own, and a 3:4 box left the page area shorter than
+            a single PDF page on most screens. */}
+        <div className="h-[70vh] w-full sm:h-[75vh] lg:sticky lg:top-24 lg:h-[calc(100vh-8rem)]">
           {canView ? (
             <BookViewer
               url={api.getBookPdfUrl(id)}
               title={book.title}
               isPreview={isPreview}
               onBuyClick={() => setBuying(true)}
+              // Buyers only. During a preview the file is a server-trimmed
+              // extract, so offering to save it would imply otherwise.
+              allowDownload={canView && !isPreview}
             />
           ) : viewError ? (
             <div
@@ -189,9 +233,25 @@ export default function BookDetail() {
             </div>
 
             {book.unlocked ? (
-              <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
-                <FileText className="h-4 w-4" /> {t.books.youOwnThis}
-              </p>
+              <>
+                <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                  <FileText className="h-4 w-4" /> {t.books.youOwnThis}
+                </p>
+                {book.completed ? (
+                  <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                    <CheckCircle2 className="h-4 w-4" /> {t.books.completed}
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleMarkComplete}
+                    disabled={markingComplete}
+                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                  >
+                    <CheckCircle2 className="h-4 w-4" /> {t.books.markComplete}
+                  </button>
+                )}
+              </>
             ) : user ? (
               <button
                 type="button"

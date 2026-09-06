@@ -1,7 +1,27 @@
 {
-  "name": "E-TnakRean",
-  "compatibility_date": "2026-08-29",
+  // Worker names become the web address, so Cloudflare only allows lowercase
+  // letters, numbers and dashes -- "E-TnakRean" and "eTnakRean" are both
+  // rejected outright. This name is what makes the site live at
+  // e-tnakrean.laothomorn.workers.dev, so changing it changes the URL and
+  // breaks every canonical tag, sitemap entry and shared link. Leave it be.
+  //
+  // The display name visitors actually read ("E-TnakRean", capitals and all)
+  // is set in client/index.html and public/manifest.webmanifest instead.
+  "name": "e-tnakrean",
+  "compatibility_date": "2026-07-22",
   "assets": {
-    "directory": "./dist"
+    // This file and tutorial-site/client/wrangler.jsonc deploy the SAME
+    // worker, so they are kept deliberately identical apart from this path.
+    // Whichever folder you run `wrangler deploy` from, the result is the
+    // same -- which is the point. Previously this pointed at "./dist", a
+    // folder that has never existed here, so a deploy from this folder
+    // would have replaced the live site with nothing.
+    //
+    // Build first: cd tutorial-site/client && npm run build
+    "directory": "./tutorial-site/client/dist",
+
+    // Routes like /videos/:id and /km/videos are handled in the browser,
+    // not by real files, so unmatched requests must fall back to index.html.
+    "not_found_handling": "single-page-application"
   }
 }

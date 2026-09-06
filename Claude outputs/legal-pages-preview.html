@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>eTnakRean — Legal pages preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Kantumruy+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f9fafb;         /* gray-50 */
+    --surface: #ffffff;
+    --border: #e5e7eb;     /* gray-200 */
+    --border-soft: #f3f4f6;/* gray-100 */
+    --text-900: #111827;
+    --text-600: #4b5563;
+    --text-500: #6b7280;
+    --text-400: #9ca3af;
+    --text-300: #d1d5db;
+    --hover-100: #f3f4f6;
+    --red-50: #fef2f2;
+    --red-600: #dc2626;
+    --red-700: #b91c1c;
+    --banner-bg: #fffbeb;
+    --banner-border: #fde68a;
+    --banner-text: #92400e;
+  }
+  [data-theme="dark"] {
+    --bg: #030712;         /* gray-950 */
+    --surface: #030712;
+    --border: #1f2937;     /* gray-800 */
+    --border-soft: rgba(255,255,255,0.05);
+    --text-900: #f3f4f6;
+    --text-600: #9ca3af;
+    --text-500: #9ca3af;
+    --text-400: #6b7280;
+    --text-300: #4b5563;
+    --hover-100: rgba(255,255,255,0.05);
+    --red-50: rgba(239,68,68,0.10);
+    --red-600: #f87171;
+    --red-700: #fca5a5;
+    --banner-bg: #1c1608;
+    --banner-border: #78350f;
+    --banner-text: #fcd34d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text-900);
+    font-family: "Poppins", "Kantumruy Pro", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background .15s ease, color .15s ease;
+  }
+  [data-lang="km"] body, [data-lang="km"] { font-family: "Kantumruy Pro", "Poppins", ui-sans-serif, system-ui, sans-serif; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ---------- preview banner ---------- */
+  .preview-banner {
+    background: var(--banner-bg);
+    border-bottom: 1px solid var(--banner-border);
+    color: var(--banner-text);
+    font-size: 13px;
+    padding: 9px 16px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  .preview-banner b { font-weight: 700; }
+
+  /* ---------- mock nav ---------- */
+  .nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  .nav-inner {
+    max-width: 1152px;
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 17px; white-space: nowrap; }
+  .brand-badge {
+    width: 30px; height: 30px; border-radius: 9px;
+    background: var(--red-600); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; flex-shrink: 0;
+  }
+  .brand span { color: var(--red-600); }
+  .nav-links { display: none; align-items: center; gap: 4px; }
+  .nav-link {
+    display: flex; align-items: center; gap: 7px;
+    padding: 9px 12px; border-radius: 8px;
+    font-size: 14px; font-weight: 500;
+    color: var(--text-600);
+  }
+  .nav-link:hover { background: var(--hover-100); }
+  @media (min-width: 1024px) { .nav-links { display: flex; } }
+  .nav-tools { display: flex; align-items: center; gap: 4px; }
+  .tool-btn {
+    display: flex; align-items: center; gap: 6px;
+    border: none; background: transparent; border-radius: 8px;
+    padding: 8px 9px; font-size: 13px; font-weight: 600;
+    color: var(--text-600);
+  }
+  .tool-btn:hover { background: var(--hover-100); }
+
+  /* ---------- page shell ---------- */
+  .page { max-width: 1152px; margin: 0 auto; padding: 40px 16px 56px; }
+  @media (min-width: 640px) { .page { padding-top: 56px; } }
+
+  /* switcher pills */
+  .switcher { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: none; background: transparent;
+    border-radius: 999px; padding: 7px 15px;
+    font-size: 14px; font-weight: 500;
+    color: var(--text-600);
+    transition: background-color .12s ease, color .12s ease;
+  }
+  .pill:hover { background: var(--hover-100); }
+  .pill.active { background: var(--red-50); color: var(--red-700); }
+  .pill svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* header */
+  .doc-header {
+    margin-top: 24px; padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .doc-icon {
+    width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+    background: var(--red-50); color: var(--red-600);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .doc-icon svg { width: 21px; height: 21px; }
+  .doc-title { font-size: 26px; font-weight: 700; line-height: 1.25; margin: 0; }
+  @media (min-width: 640px) { .doc-title { font-size: 30px; } }
+  .updated-pill {
+    margin-top: 6px; display: inline-flex; align-items: center;
+    border-radius: 999px; background: var(--border-soft);
+    padding: 2px 10px; font-size: 12px; color: var(--text-500);
+  }
+  .intro { margin-top: 24px; max-width: 720px; font-size: 16px; line-height: 1.7; color: var(--text-600); }
+
+  /* mobile chip toc */
+  .chip-row {
+    margin-top: 24px; display: flex; gap: 8px; overflow-x: auto;
+    padding-bottom: 4px; -webkit-overflow-scrolling: touch;
+  }
+  .chip-row::-webkit-scrollbar { height: 4px; }
+  .chip {
+    flex-shrink: 0; border-radius: 999px; border: 1px solid var(--border);
+    padding: 7px 13px; font-size: 12.5px; font-weight: 500; color: var(--text-600);
+    background: transparent; white-space: nowrap;
+  }
+  .chip.active { border-color: rgba(220,38,38,.35); background: var(--red-50); color: var(--red-700); }
+  @media (min-width: 1024px) { .chip-row { display: none; } }
+
+  /* content grid */
+  .grid { margin-top: 32px; display: grid; gap: 40px; align-items: start; }
+  @media (min-width: 1024px) { .grid { grid-template-columns: 220px minmax(0,1fr); } }
+
+  .toc { display: none; }
+  @media (min-width: 1024px) {
+    .toc { display: block; position: sticky; top: 88px; }
+  }
+  .toc-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--text-400);
+  }
+  .toc-list { list-style: none; margin: 12px 0 0; padding: 0; border-left: 1px solid var(--border); }
+  .toc-item {
+    display: block; width: 100%; text-align: left; background: none; border: none;
+    border-left: 2px solid transparent; margin-left: -1px;
+    padding: 6px 0 6px 12px; font-size: 14px; color: var(--text-500);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .toc-item:hover { color: var(--text-900); }
+  .toc-item.active { border-left-color: var(--red-600); color: var(--red-700); font-weight: 500; }
+
+  .sections { min-width: 0; display: flex; flex-direction: column; gap: 36px; }
+  .section h2 {
+    margin: 0; display: flex; align-items: baseline; gap: 10px;
+    font-size: 16px; font-weight: 600; color: var(--text-900);
+  }
+  .section .num {
+    font-size: 14px; font-weight: 400; color: var(--text-300);
+    font-variant-numeric: tabular-nums;
+  }
+  .section p { margin: 10px 0 0; max-width: 720px; font-size: 14px; line-height: 1.75; color: var(--text-600); }
+
+  .doc-footer {
+    margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  @media (min-width: 640px) { .doc-footer { flex-direction: row; align-items: center; justify-content: space-between; } }
+  .also-read { font-size: 14px; color: var(--text-500); display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
+  .also-read a { font-weight: 500; color: var(--red-600); }
+  .also-read a:hover { text-decoration: underline; }
+  .back-top {
+    display: inline-flex; width: fit-content; align-items: center; gap: 6px;
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 7px 14px; font-size: 14px; font-weight: 500; color: var(--text-600);
+    background: transparent; opacity: 0; transform: translateY(6px);
+    pointer-events: none; transition: opacity .2s ease, transform .2s ease;
+  }
+  .back-top.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .back-top:hover { background: var(--hover-100); }
+  .back-top svg { width: 14px; height: 14px; }
+
+  .fade-in { animation: fadeIn .25s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .fade-in { animation: none; } }
+</style>
+</head>
+<body>
+
+<div class="preview-banner">
+  ⚠ <b>Preview only — not live yet.</b> This shows the new Legal-pages design from the code that's already committed. Rebuild and redeploy to make it real on e-tnakrean.laothomorn.workers.dev.
+</div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <span class="brand-badge">e</span>
+      <span>eTnakRean</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="#">🏠 <span data-t="navHome">Home</span></a>
+      <a class="nav-link" href="#">▶ <span data-t="navVideos">Videos</span></a>
+      <a class="nav-link" href="#">📄 <span data-t="navBooks">Books</span></a>
+      <a class="nav-link" href="#">ℹ <span data-t="navAbout">About</span></a>
+    </div>
+    <div class="nav-tools">
+      <button class="tool-btn" id="langBtn" type="button" title="Switch language">🇰🇭 <span id="langLabel">KH</span></button>
+      <button class="tool-btn" id="darkBtn" type="button" title="Toggle dark mode">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+  <nav class="switcher" id="switcher" aria-label="Legal"></nav>
+
+  <div class="doc-header">
+    <div class="doc-icon" id="docIcon"></div>
+    <div style="min-width:0;">
+      <h1 class="doc-title" id="docTitle"></h1>
+      <p class="updated-pill" id="updatedPill"></p>
+    </div>
+  </div>
+
+  <p class="intro" id="docIntro"></p>
+
+  <div class="chip-row" id="chipRow"></div>
+
+  <div class="grid">
+    <aside class="toc" id="tocAside">
+      <p class="toc-label" id="onThisPageLabel">On this page</p>
+      <ul class="toc-list" id="tocList"></ul>
+    </aside>
+    <div class="sections" id="sections"></div>
+  </div>
+
+  <div class="doc-footer">
+    <p class="also-read" id="alsoRead"></p>
+    <button class="back-top" id="backTop" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      <span id="backTopLabel">Back to top</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ---------------- real content, copied verbatim from client/src/i18n/legal.js ---------------- */
+const LAST_UPDATED = "2026-06-05";
+const legal = {
+en: {
+  lastUpdatedLabel: "Last updated",
+  terms: {
+    title: "Terms of Service",
+    intro: "These terms apply to everyone who uses E-TnakRean. By creating an account or buying anything on this site, you agree to them.",
+    sections: [
+      { heading: "Who runs this site", body: "eTnakRean is operated by [YOUR LEGAL NAME OR COMPANY NAME], [ADDRESS], Cambodia. You can reach us at [EMAIL] or [PHONE / TELEGRAM]." },
+      { heading: "Your account", body: "You need an account to buy videos or books. Keep your password private — you are responsible for what happens under your account. Give us a real email address, because that is how we send verification and password-reset codes. One person, one account." },
+      { heading: "What you are buying", body: "Each video and each book is bought separately. There is no subscription. When you buy an item you get access to it through this site for as long as the site operates. You are not buying the file itself." },
+      { heading: "What you may not do", body: "Do not download, copy, re-upload, resell or share the videos and books you buy, and do not share your account so others can read them. Do not try to reach paid content you have not bought. We may suspend an account that does these things, without a refund." },
+      { heading: "Who owns the content", body: "The lessons, videos, PDFs, text and images on this site belong to [YOUR LEGAL NAME OR COMPANY NAME] or to the people we licensed them from. Buying access does not transfer ownership." },
+      { heading: "Availability", body: "We try to keep the site running, but we do not promise it will never be down. We may add, change or remove lessons over time. If we permanently remove something you paid for, contact us and we will sort it out." },
+      { heading: "Changes to these terms", body: "If we change these terms we will update this page and the date above. Continuing to use the site after a change means you accept the new version." },
+      { heading: "Questions", body: "Contact us at [EMAIL] or [PHONE / TELEGRAM]." }
+    ]
+  },
+  privacy: {
+    title: "Privacy Policy",
+    intro: "This page explains what personal information E-TnakRean collects, why, and who else sees it.",
+    sections: [
+      { heading: "What we collect", body: "When you register: your name, email address, and optionally a phone number, a profile photo and an address. When you buy something: the amount, the item, a transaction reference, and whether the payment succeeded. We also store which videos and books you have unlocked. We do not store your password — only a scrambled (hashed) version that cannot be read back." },
+      { heading: "We never see your card or bank details", body: "Payments happen inside ABA PayWay and your own banking app. Your card number, bank login and PIN never reach this site." },
+      { heading: "Why we collect it", body: "To create your account, to prove you own your email address, to let you reset your password, to remember what you have bought so you can open it again, and to answer you when you contact us." },
+      { heading: "Who else handles your data", body: "We use a small number of services to run the site: ABA PayWay (payments), MongoDB Atlas (database hosting), Cloudflare (website and file hosting), Render (server hosting), Resend (verification and password-reset emails), Twilio (SMS codes, if you choose SMS), and Google (only if you use Google sign-in). Each of these sees only what it needs. We do not sell your data to anyone and we do not use it for advertising." },
+      { heading: "Cookies and local storage", body: "We store your login token, your language choice and your dark-mode choice in your browser's local storage. That is what keeps you logged in between visits. We do not use advertising or tracking cookies." },
+      { heading: "How long we keep it", body: "We keep your account and purchase history for as long as your account exists, because purchase records are what prove you own the lessons you bought. [DESCRIBE HOW LONG YOU KEEP DATA AFTER AN ACCOUNT IS DELETED.]" },
+      { heading: "Your choices", body: "You can edit your name, phone, address and photo on your profile page at any time. To get a copy of your data or to have your account deleted, contact us at [EMAIL] and we will respond within [NUMBER] days." },
+      { heading: "Children", body: "[STATE YOUR MINIMUM AGE AND, IF YOU ACCEPT STUDENTS UNDER 18, WHETHER YOU REQUIRE PARENTAL CONSENT.]" },
+      { heading: "Questions", body: "Contact us at [EMAIL] or [PHONE / TELEGRAM]." }
+    ]
+  },
+  refund: {
+    title: "Refund Policy",
+    intro: "Videos and books on E-TnakRean are digital products that you can open immediately after paying, so refunds work a little differently from physical goods.",
+    sections: [
+      { heading: "Check before you buy", body: "Many items have a free preview — the first pages of a book, or the opening of a video. Please use the preview before paying, because it is the best way to know whether an item suits you." },
+      { heading: "When we will refund you", body: "We refund in full if: you were charged twice for the same item; money left your account but the item did not unlock; or the video or PDF is broken, missing, or clearly not what the page described. Tell us within [NUMBER] days of the purchase." },
+      { heading: "When we usually cannot refund", body: "We normally cannot refund an item you have already watched or read in full, or a purchase you changed your mind about after opening it. This is because the content cannot be returned once it has been seen." },
+      { heading: "How to ask for a refund", body: "Message us at [EMAIL] or [PHONE / TELEGRAM] with the email address on your account, the item name, and the date of purchase. We reply within [NUMBER] working days." },
+      { heading: "How the money comes back", body: "Approved refunds go back through ABA PayWay to the account you paid from. Your bank may take a few working days to show it." }
+    ]
+  }
+},
+km: {
+  lastUpdatedLabel: "ធ្វើបច្ចុប្បន្នភាពចុងក្រោយ",
+  terms: {
+    title: "លក្ខខណ្ឌប្រើប្រាស់",
+    intro: "លក្ខខណ្ឌទាំងនេះអនុវត្តចំពោះអ្នកប្រើប្រាស់គ្រប់រូបនៃ E-TnakRean។ ការបង្កើតគណនី ឬការទិញនៅលើគេហទំព័រនេះ មានន័យថាអ្នកយល់ព្រមតាមលក្ខខណ្ឌទាំងនេះ។",
+    sections: [
+      { heading: "អ្នកគ្រប់គ្រងគេហទំព័រ", body: "eTnakRean ដំណើរការដោយ [ឈ្មោះស្របច្បាប់ ឬឈ្មោះក្រុមហ៊ុន], [អាសយដ្ឋាន], ព្រះរាជាណាចក្រកម្ពុជា។ អ្នកអាចទាក់ទងមកយើងតាម [អ៊ីមែល] ឬ [លេខទូរស័ព្ទ / តេឡេក្រាម]។" },
+      { heading: "គណនីរបស់អ្នក", body: "អ្នកត្រូវមានគណនីដើម្បីទិញវីដេអូ ឬសៀវភៅ។ សូមរក្សាពាក្យសម្ងាត់ជាការសម្ងាត់ — អ្នកទទួលខុសត្រូវលើអ្វីដែលកើតឡើងក្នុងគណនីរបស់អ្នក។ សូមប្រើអ៊ីមែលពិត ព្រោះយើងផ្ញើលេខកូដផ្ទៀងផ្ទាត់ និងលេខកូដកំណត់ពាក្យសម្ងាត់ថ្មីតាមអ៊ីមែលនោះ។ មនុស្សម្នាក់ គណនីមួយ។" },
+      { heading: "អ្វីដែលអ្នកកំពុងទិញ", body: "វីដេអូនីមួយៗ និងសៀវភៅនីមួយៗ ត្រូវទិញដាច់ដោយឡែក។ មិនមានការជាវប្រចាំខែទេ។ នៅពេលអ្នកទិញធាតុមួយ អ្នកទទួលបានសិទ្ធិចូលមើលវាតាមរយៈគេហទំព័រនេះ ដរាបណាគេហទំព័រនៅដំណើរការ។ អ្នកមិនមែនកំពុងទិញឯកសារនោះផ្ទាល់ទេ។" },
+      { heading: "អ្វីដែលអ្នកមិនត្រូវធ្វើ", body: "សូមកុំទាញយក ចម្លង បង្ហោះឡើងវិញ លក់បន្ត ឬចែករំលែកវីដេអូ និងសៀវភៅដែលអ្នកបានទិញ ហើយកុំចែករំលែកគណនីរបស់អ្នកឱ្យអ្នកដទៃប្រើ។ សូមកុំព្យាយាមចូលមើលមាតិកាដែលអ្នកមិនបានទិញ។ យើងអាចផ្អាកគណនីដែលធ្វើដូច្នេះ ដោយមិនសងប្រាក់វិញ។" },
+      { heading: "កម្មសិទ្ធិមាតិកា", body: "មេរៀន វីដេអូ ឯកសារ PDF អត្ថបទ និងរូបភាពនៅលើគេហទំព័រនេះ ជាកម្មសិទ្ធិរបស់ [ឈ្មោះស្របច្បាប់ ឬឈ្មោះក្រុមហ៊ុន] ឬអ្នកដែលយើងបានទទួលអាជ្ញាបណ្ណពី។ ការទិញសិទ្ធិចូលមើល មិនផ្ទេរកម្មសិទ្ធិទេ។" },
+      { heading: "ភាពអាចប្រើប្រាស់បាន", body: "យើងខិតខំរក្សាឱ្យគេហទំព័រដំណើរការ ប៉ុន្តែយើងមិនធានាថាវានឹងមិនដាច់ឡើយ។ យើងអាចបន្ថែម កែប្រែ ឬដកមេរៀនចេញតាមពេលវេលា។ ប្រសិនបើយើងដកអ្វីមួយដែលអ្នកបានបង់ប្រាក់ចេញជាអចិន្ត្រៃយ៍ សូមទាក់ទងមកយើង ហើយយើងនឹងដោះស្រាយជូន។" },
+      { heading: "ការផ្លាស់ប្តូរលក្ខខណ្ឌ", body: "ប្រសិនបើយើងផ្លាស់ប្តូរលក្ខខណ្ឌទាំងនេះ យើងនឹងធ្វើបច្ចុប្បន្នភាពទំព័រនេះ និងកាលបរិច្ឆេទខាងលើ។ ការបន្តប្រើប្រាស់គេហទំព័រ មានន័យថាអ្នកទទួលយកកំណែថ្មី។" },
+      { heading: "សំណួរ", body: "សូមទាក់ទងមកយើងតាម [អ៊ីមែល] ឬ [លេខទូរស័ព្ទ / តេឡេក្រាម]។" }
+    ]
+  },
+  privacy: {
+    title: "គោលការណ៍ភាពឯកជន",
+    intro: "ទំព័រនេះពន្យល់ពីព័ត៌មានផ្ទាល់ខ្លួនដែល E-TnakRean ប្រមូល ហេតុអ្វី និងអ្នកណាខ្លះដែលឃើញវា។",
+    sections: [
+      { heading: "ព័ត៌មានដែលយើងប្រមូល", body: "ពេលចុះឈ្មោះ៖ ឈ្មោះ អ៊ីមែល និងជាជម្រើស លេខទូរស័ព្ទ រូបភាពប្រវត្តិរូប និងអាសយដ្ឋាន។ ពេលទិញ៖ ចំនួនទឹកប្រាក់ ធាតុដែលទិញ លេខយោងប្រតិបត្តិការ និងលទ្ធផលនៃការទូទាត់។ យើងក៏រក្សាទុកបញ្ជីវីដេអូ និងសៀវភៅដែលអ្នកបានទិញផងដែរ។ យើងមិនរក្សាទុកពាក្យសម្ងាត់របស់អ្នកទេ — មានតែកំណែដែលបានអ៊ិនគ្រីប ដែលមិនអាចអានត្រឡប់វិញបាន។" },
+      { heading: "យើងមិនឃើញព័ត៌មានកាត ឬធនាគាររបស់អ្នកទេ", body: "ការទូទាត់ធ្វើឡើងនៅក្នុង ABA PayWay និងកម្មវិធីធនាគាររបស់អ្នកផ្ទាល់។ លេខកាត ព័ត៌មានចូលធនាគារ និងលេខ PIN របស់អ្នក មិនដែលមកដល់គេហទំព័រនេះទេ។" },
+      { heading: "ហេតុអ្វីយើងប្រមូល", body: "ដើម្បីបង្កើតគណនីរបស់អ្នក ដើម្បីផ្ទៀងផ្ទាត់ថាអ៊ីមែលនោះជារបស់អ្នក ដើម្បីឱ្យអ្នកអាចកំណត់ពាក្យសម្ងាត់ថ្មី ដើម្បីចងចាំអ្វីដែលអ្នកបានទិញ ហើយដើម្បីឆ្លើយតបពេលអ្នកទាក់ទងមកយើង។" },
+      { heading: "សេវាកម្មផ្សេងទៀតដែលពាក់ព័ន្ធ", body: "យើងប្រើសេវាកម្មមួយចំនួនដើម្បីដំណើរការគេហទំព័រ៖ ABA PayWay (ការទូទាត់), MongoDB Atlas (មូលដ្ឋានទិន្នន័យ), Cloudflare (គេហទំព័រ និងឯកសារ), Render (ម៉ាស៊ីនមេ), Resend (អ៊ីមែលលេខកូដ), Twilio (សារ SMS ប្រសិនបើអ្នកជ្រើសរើស) និង Google (តែពេលអ្នកចូលដោយប្រើ Google)។ សេវាកម្មនីមួយៗឃើញតែអ្វីដែលវាត្រូវការ។ យើងមិនលក់ទិន្នន័យរបស់អ្នក ហើយមិនប្រើវាសម្រាប់ការផ្សាយពាណិជ្ជកម្មទេ។" },
+      { heading: "ខូគី និងទិន្នន័យក្នុងកម្មវិធីរុករក", body: "យើងរក្សាទុកនិមិត្តសញ្ញាចូលប្រើ ជម្រើសភាសា និងជម្រើសរបៀបងងឹត នៅក្នុងកម្មវិធីរុករករបស់អ្នក។ នោះជាអ្វីដែលធ្វើឱ្យអ្នកនៅតែចូលបានពេលត្រឡប់មកវិញ។ យើងមិនប្រើខូគីតាមដាន ឬខូគីផ្សាយពាណិជ្ជកម្មទេ។" },
+      { heading: "រយៈពេលរក្សាទុក", body: "យើងរក្សាគណនី និងប្រវត្តិការទិញរបស់អ្នក ដរាបណាគណនីរបស់អ្នកនៅមាន ព្រោះកំណត់ត្រាការទិញជាភស្តុតាងថាអ្នកជាម្ចាស់មេរៀនដែលបានទិញ។ [សូមបញ្ជាក់រយៈពេលរក្សាទុកទិន្នន័យ បន្ទាប់ពីគណនីត្រូវបានលុប]។" },
+      { heading: "សិទ្ធិរបស់អ្នក", body: "អ្នកអាចកែឈ្មោះ លេខទូរស័ព្ទ អាសយដ្ឋាន និងរូបភាពរបស់អ្នកនៅទំព័រប្រវត្តិរូបគ្រប់ពេល។ ដើម្បីស្នើសុំច្បាប់ចម្លងទិន្នន័យ ឬលុបគណនី សូមទាក់ទង [អ៊ីមែល] ហើយយើងនឹងឆ្លើយតបក្នុងរយៈពេល [ចំនួន] ថ្ងៃ។" },
+      { heading: "កុមារ", body: "[សូមបញ្ជាក់អាយុអប្បបរមា និងបើទទួលសិស្សក្រោម ១៨ ឆ្នាំ តើត្រូវការការយល់ព្រមពីអាណាព្យាបាលឬទេ]។" },
+      { heading: "សំណួរ", body: "សូមទាក់ទងមកយើងតាម [អ៊ីមែល] ឬ [លេខទូរស័ព្ទ / តេឡេក្រាម]។" }
+    ]
+  },
+  refund: {
+    title: "គោលការណ៍សងប្រាក់វិញ",
+    intro: "វីដេអូ និងសៀវភៅនៅលើ E-TnakRean ជាផលិតផលឌីជីថល ដែលអ្នកអាចបើកមើលភ្លាមៗបន្ទាប់ពីបង់ប្រាក់ ដូច្នេះការសងប្រាក់វិញខុសពីទំនិញធម្មតាបន្តិច។",
+    sections: [
+      { heading: "សូមពិនិត្យមុនទិញ", body: "ធាតុជាច្រើនមានការមើលសាកល្បងឥតគិតថ្លៃ — ទំព័រដំបូងនៃសៀវភៅ ឬផ្នែកដើមនៃវីដេអូ។ សូមប្រើការមើលសាកល្បងមុនពេលបង់ប្រាក់ ព្រោះវាជាមធ្យោបាយល្អបំផុតដើម្បីដឹងថាធាតុនោះសមនឹងអ្នកឬអត់។" },
+      { heading: "ពេលណាយើងសងប្រាក់វិញ", body: "យើងសងប្រាក់វិញពេញលេញប្រសិនបើ៖ អ្នកត្រូវបានគិតប្រាក់ពីរដងសម្រាប់ធាតុតែមួយ; ប្រាក់ចេញពីគណនីរបស់អ្នក ប៉ុន្តែធាតុនោះមិនបានបើក; ឬវីដេអូ ឬឯកសារ PDF ខូច បាត់ ឬខុសពីអ្វីដែលទំព័របានពិពណ៌នាយ៉ាងច្បាស់។ សូមប្រាប់យើងក្នុងរយៈពេល [ចំនួន] ថ្ងៃបន្ទាប់ពីការទិញ។" },
+      { heading: "ពេលណាយើងជាទូទៅមិនអាចសងវិញ", body: "ជាទូទៅយើងមិនអាចសងប្រាក់វិញសម្រាប់ធាតុដែលអ្នកបានមើល ឬអានរួចទាំងស្រុង ឬការទិញដែលអ្នកប្តូរចិត្តបន្ទាប់ពីបានបើកមើលរួច ព្រោះមាតិកាមិនអាចប្រគល់មកវិញបានទេ។" },
+      { heading: "របៀបស្នើសុំសងប្រាក់វិញ", body: "សូមផ្ញើសារមកយើងតាម [អ៊ីមែល] ឬ [លេខទូរស័ព្ទ / តេឡេក្រាម] ដោយបញ្ជាក់អ៊ីមែលគណនី ឈ្មោះធាតុ និងកាលបរិច្ឆេទទិញ។ យើងឆ្លើយតបក្នុងរយៈពេល [ចំនួន] ថ្ងៃធ្វើការ។" },
+      { heading: "របៀបទទួលប្រាក់វិញ", body: "ការសងប្រាក់វិញដែលបានអនុម័ត ត្រូវបញ្ជូនត្រឡប់តាម ABA PayWay ទៅគណនីដែលអ្នកបានបង់។ ធនាគាររបស់អ្នកអាចត្រូវការពីរបីថ្ងៃធ្វើការដើម្បីបង្ហាញវា។" }
+    ]
+  }
+}
+};
+
+const UI = {
+  en: { onThisPage: "On this page", backToTop: "Back to top", alsoRead: "Also read", footer: { terms: "Terms", privacy: "Privacy", refund: "Refunds", legal: "Legal" }, nav: { home: "Home", videos: "Videos", books: "Books", about: "About" } },
+  km: { onThisPage: "ក្នុងទំព័រនេះ", backToTop: "ត្រឡប់ទៅខាងលើ", alsoRead: "អានផងដែរ", footer: { terms: "លក្ខខណ្ឌប្រើប្រាស់", privacy: "ភាពឯកជន", refund: "ការសងប្រាក់វិញ", legal: "ផ្លូវច្បាប់" }, nav: { home: "ទំព័រដើម", videos: "វីដេអូ", books: "សៀវភៅ", about: "អំពីយើង" } }
+};
+
+const ICONS = {
+  terms: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>',
+  privacy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
+  refund: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>'
+};
+
+let doc = "terms";
+let lang = "en";
+let dark = false;
+let activeIndex = 0;
+
+function el(html){ const d=document.createElement('div'); d.innerHTML=html; return d.firstElementChild; }
+
+function render(){
+  const pack = legal[lang];
+  const c = pack[doc];
+  const t = UI[lang];
+  document.documentElement.lang = lang;
+  document.documentElement.setAttribute('data-lang', lang);
+
+  // nav labels
+  document.getElementById('navHome') && 0;
+  document.querySelector('[data-t="navHome"]').textContent = t.nav.home;
+  document.querySelector('[data-t="navVideos"]').textContent = t.nav.videos;
+  document.querySelector('[data-t="navBooks"]').textContent = t.nav.books;
+  document.querySelector('[data-t="navAbout"]').textContent = t.nav.about;
+  document.getElementById('langLabel').textContent = lang === 'en' ? 'KH' : 'ENG';
+
+  // switcher
+  const switcher = document.getElementById('switcher');
+  switcher.innerHTML = '';
+  ['terms','privacy','refund'].forEach((key) => {
+    const active = key === doc;
+    const p = el(`<button class="pill ${active?'active':''}" type="button">${ICONS[key]}${t.footer[key]}</button>`);
+    p.addEventListener('click', () => { doc = key; activeIndex = 0; render(); });
+    switcher.appendChild(p);
+  });
+
+  // header
+  document.getElementById('docIcon').innerHTML = ICONS[doc];
+  document.getElementById('docTitle').textContent = c.title;
+  document.getElementById('updatedPill').textContent = `${pack.lastUpdatedLabel}: ${LAST_UPDATED}`;
+  document.getElementById('docIntro').textContent = c.intro;
+  document.getElementById('onThisPageLabel').textContent = t.onThisPage;
+  document.getElementById('backTopLabel').textContent = t.backToTop;
+
+  // chips (mobile toc)
+  const chipRow = document.getElementById('chipRow');
+  chipRow.innerHTML = '';
+  c.sections.forEach((s, i) => {
+    const chip = el(`<button class="chip ${i===activeIndex?'active':''}" type="button">${s.heading}</button>`);
+    chip.addEventListener('click', () => scrollToSection(i));
+    chipRow.appendChild(chip);
+  });
+
+  // desktop toc
+  const tocList = document.getElementById('tocList');
+  tocList.innerHTML = '';
+  c.sections.forEach((s, i) => {
+    const li = document.createElement('li');
+    const btn = el(`<button class="toc-item ${i===activeIndex?'active':''}" type="button">${s.heading}</button>`);
+    btn.addEventListener('click', () => scrollToSection(i));
+    li.appendChild(btn);
+    tocList.appendChild(li);
+  });
+
+  // sections
+  const sectionsEl = document.getElementById('sections');
+  sectionsEl.innerHTML = '';
+  observedSections = [];
+  c.sections.forEach((s, i) => {
+    const sec = el(`<section class="section fade-in" id="section-${i}" style="scroll-margin-top:112px;">
+      <h2><span class="num">${String(i+1).padStart(2,'0')}</span>${s.heading}</h2>
+      <p>${s.body}</p>
+    </section>`);
+    sectionsEl.appendChild(sec);
+    observedSections.push(sec);
+  });
+
+  // also read footer
+  const alsoRead = document.getElementById('alsoRead');
+  const others = ['terms','privacy','refund'].filter(k => k !== doc);
+  alsoRead.innerHTML = t.alsoRead + ': ';
+  others.forEach((key, i) => {
+    const link = el(`<a href="#">${t.footer[key]}</a>`);
+    link.addEventListener('click', (e) => { e.preventDefault(); doc = key; activeIndex = 0; render(); window.scrollTo({top:0, behavior:'smooth'}); });
+    alsoRead.appendChild(link);
+    if (i < others.length - 1) alsoRead.appendChild(document.createTextNode(' · '));
+  });
+
+  setupObserver();
+}
+
+let observedSections = [];
+let io = null;
+function setupObserver(){
+  if (io) io.disconnect();
+  io = new IntersectionObserver((entries) => {
+    const visible = entries.filter(e => e.isIntersecting);
+    if (!visible.length) return;
+    const top = visible.reduce((a,b) => a.boundingClientRect.top < b.boundingClientRect.top ? a : b);
+    const idx = observedSections.indexOf(top.target);
+    if (idx !== -1 && idx !== activeIndex) {
+      activeIndex = idx;
+      document.querySelectorAll('.toc-item').forEach((n,i) => n.classList.toggle('active', i===idx));
+      document.querySelectorAll('.chip').forEach((n,i) => n.classList.toggle('active', i===idx));
+    }
+  }, { rootMargin: '-112px 0px -70% 0px', threshold: 0 });
+  observedSections.forEach(s => io.observe(s));
+}
+
+function scrollToSection(i){
+  const target = document.getElementById(`section-${i}`);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.getElementById('langBtn').addEventListener('click', () => {
+  lang = lang === 'en' ? 'km' : 'en';
+  render();
+});
+document.getElementById('darkBtn').addEventListener('click', () => {
+  dark = !dark;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  document.getElementById('darkBtn').textContent = dark ? '☀' : '🌙';
+});
+window.addEventListener('scroll', () => {
+  document.getElementById('backTop').classList.toggle('show', window.scrollY > 480);
+});
+document.getElementById('backTop').addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+render();
+</script>
+</body>
+</html>

@@ -36,7 +36,7 @@ const otpLimiter = rateLimit({
 // Off for now: registration verifies + logs the user in immediately, no
 // code sent, and /login stops enforcing isVerified. Password reset always
 // uses its OTP code regardless of this flag.
-const REQUIRE_SIGNUP_VERIFICATION = false;
+const REQUIRE_SIGNUP_VERIFICATION = true;
 
 // otp.* fields are select:false on the schema -- opt back in explicitly
 // wherever a route needs to inspect the current code.
@@ -45,7 +45,7 @@ const OTP_SELECT = "+otp.codeHash +otp.purpose +otp.channel +otp.expiresAt +otp.
 const googleClient = process.env.GOOGLE_CLIENT_ID ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID) : null;
 
 function signToken(user) {
-  return jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET, {
+  return jwt.sign({ sub: user._id.toString(), tv: user.tokenVersion ?? 0 }, process.env.JWT_SECRET, {
     expiresIn: "7d",
     algorithm: "HS256",
   });
@@ -321,6 +321,11 @@ router.post("/reset-password", otpLimiter, async (req, res) => {
 
     user.passwordHash = await bcrypt.hash(newPassword, 12);
     user.otp = emptyOtp();
+    // Every token issued before this moment stops working. Someone who reset
+    // their password because they thought their account was compromised
+    // expects exactly this; without it the attacker's existing session
+    // survived for the rest of its 7-day life.
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
 
     res.json({ message: "Password updated. You can now log in." });

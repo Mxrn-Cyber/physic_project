@@ -21,7 +21,20 @@ const userSchema = new mongoose.Schema(
 
     photoUrl: { type: String, default: "" },
     phone: { type: String, default: "" },
+    // Was missing from the schema while PATCH /api/auth/me and publicUser()
+    // both referenced it -- Mongoose's strict mode silently dropped the
+    // value on save, so a student could type an address, get a success
+    // response, and find the field empty again on reload.
+    address: { type: String, default: "", trim: true },
     phoneVerified: { type: Boolean, default: false },
+
+    // Bumped whenever every existing session for this user must stop working
+    // (currently: a completed password reset). The value is embedded in each
+    // JWT as `tv` and re-checked on every authenticated request, which is what
+    // makes a reset actually kick out whoever knew the old password -- before
+    // this, a stolen 7-day token stayed valid for its full life even after the
+    // real owner reset their password.
+    tokenVersion: { type: Number, default: 0 },
 
     isAdmin: { type: Boolean, default: false },
     // Must be true before /login will issue a session -- set once signup OTP

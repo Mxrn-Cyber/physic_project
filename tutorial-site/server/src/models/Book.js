@@ -8,6 +8,12 @@ const bookSchema = new mongoose.Schema(
       default: null,
     },
 
+    grades: {
+      type: [String],
+      enum: ["10", "11", "12"],
+      default: [],
+    },
+
     title: { type: String, required: true },
     description: { type: String, default: "" },
     order: { type: Number, default: 0 },

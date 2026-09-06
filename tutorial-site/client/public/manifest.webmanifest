@@ -1,0 +1,15 @@
+{
+  "name": "eTnakRean | Learn Anytime, Anywhere",
+  "short_name": "eTnakRean",
+  "description": "Short, practical video tutorials paired with printable PDF guides, in Khmer and English. Buy only what you want to learn.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#dc2626",
+  "lang": "km",
+  "icons": [
+    { "src": "/logo-256.png", "sizes": "256x256", "type": "image/png", "purpose": "any" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

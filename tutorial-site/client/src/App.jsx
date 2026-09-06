@@ -1,9 +1,17 @@
-import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { BookOpen, Mail, Phone, Send, Facebook, Sun, Moon } from "lucide-react";
 import NavBar from "./components/NavBar.jsx";
 import BackgroundDecor from "./components/BackgroundDecor.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import RouteSeo from "./components/RouteSeo.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import { useLanguage } from "./context/LanguageContext.jsx";
@@ -21,28 +29,13 @@ import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import VerifyOtp from "./pages/VerifyOtp.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Legal from "./pages/Legal.jsx";
 import { CONTACT } from "./config/site.js";
 
-// Admin ships a large CRUD dashboard (users/videos/books management) that
-// only admins ever use, but it used to be bundled into every visitor's
-// initial page load regardless of role. Loading it lazily means a regular
-// student on a slow connection no longer downloads admin-only code.
 const Admin = lazy(() => import("./pages/Admin.jsx"));
 
-// BookDetail pulls in pdf.js (the in-page PDF renderer used by
-// BookViewer.jsx) which is a large library on its own. Lazy-loading this
-// page keeps pdf.js out of the bundle every other page pays for -- it only
-// downloads when someone actually opens a book.
 const BookDetail = lazy(() => import("./pages/BookDetail.jsx"));
 
-// Compare the part of the URL that decides which page is shown. Using this
-// instead of `location.key` means a click on the link you're already on
-// doesn't replay the whole transition.
-// Footer contact icons. Every icon is always rendered so the footer design
-// stays complete while the real details are still missing. An entry whose
-// value is blank in src/config/site.js renders as a dimmed, non-clickable
-// placeholder rather than a link to nowhere -- fill the value in and it
-// turns into a real link automatically, no markup change needed.
 const SOCIAL_LINKS = [
   {
     key: "email",
@@ -146,7 +139,9 @@ export default function App() {
 
       <ErrorBoundary key={displayLocation.pathname}>
         <div
-          className={transitionStage === "out" ? "animate-page-out" : "animate-page-in"}
+          className={
+            transitionStage === "out" ? "animate-page-out" : "animate-page-in"
+          }
           onAnimationEnd={(e) => {
             // animationend bubbles, so a spinner or any animated element
             // *inside* the page would otherwise end the transition early and
@@ -157,6 +152,7 @@ export default function App() {
             commit();
           }}
         >
+          <RouteSeo />
           <Routes location={displayLocation}>
             <Route path="/" element={<Home />} />
             <Route path="/videos" element={<Videos />} />
@@ -168,7 +164,7 @@ export default function App() {
                 <Suspense
                   fallback={
                     <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">
-                      Loading…
+                      {t.common.loading}
                     </div>
                   }
                 >
@@ -177,6 +173,9 @@ export default function App() {
               }
             />
             <Route path="/about" element={<About />} />
+            <Route path="/terms" element={<Legal doc="terms" />} />
+            <Route path="/privacy" element={<Legal doc="privacy" />} />
+            <Route path="/refund" element={<Legal doc="refund" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -197,7 +196,7 @@ export default function App() {
                   <Suspense
                     fallback={
                       <div className="p-10 text-center text-sm text-gray-500 dark:text-gray-400">
-                        Loading…
+                        {t.common.loading}
                       </div>
                     }
                   >
@@ -234,7 +233,9 @@ export default function App() {
                   loading="lazy"
                   className="h-8 w-8 rounded-lg object-contain"
                 />
-                <span className="text-red-600 dark:text-red-400">eTnakRean</span>
+                <span className="text-red-600 dark:text-red-400">
+                  eTnakRean
+                </span>
               </Link>
               <p className="mt-3 max-w-xs text-sm leading-relaxed text-gray-600 dark:text-gray-400">
                 {t.footer.tagline}
@@ -299,30 +300,31 @@ export default function App() {
                 {t.footer.connect}
               </h2>
               <div className="mt-4 flex items-center gap-2">
-                {SOCIAL_LINKS.map(({ key, href, title, label, Icon, external }) =>
-                  href ? (
-                    <a
-                      key={key}
-                      href={href}
-                      title={title || label}
-                      aria-label={label}
-                      {...(external
-                        ? { target: "_blank", rel: "noopener noreferrer" }
-                        : {})}
-                      className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-red-600 hover:text-white dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-600 dark:hover:text-white"
-                    >
-                      <Icon className="h-4 w-4" />
-                    </a>
-                  ) : (
-                    <span
-                      key={key}
-                      title={`${label} — ${t.footer.linkNotSet}`}
-                      aria-hidden="true"
-                      className="flex h-9 w-9 cursor-default items-center justify-center rounded-full bg-gray-100 text-gray-300 dark:bg-gray-800 dark:text-gray-600"
-                    >
-                      <Icon className="h-4 w-4" />
-                    </span>
-                  )
+                {SOCIAL_LINKS.map(
+                  ({ key, href, title, label, Icon, external }) =>
+                    href ? (
+                      <a
+                        key={key}
+                        href={href}
+                        title={title || label}
+                        aria-label={label}
+                        {...(external
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                        className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-red-600 hover:text-white dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-red-600 dark:hover:text-white"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </a>
+                    ) : (
+                      <span
+                        key={key}
+                        title={`${label} — ${t.footer.linkNotSet}`}
+                        aria-hidden="true"
+                        className="flex h-9 w-9 cursor-default items-center justify-center rounded-full bg-gray-100 text-gray-300 dark:bg-gray-800 dark:text-gray-600"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </span>
+                    ),
                 )}
               </div>
             </div>
@@ -330,9 +332,31 @@ export default function App() {
 
           {/* Bottom bar */}
           <div className="mt-10 flex flex-col-reverse items-center gap-4 border-t border-gray-200 pt-6 dark:border-gray-800 sm:flex-row sm:justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-500">
-              © {new Date().getFullYear()} eTnakRean. {t.footer.rights}
-            </p>
+            <div className="flex flex-col items-center gap-2 sm:items-start">
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                © {new Date().getFullYear()} eTnakRean. {t.footer.rights}
+              </p>
+              {/* Required reading for anyone paying money: kept in the bottom
+                  bar so they are reachable from every page. */}
+              <nav
+                aria-label={t.footer.legal}
+                className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1"
+              >
+                {[
+                  { to: "/terms", label: t.footer.terms },
+                  { to: "/privacy", label: t.footer.privacy },
+                  { to: "/refund", label: t.footer.refund },
+                ].map(({ to, label }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    className="text-xs text-gray-500 transition-colors hover:text-red-600 dark:text-gray-500 dark:hover:text-red-400"
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
 
             {/* Mirrored from NavBar so the toggles are reachable from the
                 bottom of long pages too. */}

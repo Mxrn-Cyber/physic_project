@@ -1,10 +1,12 @@
 import { Router } from "express";
-import crypto from "crypto";
 import Video from "../models/Video.js";
 import Book from "../models/Book.js";
 import Purchase from "../models/Purchase.js";
 import { requireAuth } from "../middleware/auth.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+// The two HMAC helpers live in utils/abaSignature.js so they can be unit
+// tested without booting Express or Mongoose.
+import { buildPurchaseHash, verifyCallbackSignature } from "../utils/abaSignature.js";
 
 const router = Router();
 
@@ -32,55 +34,6 @@ function makeTranId() {
   return `T${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
     .toUpperCase()
     .slice(0, 20);
-}
-
-function buildPurchaseHash(fields) {
-  const order = [
-    "req_time",
-    "merchant_id",
-    "tran_id",
-    "amount",
-    "items",
-    "shipping",
-    "firstname",
-    "lastname",
-    "email",
-    "phone",
-    "type",
-    "payment_option",
-    "return_url",
-    "cancel_url",
-    "continue_success_url",
-    "return_deeplink",
-    "currency",
-    "custom_fields",
-    "return_params",
-    "payout",
-    "lifetime",
-    "additional_params",
-    "google_pay_token",
-    "skip_success_page",
-  ];
-  const concatenated = order.map((key) => fields[key] ?? "").join("");
-  return crypto.createHmac("sha512", ABA_API_KEY).update(concatenated).digest("base64");
-}
-
-function verifyCallbackSignature(body, headerSignature) {
-  if (!headerSignature) return false;
-  const sortedKeys = Object.keys(body).sort();
-  const concatenated = sortedKeys
-    .map((key) => {
-      const value = body[key];
-      return typeof value === "object" && value !== null ? JSON.stringify(value) : String(value ?? "");
-    })
-    .join("");
-  const expected = crypto.createHmac("sha512", ABA_API_KEY).update(concatenated).digest("base64");
-
-  try {
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(headerSignature));
-  } catch {
-    return false;
-  }
 }
 
 router.post(
@@ -186,6 +139,15 @@ export async function handleAbaCallback(req, res) {
   const { tran_id: tranId, status } = req.body;
   const purchase = await Purchase.findOne({ tranId });
   if (!purchase) return res.status(404).json({ error: "Unknown tran_id" });
+
+  // ABA retries a callback it doesn't get a clean answer to, so the same
+  // transaction can arrive more than once. Without this, a late duplicate
+  // carrying a failure status could flip an already-completed purchase to
+  // "failed" and strand a student who had genuinely paid. A settled purchase
+  // is final; acknowledge and stop.
+  if (purchase.status === "completed") {
+    return res.json({ received: true, alreadyProcessed: true });
+  }
 
   purchase.rawCallback = req.body;
 

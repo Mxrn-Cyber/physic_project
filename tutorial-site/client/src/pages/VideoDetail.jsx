@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Lock, ShoppingCart, Clock } from "lucide-react";
+import { ArrowLeft, Play, Lock, ShoppingCart, Clock, CheckCircle2 } from "lucide-react";
 import { api } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useLanguage } from "../context/LanguageContext.jsx";
 import VideoPlayer from "../components/VideoPlayer.jsx";
 import PaymentModal from "../components/PaymentModal.jsx";
 import { badgeLabel, BADGE_STYLES } from "../components/badges.js";
+import Seo, { fill } from "../components/Seo.jsx";
+import { videoSchema, breadcrumbSchema } from "../utils/schema.js";
 
 export default function VideoDetail() {
   const { id } = useParams();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const navigate = useNavigate();
 
   const [video, setVideo] = useState(null);
@@ -20,6 +22,7 @@ export default function VideoDetail() {
   const [previewInfo, setPreviewInfo] = useState({ previewSeconds: 0, isPreview: false });
   const [playError, setPlayError] = useState(null);
   const [buying, setBuying] = useState(false);
+  const [markingComplete, setMarkingComplete] = useState(false);
 
   const load = () =>
     api
@@ -80,8 +83,42 @@ export default function VideoDetail() {
   const badges = video.badges || [];
   const onSale = video.discountPercent > 0 && !video.isFree;
 
+  // One-way: the server only exposes addToSet (see POST /videos/:id/complete),
+  // there is no "unmark" endpoint. Re-fetching afterward keeps this in sync
+  // with the same server response every other action already relies on,
+  // instead of hand-rolling local state that could drift from it.
+  function handleMarkComplete() {
+    if (markingComplete || video.completed) return;
+    setMarkingComplete(true);
+    api
+      .markVideoComplete(video._id)
+      .then(load)
+      .catch(() => {})
+      .finally(() => setMarkingComplete(false));
+  }
+
+  const seoDescription =
+    video.description || fill(t.seo.videoDescription, { title: video.title });
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
+      <Seo
+        title={video.title}
+        description={seoDescription}
+        image={video.thumbnailUrl}
+        type="video.other"
+        jsonLd={[
+          videoSchema(video, { description: seoDescription, lang }),
+          breadcrumbSchema(
+            [
+              { name: t.nav.home, path: "/" },
+              { name: t.seo.videos.title, path: "/videos" },
+              { name: video.title, path: `/videos/${video._id}` },
+            ],
+            lang
+          ),
+        ]}
+      />
       <Link
         to="/videos"
         className="inline-flex items-center gap-1 text-sm font-medium text-red-600 hover:underline dark:text-red-400"
@@ -117,7 +154,12 @@ export default function VideoDetail() {
         )}
       </div>
 
-      <div className="mt-6 flex flex-wrap items-start justify-between gap-6">
+      {/* Stacked on phones, side by side from `sm` up. This used to be a
+          single flex-wrap row: with `flex-1 min-w-0` on the left and a
+          320px `shrink-0` card on the right, the row never wrapped -- the
+          title column just shrank to a sliver, clipping the heading and
+          breaking "19 min" across two lines. */}
+      <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           {badges.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
@@ -146,7 +188,7 @@ export default function VideoDetail() {
           ) : null}
         </div>
 
-        <div className="w-full max-w-xs shrink-0 rounded-xl border border-gray-200 p-5 dark:border-gray-700">
+        <div className="w-full rounded-xl border border-gray-200 p-5 dark:border-gray-700 sm:max-w-xs sm:shrink-0">
           <div className="flex items-baseline gap-2">
             {video.isFree ? (
               <span className="text-2xl font-bold text-green-700 dark:text-green-400">
@@ -169,9 +211,25 @@ export default function VideoDetail() {
           </div>
 
           {video.unlocked ? (
-            <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
-              <Play className="h-4 w-4" /> {t.videos.youOwnThis}
-            </p>
+            <>
+              <p className="mt-3 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                <Play className="h-4 w-4" /> {t.videos.youOwnThis}
+              </p>
+              {video.completed ? (
+                <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-400">
+                  <CheckCircle2 className="h-4 w-4" /> {t.videos.completed}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleMarkComplete}
+                  disabled={markingComplete}
+                  className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-60 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                >
+                  <CheckCircle2 className="h-4 w-4" /> {t.videos.markComplete}
+                </button>
+              )}
+            </>
           ) : user ? (
             <button
               type="button"
